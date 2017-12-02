@@ -25,20 +25,17 @@
 
 package javafx.application;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Map;
 
 import javafx.application.Preloader.PreloaderNotification;
 import javafx.scene.Scene;
+import javafx.scene.robot.Robot;
 import javafx.stage.Stage;
 
-import com.sun.glass.ui.Robot;
 import com.sun.javafx.application.LauncherImpl;
 import com.sun.javafx.application.ParametersImpl;
 import com.sun.javafx.application.PlatformImpl;
-import com.sun.javafx.css.StyleManager;
 
 /**
  * Application class from which JavaFX applications extend.
@@ -528,8 +525,10 @@ public abstract class Application {
     }
 
     /**
-     * Creates a {@link
-     * @return
+     * Creates and returns a {@link javafx.scene.robot.Robot} which can be used for
+     * simulating user interaction.
+     *
+     * @return a new {@link javafx.scene.robot.Robot} instance
      * @since 10
      */
     public static Robot createRobot() {

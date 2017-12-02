@@ -29,16 +29,15 @@ import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
 import com.sun.glass.ui.Cursor;
 import com.sun.glass.ui.Pixels;
-import com.sun.glass.ui.Robot;
 import com.sun.glass.ui.Screen;
 import com.sun.glass.ui.Size;
 import com.sun.glass.ui.Timer;
 import com.sun.glass.ui.View;
 import com.sun.glass.ui.Window;
 import javafx.collections.SetChangeListener;
+import javafx.scene.robot.Robot;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.security.AccessController;
