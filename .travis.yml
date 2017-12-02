@@ -1,0 +1,91 @@
+language: java
+sudo: false
+
+addons:
+  apt:
+    packages: &global_deps
+      - ksh
+      - bison
+      - flex
+      - gperf
+      - libasound2-dev
+      - libgl1-mesa-dev
+      - libgstreamer0.10-dev
+      - libgstreamer-plugins-base0.10-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libx11-dev
+      - libxml2-dev
+      - libxslt1-dev
+      - libxt-dev
+      - libxxf86vm-dev
+      - pkg-config
+      - libavcodec-dev
+      - mercurial
+      - libgtk2.0-dev
+      - libgtk-3-dev
+      - libxtst-dev
+      - libudev-dev
+      - libavformat-dev
+      - cmake
+      - ruby
+      - gdb
+
+# For webkit: t5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev ?
+# Won't be able to build webkit in the time alloted by Travis
+
+# keep gradle cache.
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      dist: trusty
+      jdk: oraclejdk9
+      addons:
+        apt:
+          packages:
+            - oracle-java9-installer
+            - *global_deps
+    - os: osx
+      osx_image: xcode9
+      env:
+        - TRAVIS_JAVA_VERSION="9"
+        - PRINT_CRASH_LOGS="true"
+
+before_script:
+  - echo $HOME
+  - echo $JAVA_OPTS
+  - echo $GRADLE_OPTS
+  # run on xvfb screen (for linux).
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then export DISPLAY=:99.0 && sh -e /etc/init.d/xvfb start; fi
+
+before_install: .ci/before_install.sh
+
+# skip install stage.
+install: true
+
+script: .ci/script.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: Dsu3STNPPMI2jN57Rvbdzu5iGnhyynJk5y40G0wrleb8+X4QXs3hQta+UJZzWQYTb/cufMxI+F776dwGkX36/YH4s2cJhfVLSJcjIvKxLnigQ0b1JUlsB6OlLj2h2/4mcfpjVEXjQ5TzmCjOFb7HumLqlvCxsp/uTedVJcv4WADNSK4j0cLIkRkfhvFDnnwNq6ICBpkbZnBGngI4mCw80ygho6kYNaMBpLeoVzOIDbNBG7wG1oKysV0DUEqUbK78pW73NW0ANdKDK41p8T4Tw+QhyGk+fPih64f5SSSC8K5lV37sEZEZwmCoDNkw3bja8fXNDCsXXky+q62XgpA2LfEAAWu1BZIYMAUf8aoCpZKTl9bWqF1IAXpVZHRoaN2g/M+tPDp+Bd1pflREVOs/PjolRa3jlSo0F7qXM+G7frQvo5SsodVmLxLddkqN86VwxTzDL2gGFzFE1kaOhUdAxS+UZXE7cRV/HH243lF5uEzeEVo8JLgE3isdDX8A5fie5xJkP5e+rC7WJXikTBTdoqwqmoRjvHYGkj/RvDf4zyqIQ6h3tKJwt7f4UgN0nT2qkkiH6aiOAa3r5W8xu1+aZktr9NiUrx4rGI5Pj2hxNDgzxz+0PsE99I+7Q94spBjErjErTeCV7ZqTSVwaaM25Faop5lIDoGUfVwlfVAhW1iw=
+  skip_cleanup: true
+  file_glob: true
+  file: ${TRAVIS_BUILD_DIR}/images.zip
+  on:
+    repo: brcolow/openjfx
+    all_branches: true
+    condition: true
+
+notifications:
+  email: false

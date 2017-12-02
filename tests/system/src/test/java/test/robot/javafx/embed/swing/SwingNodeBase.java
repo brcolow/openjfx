@@ -27,6 +27,7 @@ package test.robot.javafx.embed.swing;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
@@ -35,16 +36,21 @@ import junit.framework.AssertionFailedError;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import test.util.Util;
 
+import javax.imageio.ImageIO;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import java.awt.AWTException;
-import java.awt.Frame;
-import java.awt.Robot;
+
+import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +72,8 @@ public class SwingNodeBase {
     // Singleton Application instance
     static MyApp myApp;
 
+    @Rule
+    public TestName name = new TestName();
 
     @BeforeClass
     public static void setupOnce() throws AWTException, InvocationTargetException, InterruptedException {
@@ -217,11 +225,37 @@ public class SwingNodeBase {
         }
 
         if (above) {
+            if (!robot.getPixelColor(checkLoc, checkLoc).equals(java.awt.Color.BLUE)) {
+                saveScreenshot();
+            }
             Assert.assertEquals("JDialog is not above JavaFX stage",
-                    java.awt.Color.BLUE, robot.getPixelColor(checkLoc, checkLoc));
+                java.awt.Color.BLUE, robot.getPixelColor(checkLoc, checkLoc));
         } else {
+            if (robot.getPixelColor(checkLoc, checkLoc).equals(java.awt.Color.BLUE)) {
+            }
             Assert.assertFalse("JDialog is above JavaFX stage",
                     java.awt.Color.BLUE.equals(robot.getPixelColor(checkLoc, checkLoc)));
+        }
+    }
+
+    private void saveScreenshot() {
+            BufferedImage bufferedImage = robot.createScreenCapture(new Rectangle(
+                    Toolkit.getDefaultToolkit().getScreenSize()));
+            try {
+                File screenshot = new File("~/images/" + name.getMethodName() + ".png");
+                File parent = screenshot.getParentFile();
+                if (parent != null && !parent.exists()) {
+                    if (!parent.mkdirs()) {
+                        throw new IOException("could not create directory: " + parent);
+                    }
+                }
+                System.out.println("Saving screenshot to: " + screenshot.getCanonicalPath());
+                ImageIO.write(bufferedImage, "PNG", screenshot);
+            }
+            catch (IOException e) {
+                System.out.println("Error saving screenshot: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }

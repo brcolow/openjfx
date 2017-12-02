@@ -28,7 +28,7 @@
 
 #include "KeyTable.h"
 
-#include "com_sun_glass_ui_Robot.h"
+#include "javafx_scene_robot_Robot.h"
 #include "com_sun_glass_ui_win_WinRobot.h"
 #include "GlassScreen.h"
 

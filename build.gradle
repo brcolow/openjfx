@@ -58,6 +58,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 /******************************************************************************
  *                              Utility methods                               *
  *****************************************************************************/
@@ -272,7 +275,7 @@ ext.MODULESOURCEPATH = "modulesourcepath.args"
 // this build running on a Mac, Windows, or Linux machine? 32 or 64 bit?
 ext.OS_NAME = System.getProperty("os.name").toLowerCase()
 ext.OS_ARCH = System.getProperty("os.arch")
-ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
+ext.IS_64 = true
 ext.IS_MAC = OS_NAME.contains("mac") || OS_NAME.contains("darwin")
 ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
@@ -1514,7 +1517,44 @@ allprojects {
     test {
         executable = JAVA;
         enableAssertions = true;
-        testLogging.exceptionFormat = "full";
+        testLogging {
+            exceptionFormat TestExceptionFormat.FULL
+            events TestLogEvent.PASSED, TestLogEvent.SKIPPED,
+                    TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT
+            showCauses true
+            showStackTraces true
+            showExceptions true
+            // set options for log level DEBUG and INFO
+            debug {
+                events TestLogEvent.STARTED, TestLogEvent.PASSED,
+                        TestLogEvent.SKIPPED, TestLogEvent.FAILED,
+                        TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR
+            }
+            info.events = debug.events
+            def failedTestSummary = "\n\n FAILED TESTS SUMMARY: \n\n"
+            afterTest { desc, result ->
+                if (desc.parent) {
+                    if (result.getResultType() == TestResult.ResultType.FAILURE) {
+                        failedTestSummary += "${desc.getClassName()}#${desc.getName()} FAILED:\n" +
+                                "${result.getExceptions()}\n"
+                    }
+                }
+            }
+            afterSuite { desc, result ->
+                if (!desc.parent) {
+                    def output = "Results: ${result.resultType} (${result.testCount} tests, " +
+                            "${result.successfulTestCount} successes, " +
+                            "${result.failedTestCount} failures, " +
+                            "${result.skippedTestCount} skipped)"
+                    def startItem = '|  ', endItem = '  |'
+                    def repeat = startItem + output + endItem
+                    println('\n' + ('-' * repeat.length()) + '\n' + repeat + '\n' + ('-' * repeat.length()))
+                    if (result.failedTestCount > 0) {
+                        println(failedTestSummary)
+                    }
+                }
+            }
+        }
         scanForTestClasses = false;
         include("**/*Test.*");
         if (BUILD_CLOSED && DO_JCOV) {

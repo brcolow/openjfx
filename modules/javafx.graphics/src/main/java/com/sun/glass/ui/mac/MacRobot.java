@@ -24,7 +24,8 @@
  */
 package com.sun.glass.ui.mac;
 
-import com.sun.glass.ui.*;
+import com.sun.glass.ui.Pixels;
+import javafx.scene.robot.Robot;
 
 /**
  * MacOSX platform implementation class for Robot.
