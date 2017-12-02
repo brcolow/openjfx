@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,19 +22,37 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.sun.glass.ui;
+package javafx.scene.robot;
 
 import static com.sun.javafx.FXPermissions.CREATE_ROBOT_PERMISSION;
+
 import java.lang.annotation.Native;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
+import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.image.Image;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
+
+import com.sun.glass.ui.Application;
+import com.sun.glass.ui.Pixels;
+import com.sun.glass.ui.Screen;
 
 public abstract class Robot {
 
     @Native public static final int MOUSE_LEFT_BTN   = 1;
     @Native public static final int MOUSE_RIGHT_BTN  = 2;
     @Native public static final int MOUSE_MIDDLE_BTN = 4;
+    public static final int BYTE_BUFFER_BYTES_PER_COMPONENT = 1;
+    public static final int INT_BUFFER_BYTES_PER_COMPONENT = 4;
 
     protected abstract void _create();
+
     protected Robot() {
         // Ensure proper permission
         final SecurityManager sm = System.getSecurityManager();
@@ -52,27 +70,64 @@ public abstract class Robot {
     }
 
     protected abstract void _keyPress(int code);
+
     /**
      * Generate a key pressed event.
-     * @param code key code for this event
+     * @param keyCode key code for this event
      */
-    public void keyPress(int code) {
+    public void keyPress(KeyCode keyCode) {
         Application.checkEventThread();
-        _keyPress(code);
+        _keyPress(keyCode.getCode());
     }
 
     protected abstract void _keyRelease(int code);
+
     /**
      * Generate a key released event.
      *
-     * @param code key code for this event
+     * @param keyCode key code for this event
      */
-    public void keyRelease(int code) {
+    public void keyRelease(KeyCode keyCode) {
         Application.checkEventThread();
-        _keyRelease(code);
+        _keyRelease(keyCode.getCode());
+    }
+
+    protected abstract int _getMouseX();
+
+    /**
+     * Get the current mouse x position.
+     *
+     * @return the current mouse x position
+     */
+    public int getMouseX() {
+        Application.checkEventThread();
+        return _getMouseX();
+    }
+
+    protected abstract int _getMouseY();
+
+    /**
+     * Get the current mouse y position.
+     *
+     * @return the current mouse y position
+     */
+    public int getMouseY() {
+        Application.checkEventThread();
+        return _getMouseY();
+    }
+
+    /**
+     * Get the current mouse (x, y) coordinates
+     *
+     * @return the current mouse (x,y) coordinates
+     */
+    public Point2D getMousePosition() {
+        Application.checkEventThread();
+        return new Point2D(_getMouseX(), _getMouseY());
     }
 
     protected abstract void _mouseMove(int x, int y);
+
     /**
      * Generate a mouse moved event.
      *
@@ -84,7 +139,18 @@ public abstract class Robot {
         _mouseMove(x, y);
     }
 
+    /**
+     * Generate a mouse moved event.
+     *
+     * @param location the (x,y) screen coordinates
+     */
+    public void mouseMove(Point2D location) {
+        Application.checkEventThread();
+        _mouseMove((int) location.getX(), (int) location.getY());
+    }
+
     protected abstract void _mousePress(int buttons);
+
     /**
      * Generate a mouse press event with specified buttons mask.
      *
@@ -92,25 +158,27 @@ public abstract class Robot {
      * by the robot. Bits 0, 1, and 2 mean LEFT, RIGHT, and MIDDLE mouse buttons
      * respectively.
      *
-     * @param buttons buttons to have generated the event
+     * @param button the mouse button to press
      */
-    public void mousePress(int buttons) {
+    public void mousePress(MouseButton button) {
         Application.checkEventThread();
-        _mousePress(buttons);
+        _mousePress(convertToButtonId(button));
     }
 
     protected abstract void _mouseRelease(int buttons);
+
     /**
      * Generate a mouse release event with specified buttons mask.
      *
-     * @param buttons buttons to have generated the event
+     * @param button the mouse button to release
      */
-    public void mouseRelease(int buttons) {
+    public void mouseRelease(MouseButton button) {
         Application.checkEventThread();
-        _mouseRelease(buttons);
+        _mouseRelease(convertToButtonId(button));
     }
 
     protected abstract void _mouseWheel(int wheelAmt);
+
     /**
      * Generate a mouse wheel event.
      *
@@ -121,32 +189,33 @@ public abstract class Robot {
         _mouseWheel(wheelAmt);
     }
 
-    protected abstract int _getMouseX();
-    public int getMouseX() {
-        Application.checkEventThread();
-        return _getMouseX();
-    }
-
-    protected abstract int _getMouseY();
-    public int getMouseY() {
-        Application.checkEventThread();
-        return _getMouseY();
-    }
-
     protected abstract int _getPixelColor(int x, int y);
+
     /**
-     * Returns pixel color at specified screen coordinates in IntARGB format.
+     * Returns the pixel {@link Color} at specified screen coordinates.
+     *
+     * @param x the x coordinate to get the pixel color from
+     * @param y the y coordinate to get the pixel color from
+     * @return the pixel color at the specified screen coordinates
      */
-    public int getPixelColor(int x, int y) {
+    public Color getPixelColor(int x, int y) {
         Application.checkEventThread();
-        return _getPixelColor(x, y);
+        return convertFromColor(_getPixelColor(x, y));
     }
 
-    // Subclasses must override and implement at least one of the following two
-    // _getScreenCapture methods
+    /**
+     * Returns the pixel {@link Color} at specified screen coordinates.
+     *
+     * @param location the (x,y) coordinates to get the pixel color from
+     * @return the pixel color at the specified screen coordinates
+     */
+    public Color getPixelColor(Point2D location) {
+        Application.checkEventThread();
+        return convertFromColor(_getPixelColor((int) location.getX(), (int) location.getY()));
+    }
 
     protected void _getScreenCapture(int x, int y, int width, int height, int[] data) {
-        throw new UnsupportedOperationException("Not implementated in the base class");
+        throw new UnsupportedOperationException("Not implemented in the base class");
     }
 
     protected Pixels _getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {
@@ -185,7 +254,7 @@ public abstract class Robot {
                         int irelx = (int) Math.floor(relx);
                         int fractx = (int) ((relx - irelx) * 256);
                         data[index++] =
-                            interp(tmpdata, irelx, irely, pwidth, pheight, fractx, fracty);
+                                interp(tmpdata, irelx, irely, pwidth, pheight, fractx, fracty);
                     }
                 }
                 dw = width;
@@ -197,8 +266,8 @@ public abstract class Robot {
 
     /**
      * Returns a capture of the specified rectangular area of the screen.
-     *
-     * If {@code isHiDPI} argument is {@code true}, the returned Pixels object
+     * <p>
+     * If {@code isHiDPI} argument is {@literal true}, the returned Pixels object
      * dimensions may differ from the requested {@code width} and {@code
      * height} depending on how many physical pixels the area occupies on the
      * screen.  E.g. in HiDPI mode on the Mac (aka Retina display) the pixels
@@ -206,23 +275,89 @@ public abstract class Robot {
      * will result in a Pixels object with dimensions (20x20). Calling code
      * should use the returned objects's getWidth() and getHeight() methods
      * to determine the image size.
-     *
-     * If (@code isHiDPI) is {@code false}, the returned Pixels object is of
+     * <p>
+     * If {@code isHiDPI} is {@literal false}, the returned Pixels object is of
      * the requested size. Note that in this case the image may be scaled in
      * order to fit to the requested dimensions if running on a HiDPI display.
      */
-    public Pixels getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {
+    public Image getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {
         Application.checkEventThread();
-        return _getScreenCapture(x, y, width, height, isHiDPI);
+        return convertFromPixels(_getScreenCapture(x, y, width, height, isHiDPI));
     }
 
     /**
      * Returns a capture of the specified area of the screen.
+     * <p>
      * It is equivalent to calling getScreenCapture(x, y, width, height, false),
      * i.e. this method takes a "LowDPI" screen shot.
+     *
+     * @return the screen capture of the specified {@code region} as an {@link Image}
      */
-    public Pixels getScreenCapture(int x, int y, int width, int height) {
+    public Image getScreenCapture(int x, int y, int width, int height) {
         return getScreenCapture(x, y, width, height, false);
+    }
+
+    /**
+     * Returns a capture of the specified area of the screen.
+     * <p>
+     * It is equivalent to calling getScreenCapture(x, y, width, height, false),
+     * i.e. this method takes a "LowDPI" screen shot.
+     *
+     * @return the screen capture of the specified {@code region} as an {@link Image}
+     */
+    public Image getScreenCapture(Rectangle2D region) {
+        return convertFromPixels(_getScreenCapture((int) region.getMinX(), (int) region.getMinY(),
+                (int) region.getWidth(), (int) region.getHeight(), false));
+    }
+
+    private int convertToButtonId(MouseButton button) {
+        switch (button) {
+            case PRIMARY: return Robot.MOUSE_LEFT_BTN;
+            case SECONDARY: return Robot.MOUSE_RIGHT_BTN;
+            case MIDDLE: return Robot.MOUSE_MIDDLE_BTN;
+        }
+        throw new IllegalArgumentException("MouseButton: " + button + " not supported by Robot");
+    }
+
+    private Color convertFromColor(int color) {
+        WritableImage image = new WritableImage(1, 1);
+        image.getPixelWriter().setArgb(0, 0, color);
+        return image.getPixelReader().getColor(0, 0);
+    }
+
+    private Image convertFromPixels(Pixels pixels) {
+        int width = pixels.getWidth();
+        int height = pixels.getHeight();
+        WritableImage image = new WritableImage(width, height);
+
+        int bytesPerComponent = pixels.getBytesPerComponent();
+        if (bytesPerComponent == INT_BUFFER_BYTES_PER_COMPONENT) {
+            IntBuffer intBuffer = (IntBuffer) pixels.getPixels();
+            writeIntBufferToImage(intBuffer, image);
+        }
+        else if (bytesPerComponent == BYTE_BUFFER_BYTES_PER_COMPONENT) {
+            ByteBuffer byteBuffer = (ByteBuffer) pixels.getPixels();
+            writeByteBufferToImage(byteBuffer, image);
+        }
+
+        return image;
+    }
+
+    private void writeIntBufferToImage(IntBuffer intBuffer, WritableImage image) {
+        PixelWriter pixelWriter = image.getPixelWriter();
+        double width = image.getWidth();
+        double height = image.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int argb = intBuffer.get();
+                pixelWriter.setArgb(x, y, argb);
+            }
+        }
+    }
+
+    private void writeByteBufferToImage(ByteBuffer byteBuffer, WritableImage image) {
+        throw new UnsupportedOperationException("Writing from byte buffer is not supported.");
     }
 
     private static int interp(int pixels[], int x, int y, int w, int h, int fractx1, int fracty1) {
@@ -248,8 +383,8 @@ public abstract class Robot {
             int rgb01 = (x < 0 || x >= w || y+1 >= h) ? 0 : pixels[i+w];
             int rgb11 = (x+1 >= w || y+1 >= h) ? 0 : pixels[i+w+1];
             return interp(interp(rgb00, rgb10, fractx0, fractx1),
-                          interp(rgb01, rgb11, fractx0, fractx1),
-                          fracty0, fracty1);
+                    interp(rgb01, rgb11, fractx0, fractx1),
+                    fracty0, fracty1);
         }
     }
 
@@ -268,4 +403,5 @@ public abstract class Robot {
         int b = (b0 * fract0 + b1 * fract1) >> 8;
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
+
 }

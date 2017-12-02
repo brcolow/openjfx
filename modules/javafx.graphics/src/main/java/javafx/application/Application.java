@@ -34,6 +34,7 @@ import javafx.application.Preloader.PreloaderNotification;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import com.sun.glass.ui.Robot;
 import com.sun.javafx.application.LauncherImpl;
 import com.sun.javafx.application.ParametersImpl;
 import com.sun.javafx.application.PlatformImpl;
@@ -524,5 +525,14 @@ public abstract class Application {
         } else {
             PlatformImpl.setPlatformUserAgentStylesheet(url);
         }
+    }
+
+    /**
+     * Creates a {@link
+     * @return
+     * @since 10
+     */
+    public static Robot createRobot() {
+        return com.sun.glass.ui.Application.GetApplication().createRobot();
     }
 }

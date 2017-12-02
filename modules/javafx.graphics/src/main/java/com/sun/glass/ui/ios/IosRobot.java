@@ -25,8 +25,12 @@
 
 package com.sun.glass.ui.ios;
 
-import com.sun.glass.ui.*;
+import com.sun.glass.ui.Application;
+import com.sun.glass.ui.Pixels;
+
 import java.nio.IntBuffer;
+
+import javafx.scene.robot.Robot;
 
 /**
  * iOS platform implementation class of test automation Robot.

@@ -27,8 +27,8 @@ package com.sun.glass.ui.monocle;
 
 import com.sun.glass.events.MouseEvent;
 import com.sun.glass.ui.Pixels;
-import com.sun.glass.ui.Robot;
 import javafx.application.Platform;
+import javafx.scene.robot.Robot;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
