@@ -13,3 +13,4 @@
 # ----------------------------------------------------------------------
 #
 # end temporary --add-exports
+--add-exports javafx.graphics/javafx.scene.robot=ALL-UNNAMED
