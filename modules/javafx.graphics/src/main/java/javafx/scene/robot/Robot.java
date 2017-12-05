@@ -200,7 +200,8 @@ public abstract class Robot {
      */
     public Color getPixelColor(int x, int y) {
         Application.checkEventThread();
-        return convertFromColor(_getPixelColor(x, y));
+        System.out.printf("javafx.scene.robot.Robot#getPixelColor(%d, %d)", x, y);
+        return convertFromIntArgb(_getPixelColor(x, y));
     }
 
     /**
@@ -211,7 +212,7 @@ public abstract class Robot {
      */
     public Color getPixelColor(Point2D location) {
         Application.checkEventThread();
-        return convertFromColor(_getPixelColor((int) location.getX(), (int) location.getY()));
+        return convertFromIntArgb(_getPixelColor((int) location.getX(), (int) location.getY()));
     }
 
     protected void _getScreenCapture(int x, int y, int width, int height, int[] data) {
@@ -319,10 +320,14 @@ public abstract class Robot {
         throw new IllegalArgumentException("MouseButton: " + button + " not supported by Robot");
     }
 
-    private Color convertFromColor(int color) {
-        WritableImage image = new WritableImage(1, 1);
-        image.getPixelWriter().setArgb(0, 0, color);
-        return image.getPixelReader().getColor(0, 0);
+    private Color convertFromIntArgb(int color) {
+        System.out.printf("javafx.scene.robot.Robot#convertFromIntArgb(%d)", color);
+        int alpha = (color >> 24) & 0xFF;
+        int red   = (color >> 16) & 0xFF;
+        int green = (color >>  8) & 0xFF;
+        int blue  =  color        & 0xFF;
+        System.out.println("Returning color: " + new Color(red / 255d, green / 255d, blue / 255d, alpha / 255d));
+        return new Color(red / 255d, green / 255d, blue / 255d, alpha / 255d);
     }
 
     private Image convertFromPixels(Pixels pixels) {
