@@ -43,6 +43,12 @@ import com.sun.glass.ui.Application;
 import com.sun.glass.ui.Pixels;
 import com.sun.glass.ui.Screen;
 
+/**
+ * A {@code Robot} is used for simulating user interaction such as
+ * typing keys, using the mouse, and capturing portions of the screen.
+ *
+ * @since 11
+ */
 public abstract class Robot {
 
     @Native public static final int MOUSE_LEFT_BTN   = 1;
@@ -72,8 +78,9 @@ public abstract class Robot {
     protected abstract void _keyPress(int code);
 
     /**
-     * Generate a key pressed event.
-     * @param keyCode key code for this event
+     * Generates a keyboard key pressed event for the given {@link KeyCode}.
+     *
+     * @param keyCode the key to press
      */
     public void keyPress(KeyCode keyCode) {
         Application.checkEventThread();
@@ -83,9 +90,9 @@ public abstract class Robot {
     protected abstract void _keyRelease(int code);
 
     /**
-     * Generate a key released event.
+     * Generates a keyboard key released event for the given {@link KeyCode}.
      *
-     * @param keyCode key code for this event
+     * @param keyCode the key to release
      */
     public void keyRelease(KeyCode keyCode) {
         Application.checkEventThread();
@@ -95,7 +102,7 @@ public abstract class Robot {
     protected abstract int _getMouseX();
 
     /**
-     * Get the current mouse x position.
+     * Returns the current mouse x position.
      *
      * @return the current mouse x position
      */
@@ -107,7 +114,7 @@ public abstract class Robot {
     protected abstract int _getMouseY();
 
     /**
-     * Get the current mouse y position.
+     * Returns the current mouse y position.
      *
      * @return the current mouse y position
      */
@@ -117,7 +124,7 @@ public abstract class Robot {
     }
 
     /**
-     * Get the current mouse (x, y) coordinates
+     * Returns the current mouse (x, y) coordinates as a {@link Point2D}.
      *
      * @return the current mouse (x,y) coordinates
      */
@@ -129,10 +136,11 @@ public abstract class Robot {
     protected abstract void _mouseMove(int x, int y);
 
     /**
-     * Generate a mouse moved event.
+     * Generates a mouse moved event to the specified (x,y) screen
+     * coordinates.
      *
-     * @param x screen coordinate x
-     * @param y screen coordinate y
+     * @param x screen coordinate x to move the mouse to
+     * @param y screen coordinate y to move the mouse to
      */
     public void mouseMove(int x, int y) {
         Application.checkEventThread();
@@ -140,9 +148,10 @@ public abstract class Robot {
     }
 
     /**
-     * Generate a mouse moved event.
+     * Generates a mouse moved event to the specified location.
      *
-     * @param location the (x,y) screen coordinates
+     * @param location the (x,y) screen coordinates to move to
+     * mouse to
      */
     public void mouseMove(Point2D location) {
         Application.checkEventThread();
@@ -152,35 +161,31 @@ public abstract class Robot {
     protected abstract void _mousePress(int buttons);
 
     /**
-     * Generate a mouse press event with specified buttons mask.
-     *
-     * Up to 32-buttons mice are supported. Other buttons are inaccessible
-     * by the robot. Bits 0, 1, and 2 mean LEFT, RIGHT, and MIDDLE mouse buttons
-     * respectively.
+     * Generates a mouse press event for the specified {@link MouseButton}.
      *
      * @param button the mouse button to press
      */
     public void mousePress(MouseButton button) {
         Application.checkEventThread();
-        _mousePress(convertToButtonId(button));
+        _mousePress(convertToRobotMouseButton(button));
     }
 
     protected abstract void _mouseRelease(int buttons);
 
     /**
-     * Generate a mouse release event with specified buttons mask.
+     * Generates a mouse release event for the specified {@link MouseButton}.
      *
      * @param button the mouse button to release
      */
     public void mouseRelease(MouseButton button) {
         Application.checkEventThread();
-        _mouseRelease(convertToButtonId(button));
+        _mouseRelease(convertToRobotMouseButton(button));
     }
 
     protected abstract void _mouseWheel(int wheelAmt);
 
     /**
-     * Generate a mouse wheel event.
+     * Generates a mouse wheel event.
      *
      * @param wheelAmt amount the wheel has turned of wheel turning
      */
@@ -192,7 +197,7 @@ public abstract class Robot {
     protected abstract int _getPixelColor(int x, int y);
 
     /**
-     * Returns the pixel {@link Color} at specified screen coordinates.
+     * Returns the {@link Color} of the pixel at the specified screen coordinates.
      *
      * @param x the x coordinate to get the pixel color from
      * @param y the y coordinate to get the pixel color from
@@ -205,7 +210,7 @@ public abstract class Robot {
     }
 
     /**
-     * Returns the pixel {@link Color} at specified screen coordinates.
+     * Returns the {@link Color} of the pixel at the specified screen coordinates.
      *
      * @param location the (x,y) coordinates to get the pixel color from
      * @return the pixel color at the specified screen coordinates
@@ -268,16 +273,16 @@ public abstract class Robot {
     /**
      * Returns a capture of the specified rectangular area of the screen.
      * <p>
-     * If {@code isHiDPI} argument is {@literal true}, the returned Pixels object
-     * dimensions may differ from the requested {@code width} and {@code
-     * height} depending on how many physical pixels the area occupies on the
-     * screen.  E.g. in HiDPI mode on the Mac (aka Retina display) the pixels
+     * If the {@code isHiDPI} argument is {@literal true}, the returned
+     * {@code Image} object dimensions may differ from the requested {@code width}
+     * and {@code height} depending on how many physical pixels the area occupies
+     * on the screen. E.g. in HiDPI mode on the Mac (aka Retina display) the pixels
      * are doubled, and thus a screen capture of an area of size (10x10) pixels
-     * will result in a Pixels object with dimensions (20x20). Calling code
-     * should use the returned objects's getWidth() and getHeight() methods
-     * to determine the image size.
+     * will result in an Image with dimensions (20x20). Calling code should use the
+     * returned objects's getWidth() and getHeight() methods to determine the image
+     * size.
      * <p>
-     * If {@code isHiDPI} is {@literal false}, the returned Pixels object is of
+     * If {@code isHiDPI} is {@literal false}, the returned {@code Image} is of
      * the requested size. Note that in this case the image may be scaled in
      * order to fit to the requested dimensions if running on a HiDPI display.
      */
@@ -311,13 +316,13 @@ public abstract class Robot {
                 (int) region.getWidth(), (int) region.getHeight(), false));
     }
 
-    private int convertToButtonId(MouseButton button) {
+    private int convertToRobotMouseButton(MouseButton button) {
         switch (button) {
             case PRIMARY: return Robot.MOUSE_LEFT_BTN;
             case SECONDARY: return Robot.MOUSE_RIGHT_BTN;
             case MIDDLE: return Robot.MOUSE_MIDDLE_BTN;
+            default: throw new IllegalArgumentException("MouseButton: " + button + " not supported by Robot");
         }
-        throw new IllegalArgumentException("MouseButton: " + button + " not supported by Robot");
     }
 
     private Color convertFromIntArgb(int color) {

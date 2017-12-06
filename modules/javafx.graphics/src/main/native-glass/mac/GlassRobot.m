@@ -117,6 +117,135 @@ static inline void PostGlassKeyEvent(jint code, BOOL keyPressed)
     }
 }
 
+static NSMutableDictionary *originalColorProfileURLs()
+{
+    static NSMutableDictionary *sharedInstance;
+    if (!sharedInstance)
+        sharedInstance = [[NSMutableDictionary alloc] init];
+    return sharedInstance;
+}
+
+static NSURL *colorProfileURLForDisplay(NSString *displayUUIDString)
+{
+    CFUUIDRef uuid = CFUUIDCreateFromString(kCFAllocatorDefault, (CFStringRef)displayUUIDString);
+    CFDictionaryRef deviceInfo = ColorSyncDeviceCopyDeviceInfo(kColorSyncDisplayDeviceClass, uuid);
+    CFRelease(uuid);
+    if (!deviceInfo) {
+        LOG("No display attached to system; not setting main display's color profile.");
+        return nil;
+    }
+
+    CFURLRef profileURL = nil;
+    CFDictionaryRef profileInfo = (CFDictionaryRef)CFDictionaryGetValue(deviceInfo, kColorSyncCustomProfiles);
+    if (profileInfo)
+        profileURL = (CFURLRef)CFDictionaryGetValue(profileInfo, CFSTR("1"));
+    else {
+        profileInfo = (CFDictionaryRef)CFDictionaryGetValue(deviceInfo, kColorSyncFactoryProfiles);
+        CFDictionaryRef factoryProfile = (CFDictionaryRef)CFDictionaryGetValue(profileInfo, CFSTR("1"));
+        if (factoryProfile)
+            profileURL = (CFURLRef)CFDictionaryGetValue(factoryProfile, kColorSyncDeviceProfileURL);
+    }
+
+    if (!profileURL) {
+        LOG("Could not determine current color profile, so it will not be reset after running the tests.");
+        CFRelease(deviceInfo);
+        return nil;
+    }
+
+    NSURL *url = (NSURL *)CFAutorelease(CFRetain(profileURL));
+    CFRelease(deviceInfo);
+    return url;
+}
+
+static NSArray *displayUUIDStrings()
+{
+    NSMutableArray *result = [NSMutableArray array];
+
+    static const uint32_t maxDisplayCount = 10;
+    CGDirectDisplayID displayIDs[maxDisplayCount] = { 0 };
+    uint32_t displayCount = 0;
+
+    CGError err = CGGetActiveDisplayList(maxDisplayCount, displayIDs, &displayCount);
+    if (err != kCGErrorSuccess) {
+        LOG("Error %d getting active display list; not setting display color profile.", err);
+        return nil;
+    }
+
+    if (!displayCount) {
+        LOG("No display attached to system; not setting display color profile.");
+        return nil;
+    }
+
+    for (uint32_t i = 0; i < displayCount; ++i) {
+        CFUUIDRef displayUUIDRef = CGDisplayCreateUUIDFromDisplayID(displayIDs[i]);
+        [result addObject:(NSString *)CFBridgingRelease(CFUUIDCreateString(kCFAllocatorDefault, displayUUIDRef))];
+        CFRelease(displayUUIDRef);
+    }
+
+    return result;
+}
+
+static void saveDisplayColorProfiles(NSArray *displayUUIDStrings)
+{
+    NSMutableDictionary *userColorProfiles = originalColorProfileURLs();
+
+    for (NSString *UUIDString in displayUUIDStrings) {
+        if ([userColorProfiles objectForKey:UUIDString])
+            continue;
+
+        NSURL *colorProfileURL = colorProfileURLForDisplay(UUIDString);
+        if (!colorProfileURL)
+            continue;
+
+        [userColorProfiles setObject:colorProfileURL forKey:UUIDString];
+    }
+}
+
+static void setDisplayColorProfile(NSString *displayUUIDString, NSURL *colorProfileURL)
+{
+    NSDictionary *profileInfo = @{
+        (NSString *)kColorSyncDeviceDefaultProfileID : colorProfileURL
+    };
+
+    CFUUIDRef uuid = CFUUIDCreateFromString(kCFAllocatorDefault, (CFStringRef)displayUUIDString);
+    BOOL success = ColorSyncDeviceSetCustomProfiles(kColorSyncDisplayDeviceClass, uuid, (CFDictionaryRef)profileInfo);
+    if (!success)
+        LOG("Failed to set color profile for display %s! Many pixel tests may fail as a result.", displayUUIDString);
+    CFRelease(uuid);
+}
+
+static void installLayoutTestColorProfile()
+{
+    // Set color profile to generic sRGB
+    NSArray *displays = displayUUIDStrings();
+    saveDisplayColorProfiles(displays);
+
+    // Profile path needs to be hardcoded because of <rdar://problem/28392768>.
+    NSURL *sRGBProfileURL = [NSURL fileURLWithPath:@"/System/Library/ColorSync/Profiles/sRGB Profile.icc"];
+
+    for (NSString *displayUUIDString in displays)
+        setDisplayColorProfile(displayUUIDString, sRGBProfileURL);
+}
+
+static void restoreUserColorProfile(void)
+{
+    NSArray *displays = displayUUIDStrings();
+    restoreDisplayColorProfiles(displays);
+}
+
+static void restoreDisplayColorProfiles(NSArray *displayUUIDStrings)
+{
+    NSMutableDictionary* userColorProfiles = originalColorProfileURLs();
+
+    for (NSString *UUIDString in displayUUIDStrings) {
+        NSURL *profileURL = [userColorProfiles objectForKey:UUIDString];
+        if (!profileURL)
+            continue;
+
+        setDisplayColorProfile(UUIDString, profileURL);
+    }
+}
+
 @interface GlassRobot : NSObject
 {
     UInt32 mouseButtons;
@@ -398,7 +527,12 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getPixelColor
     GLASS_POOL_ENTER
     {
         CGRect bounds = CGRectMake((CGFloat)x, (CGFloat)y, 1.0f, 1.0f);
+        // Calling CGWindowListCreateImage will return an image in the output device's
+        // color space. This makes it infeasible to test for exact color matches. Thus,
+        // force the color space to be sRGB.
+        installLayoutTestColorProfile();
         CGImageRef screenImage = CGWindowListCreateImage(bounds, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+
         if (screenImage != NULL)
         {
             //DumpImage(screenImage);
@@ -418,6 +552,7 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getPixelColor
             }
             CGImageRelease(screenImage);
         }
+        restoreUserColorProfile();
     }
     GLASS_POOL_EXIT;
 
@@ -440,6 +575,7 @@ JNIEXPORT jobject JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture
     GLASS_POOL_ENTER
     {
         CGRect bounds = CGRectMake((CGFloat)x, (CGFloat)y, (CGFloat)width, (CGFloat)height);
+        installLayoutTestColorProfile();
         CGImageRef screenImage = CGWindowListCreateImage(bounds, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
         if (screenImage != NULL)
         {
@@ -501,6 +637,7 @@ JNIEXPORT jobject JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture
 
             CGImageRelease(screenImage);
         }
+        restoreUserColorProfile();
     }
     GLASS_POOL_EXIT;
 
