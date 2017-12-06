@@ -21,9 +21,15 @@ build_script:
         choco install jdk9 --version 9.0.1.11 -params 'installdir=C:\\jdk9'
         refreshenv
       }
+      choco install gradle -version 4.3.1
       # choco install visualstudio2017community --ignorepackagecodes
       # Will need Windows SDK 10.0.26624
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+      #Save the current value in the $p variable.
+      $p = [Environment]::GetEnvironmentVariable("PSModulePath")
+      $p += ";C:\projects\openjfx\.ci\"
+      [Environment]::SetEnvironmentVariable("PSModulePath",$p)
+      refreshenv
+      Invoke-Environment '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"' -Force
       $client = new-object net.webclient
 
       # install directx sdk
@@ -35,7 +41,7 @@ build_script:
       if ($Result.ExitCode -ne 0) {
         Get-ChildItem -Include hs_err_pid*.log -Recurse | Get-Content
       }
-      cmd.exe /c '\buildSrc\genVSproperties.bat'
+      # cmd.exe /c '\buildSrc\genVSproperties.bat'
 
 test_script:
   - gradlew check --no-daemon
