@@ -220,7 +220,7 @@ static void installLayoutTestColorProfile()
     NSArray *displays = displayUUIDStrings();
     saveDisplayColorProfiles(displays);
 
-    // Profile path needs to be hardcoded because of <rdar://problem/28392768>.
+    // /System/Library/ColorSync/Profiles/Generic RGB Profile.icc
     NSURL *sRGBProfileURL = [NSURL fileURLWithPath:@"/System/Library/ColorSync/Profiles/sRGB Profile.icc"];
 
     for (NSString *displayUUIDString in displays)

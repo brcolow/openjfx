@@ -1,0 +1,40 @@
+version: "{branch} {build}"
+
+environment:
+  matrix:
+    - JAVA_VERSION: "8"
+      JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+
+    - JAVA_VERSION: "9"
+      JAVA_HOME: C:\jdk9
+
+shallow_clone: true
+
+build:
+  verbosity: detailed
+
+build_script:
+  - ps: |
+      if ($env:JAVA_VERSION -eq "9") {
+        choco install jdk9 --version 9.0.1.11 -params 'installdir=C:\\jdk9'
+        refreshenv
+      }
+      choco install visualstudio2017community
+      $client = new-object net.webclient
+
+      # install directx sdk
+      $client.DownloadFile("http://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe", "DXSDK_Jun10.exe")
+      Start-Process "DXSDK_Jun10.exe" -ArgumentList "/silent"
+
+
+  - cmd: |
+      java -version
+      gradlew --version --no-daemon
+      gradlew build --no-daemon
+
+test_script:
+  - gradlew check --no-daemon
+
+cache:
+  - C:\Users\appveyor\.gradle\caches
+  - C:\Users\appveyor\.gradle\wrapper -> .gradle-wrapper\gradle-wrapper.properties
