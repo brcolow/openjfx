@@ -23,17 +23,19 @@ build_script:
       }
       # choco install visualstudio2017community --ignorepackagecodes
       # Will need Windows SDK 10.0.26624
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
       $client = new-object net.webclient
 
       # install directx sdk
       $client.DownloadFile("http://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe", "DXSDK_Jun10.exe")
       Start-Process "DXSDK_Jun10.exe" -ArgumentList "/silent"
-
-
-  - cmd: |
-      java -version
-      gradlew --version --no-daemon
-      gradlew build --no-daemon
+      java --version
+      gradle --version --no-daemon
+      gradle build --no-daemon
+      if ($Result.ExitCode -ne 0) {
+        Get-ChildItem -Include hs_err_pid*.log -Recurse | Get-Content
+      }
+      cmd.exe /c '\buildSrc\genVSproperties.bat'
 
 test_script:
   - gradlew check --no-daemon
