@@ -1,5 +1,7 @@
 version: "{branch} {build}"
 
+image: Visual Studio 2017
+
 environment:
   matrix:
     - JAVA_VERSION: "8"
@@ -19,7 +21,8 @@ build_script:
         choco install jdk9 --version 9.0.1.11 -params 'installdir=C:\\jdk9'
         refreshenv
       }
-      choco install visualstudio2017community
+      # choco install visualstudio2017community --ignorepackagecodes
+      # Will need Windows SDK 10.0.26624
       $client = new-object net.webclient
 
       # install directx sdk
