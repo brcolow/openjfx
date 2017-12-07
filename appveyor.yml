@@ -21,27 +21,30 @@ build_script:
         choco install jdk9 --version 9.0.1.11 -params 'installdir=C:\\jdk9'
         refreshenv
       }
+      choco install pscx
       choco install gradle -version 4.3.1
+
       # choco install visualstudio2017community --ignorepackagecodes
       # Will need Windows SDK 10.0.26624
-      #Save the current value in the $p variable.
-      $p = [Environment]::GetEnvironmentVariable("PSModulePath")
-      $p += ";C:\projects\openjfx\.ci\"
-      [Environment]::SetEnvironmentVariable("PSModulePath",$p)
+      Copy-Item C:\projects\openjfx\.ci\Invoke-Environment.ps1 $PSHome\Modules
       refreshenv
-      Invoke-Environment '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"' -Force
-      $client = new-object net.webclient
 
-      # install directx sdk
+      # Set environment to mimic the Visual Studio command prompt
+      Invoke-BatchFile 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat' -Force
+
+      # Install DirectX SDK needed by JavaFX
+      $client = new-object net.webclient
       $client.DownloadFile("http://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe", "DXSDK_Jun10.exe")
       Start-Process "DXSDK_Jun10.exe" -ArgumentList "/silent"
-      java --version
+
+      java -version
       .\gradlew --version --no-daemon
       .\gradlew build --no-daemon
+
+      # Try and print crash logs if gradle build returned non-zero exit code
       if ($Result.ExitCode -ne 0) {
         Get-ChildItem -Include hs_err_pid*.log -Recurse | Get-Content
       }
-      # cmd.exe /c '\buildSrc\genVSproperties.bat'
 
 test_script:
   - .\gradlew check --no-daemon
