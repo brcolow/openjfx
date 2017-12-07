@@ -21,11 +21,6 @@ build_script:
       choco install pscx
       choco install gradle -version 4.3.1
 
-      # choco install visualstudio2017community --ignorepackagecodes
-      # Will need Windows SDK 10.0.26624
-      Copy-Item C:\projects\openjfx\.ci\Invoke-Environment.ps1 $PSHome\Modules
-      refreshenv
-
       # Set environment to mimic the Visual Studio command prompt
       Invoke-BatchFile 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat' -Force
 
@@ -43,10 +38,13 @@ build_script:
         Get-ChildItem -Include hs_err_pid*.log -Recurse | Get-Content
       }
 
+      # TODO use cdb to get back traces
+
 test_script:
   - .\gradlew check --no-daemon
 
-after_test:
+# Even if tests fail we want to upload results
+on_finish:
   - ps: |
         Write-Verbose -Message 'Uploading test results to AppVeyor…' -Verbose
         $wc = New-Object 'System.Net.WebClient'
