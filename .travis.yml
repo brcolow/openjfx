@@ -29,6 +29,7 @@ addons:
       - libavformat-dev
       - cmake
       - ruby
+      - gdb
 
 # keep gradle cache.
 before_cache:

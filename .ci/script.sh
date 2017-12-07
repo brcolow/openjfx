@@ -11,11 +11,8 @@ RESULT=$?
 echo "Exit code from gradle build: $RESULT"
 
 if [[ ${RESULT} -ne 0 ]]; then
-  JVMCRASH="$(find . -name "hs_err_pid*.log" -type f -print | head -n 1)"
-  if [ -f "$JVMCRASH" ]; then
-    echo "======= JVM Crash Log $JVMCRASH ======="
-    cat "$JVMCRASH"
-  fi
+  echo "======== JVM CRASH LOGS ======="
+  find . -name "hs_err_pid*.log" -type f -printf "\n%p\n" -exec cat {} \;
 
   CORES=''
   if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
