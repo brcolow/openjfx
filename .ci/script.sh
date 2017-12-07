@@ -8,6 +8,8 @@ ulimit -c unlimited -S
 
 # Print core dumps when JVM crashes.
 RESULT=$?
+echo "Exit code from gradle build: $RESULT"
+
 if [[ ${RESULT} -ne 0 ]]; then
   JVMCRASH="$(find . -name "hs_err_pid*.log" -type f -print | head -n 1)"
   if [ -f "$JVMCRASH" ]; then
