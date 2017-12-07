@@ -3,7 +3,7 @@ sudo: false
 
 addons:
   apt:
-    packages:
+    packages: &global_deps
       - ksh
       - bison
       - flex
@@ -49,6 +49,7 @@ matrix:
         apt:
           packages:
             - oracle-java8-installer
+            - *global_deps
     - os: linux
       dist: trusty
       jdk: oraclejdk9
@@ -56,6 +57,7 @@ matrix:
         apt:
           packages:
             - oracle-java9-installer
+            - *global_deps
     - os: osx
       osx_image: xcode9
       env:
