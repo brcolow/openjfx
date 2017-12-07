@@ -11,19 +11,20 @@ RESULT=$?
 echo "Exit code from gradle build: $RESULT"
 
 if [[ ${RESULT} -ne 0 ]]; then
-  echo "======== JVM CRASH LOGS ======="
+  echo "\n\n======== JVM CRASH LOGS ======="
   find . -name "hs_err_pid*.log" -type f -printf "\n%p\n" -exec cat {} \;
 
   CORES=''
   if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
     CORES="$(find /cores/ -type f -print)"
   else
-    CORES="$(find . -type f -name 'core.*' -print)"
+    echo $PWD
+    CORES="$(find . -type f -regex '*core.[0-9]{6}' -print)"
   fi
 
   if [ -n "${CORES}" ]; then
     for core in ${CORES}; do
-    echo "======= Core file $core ======="
+    echo "\n\n======= Core file $core ======="
     if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
       lldb -Q -o "bt all" -f "$(which java)" -c "${core}"
     else
