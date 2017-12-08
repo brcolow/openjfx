@@ -4,6 +4,8 @@ set -euo pipefail
 if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
   brew update
   brew install findutils
+  brew install qt5
+  brew link qt5 --force
   if [[ "${TRAVIS_JAVA_VERSION}" == 8 ]]; then
     brew cask reinstall caskroom/versions/java8
   elif [[ "${TRAVIS_JAVA_VERSION}" == 9 ]]; then

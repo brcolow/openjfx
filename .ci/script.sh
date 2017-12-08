@@ -13,8 +13,7 @@ echo "Exit code from gradle build: $RESULT"
 if [[ ${RESULT} -ne 0 ]]; then
   printf '\n\n======== JVM CRASH LOGS ======='
 
-  FIND="gfind" && [[ "${TRAVIS_OS_NAME}" == osx ]] && FIND="find"
-
+  if [[ "${TRAVIS_OS_NAME}" == osx ]]; then FIND="gfind"; else FIND="find"; fi
   ${FIND} . -name "hs_err_pid*.log" -type f -printf '\n%p\n' -exec cat {} \;
 
   CORES=''

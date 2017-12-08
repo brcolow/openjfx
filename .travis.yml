@@ -31,6 +31,7 @@ addons:
       - ruby
       - gdb
 
+# For webkit: t5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev ?
 # keep gradle cache.
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
