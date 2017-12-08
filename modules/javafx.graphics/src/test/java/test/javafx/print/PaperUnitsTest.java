@@ -46,7 +46,7 @@ public class PaperUnitsTest {
   }
 
   @BeforeClass
-  public void beforeClass() {
+  public static void beforeClass() {
       Assume.assumeTrue(!System.getenv("APPVEYOR").equalsIgnoreCase("true"));
   }
 

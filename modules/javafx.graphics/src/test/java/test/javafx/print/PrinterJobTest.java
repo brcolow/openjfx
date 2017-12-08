@@ -49,7 +49,7 @@ public class PrinterJobTest {
   private PrinterJob job;
 
   @BeforeClass
-  public void beforeClass() {
+  public static void beforeClass() {
       Assume.assumeTrue(!System.getenv("APPVEYOR").equalsIgnoreCase("true"));
   }
 
