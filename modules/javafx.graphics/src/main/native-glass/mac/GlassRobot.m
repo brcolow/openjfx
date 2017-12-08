@@ -530,7 +530,7 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getPixelColor
         // Calling CGWindowListCreateImage will return an image in the output device's
         // color space. This makes it infeasible to test for exact color matches. Thus,
         // force the color space to be sRGB.
-        installLayoutTestColorProfile();
+        // installLayoutTestColorProfile();
         CGImageRef screenImage = CGWindowListCreateImage(bounds, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 
         if (screenImage != NULL)
@@ -552,7 +552,7 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getPixelColor
             }
             CGImageRelease(screenImage);
         }
-        restoreUserColorProfile();
+        // restoreUserColorProfile();
     }
     GLASS_POOL_EXIT;
 
@@ -575,7 +575,7 @@ JNIEXPORT jobject JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture
     GLASS_POOL_ENTER
     {
         CGRect bounds = CGRectMake((CGFloat)x, (CGFloat)y, (CGFloat)width, (CGFloat)height);
-        installLayoutTestColorProfile();
+        // installLayoutTestColorProfile();
         CGImageRef screenImage = CGWindowListCreateImage(bounds, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
         if (screenImage != NULL)
         {
@@ -637,7 +637,7 @@ JNIEXPORT jobject JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture
 
             CGImageRelease(screenImage);
         }
-        restoreUserColorProfile();
+        // restoreUserColorProfile();
     }
     GLASS_POOL_EXIT;
 
