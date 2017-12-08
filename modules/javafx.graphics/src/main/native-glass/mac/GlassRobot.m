@@ -162,7 +162,7 @@ static NSArray *displayUUIDStrings()
     NSMutableArray *result = [NSMutableArray array];
 
     static const uint32_t maxDisplayCount = 10;
-    CGDirectDisplayID displayIDs[maxDisplayCount] = { 0 };
+    CGDirectDisplayID displayIDs[maxDisplayCount];
     uint32_t displayCount = 0;
 
     CGError err = CGGetActiveDisplayList(maxDisplayCount, displayIDs, &displayCount);
@@ -227,12 +227,6 @@ static void installLayoutTestColorProfile()
         setDisplayColorProfile(displayUUIDString, sRGBProfileURL);
 }
 
-static void restoreUserColorProfile(void)
-{
-    NSArray *displays = displayUUIDStrings();
-    restoreDisplayColorProfiles(displays);
-}
-
 static void restoreDisplayColorProfiles(NSArray *displayUUIDStrings)
 {
     NSMutableDictionary* userColorProfiles = originalColorProfileURLs();
@@ -244,6 +238,12 @@ static void restoreDisplayColorProfiles(NSArray *displayUUIDStrings)
 
         setDisplayColorProfile(UUIDString, profileURL);
     }
+}
+
+static void restoreUserColorProfile(void)
+{
+    NSArray *displays = displayUUIDStrings();
+    restoreDisplayColorProfiles(displays);
 }
 
 @interface GlassRobot : NSObject
