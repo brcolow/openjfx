@@ -3,6 +3,7 @@ set -euo pipefail
 
 if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
   brew update
+  brew install findutils
   if [[ "${TRAVIS_JAVA_VERSION}" == 8 ]]; then
     brew cask reinstall caskroom/versions/java8
   elif [[ "${TRAVIS_JAVA_VERSION}" == 9 ]]; then
