@@ -27,12 +27,19 @@ package test.robot.testharness;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.robot.Robot;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static test.util.Util.TIMEOUT;
+
+import javax.imageio.ImageIO;
 
 /**
  * Common base class for testing snapshot.
@@ -164,8 +173,25 @@ public abstract class VisualTestBase {
         return "rgba(" + r + "," + g + "," + b + "," + a + ")";
     }
 
-    protected void assertColorEquals(Color expected, Color actual, double delta) {
+    protected void assertColorEquals(Color expected, Color actual, double delta) throws Exception {
         if (!testColorEquals(expected, actual, delta)) {
+            Image screenCapture = robot.getScreenCapture(0, 0, (int) Screen.getPrimary().getBounds().getWidth(),
+                    (int) Screen.getPrimary().getBounds().getHeight());
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(screenCapture, null);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(bufferedImage, "PNG", baos);
+            byte[] buffer = baos.toByteArray();
+            baos.close();
+            System.out.println("\n\nBase 64 PNG image:\n\n" + Base64.getEncoder().encodeToString(buffer));
+
+            /*
+            PixelReader pixelReader = screenCapture.getPixelReader();
+            int width = (int) screenCapture.getWidth();
+            int height = (int) screenCapture.getHeight();
+            byte[] buffer = new byte[width * height * 4];
+            pixelReader.getPixels(0, 0, width, height,
+                    PixelFormat.getByteBgraInstance(), buffer, 0, width * 4);
+            */
             throw new AssertionFailedError("expected:" + colorToString(expected)
                     + " but was:" + colorToString(actual));
         }
