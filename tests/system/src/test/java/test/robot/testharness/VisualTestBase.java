@@ -38,6 +38,7 @@ import javafx.stage.StageStyle;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -173,16 +174,21 @@ public abstract class VisualTestBase {
         return "rgba(" + r + "," + g + "," + b + "," + a + ")";
     }
 
-    protected void assertColorEquals(Color expected, Color actual, double delta) throws Exception {
+    protected void assertColorEquals(Color expected, Color actual, double delta) {
         if (!testColorEquals(expected, actual, delta)) {
             Image screenCapture = robot.getScreenCapture(0, 0, (int) Screen.getPrimary().getBounds().getWidth(),
                     (int) Screen.getPrimary().getBounds().getHeight());
             BufferedImage bufferedImage = SwingFXUtils.fromFXImage(screenCapture, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(bufferedImage, "PNG", baos);
-            byte[] buffer = baos.toByteArray();
-            baos.close();
-            System.out.println("\n\nBase 64 PNG image:\n\n" + Base64.getEncoder().encodeToString(buffer));
+            try {
+                ImageIO.write(bufferedImage, "PNG", baos);
+                byte[] buffer = baos.toByteArray();
+                baos.close();
+                System.out.println("\n\nBase 64 PNG image:\n\n" + Base64.getEncoder().encodeToString(buffer));
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
 
             /*
             PixelReader pixelReader = screenCapture.getPixelReader();
