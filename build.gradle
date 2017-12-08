@@ -1514,7 +1514,21 @@ allprojects {
     test {
         executable = JAVA;
         enableAssertions = true;
-        testLogging.exceptionFormat = "full";
+        testLogging {
+            exceptionFormat TestExceptionFormat.FULL
+            events TestLogEvent.PASSED, TestLogEvent.SKIPPED,
+                    TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT
+            showCauses true
+            showStackTraces true
+            showExceptions true
+            // set options for log level DEBUG and INFO
+            debug {
+                events TestLogEvent.STARTED, TestLogEvent.PASSED,
+                        TestLogEvent.SKIPPED, TestLogEvent.FAILED,
+                        TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR
+            }
+            info.events = debug.events
+        }
         scanForTestClasses = false;
         include("**/*Test.*");
         if (BUILD_CLOSED && DO_JCOV) {
