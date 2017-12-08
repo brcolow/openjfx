@@ -37,11 +37,11 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import junit.framework.AssertionFailedError;
@@ -179,25 +179,14 @@ public abstract class VisualTestBase {
             Image screenCapture = robot.getScreenCapture(0, 0, (int) Screen.getPrimary().getBounds().getWidth(),
                     (int) Screen.getPrimary().getBounds().getHeight());
             BufferedImage bufferedImage = SwingFXUtils.fromFXImage(screenCapture, null);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
-                ImageIO.write(bufferedImage, "PNG", baos);
-                byte[] buffer = baos.toByteArray();
-                baos.close();
-                System.out.println("\n\nBase 64 PNG image:\n\n" + Base64.getEncoder().encodeToString(buffer));
+                File screenshot = new File("~/images/" + new Random().nextInt() + ".png");
+                System.out.println("Saving screenshot to: " + screenshot.getCanonicalPath());
+                ImageIO.write(bufferedImage, "PNG", screenshot);
             }
             catch (IOException e) {
                 e.printStackTrace();
             }
-
-            /*
-            PixelReader pixelReader = screenCapture.getPixelReader();
-            int width = (int) screenCapture.getWidth();
-            int height = (int) screenCapture.getHeight();
-            byte[] buffer = new byte[width * height * 4];
-            pixelReader.getPixels(0, 0, width, height,
-                    PixelFormat.getByteBgraInstance(), buffer, 0, width * 4);
-            */
             throw new AssertionFailedError("expected:" + colorToString(expected)
                     + " but was:" + colorToString(actual));
         }

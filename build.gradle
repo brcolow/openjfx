@@ -1531,6 +1531,16 @@ allprojects {
                         TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR
             }
             info.events = debug.events
+            afterSuite { desc, result ->
+                if (!desc.parent) {
+                    def output = "Results: ${result.resultType} (${result.testCount} tests, " +
+                            "${result.successfulTestCount} successes, " +
+                            "${result.failedTestCount} failures, " +
+                            "${result.skippedTestCount} skipped)"
+                    def startItem = '|  ', endItem = '  |'
+                    def repeat = startItem + output + endItem
+                    println('\n' + ('-' * repeat.length()) + '\n' + repeat + '\n' + ('-' * repeat.length()))
+                }
         }
         scanForTestClasses = false;
         include("**/*Test.*");

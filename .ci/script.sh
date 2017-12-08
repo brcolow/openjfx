@@ -10,6 +10,8 @@ ulimit -c unlimited -S
 RESULT=$?
 
 if [[ ${RESULT} -ne 0 ]]; then
+  zip -r ~/images.zip ~/images
+
   if [ "${PRINT_CRASH_LOGS}" = "true" ]; then
 
     if [[ "${TRAVIS_OS_NAME}" == osx ]]; then FIND="gfind"; else FIND="find"; fi
@@ -24,13 +26,14 @@ if [[ ${RESULT} -ne 0 ]]; then
 
     if [ -n "${CORES}" ]; then
       for core in ${CORES}; do
-      printf '\n\n======= Core file %s =======' "$core"
-      if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
-        lldb -Q -o "bt all" -f "$(which java)" -c "${core}"
-      else
-        gdb -n -batch -ex "thread apply all bt" -ex "set pagination 0" "$(which java)" -c "${core}"
-      fi
-    done
+        printf '\n\n======= Core file %s =======' "$core"
+        if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
+          lldb -Q -o "bt all" -f "$(which java)" -c "${core}"
+        else
+          gdb -n -batch -ex "thread apply all bt" -ex "set pagination 0" "$(which java)" -c "${core}"
+        fi
+      done
+    fi
   fi
   exit ${RESULT}
 fi
