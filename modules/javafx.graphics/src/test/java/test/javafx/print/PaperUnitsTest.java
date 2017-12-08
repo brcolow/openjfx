@@ -30,9 +30,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assume.assumeFalse;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javafx.print.Paper;
@@ -44,9 +45,9 @@ public class PaperUnitsTest {
   @Test public void dummyTest() {
   }
 
-  @Before
-  public void setUp() {
-      assumeFalse(System.getenv("CI").equalsIgnoreCase("true") && System.getenv("APPVEYOR").equalsIgnoreCase("true"));
+  @BeforeClass
+  public void beforeClass() {
+      Assume.assumeTrue(!System.getenv("APPVEYOR").equalsIgnoreCase("true"));
   }
 
   @Test public void createPaperPts() {
