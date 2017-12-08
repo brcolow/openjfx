@@ -30,6 +30,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeFalse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +50,7 @@ public class PrinterJobTest {
 
   @Before
   public void setUp() {
+     assumeFalse(System.getenv("CI").equalsIgnoreCase("true") && System.getenv("APPVEYOR").equalsIgnoreCase("true"));
      try {
          job = PrinterJob.createPrinterJob();
          if (job == null) {
