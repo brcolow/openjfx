@@ -10,6 +10,7 @@ ulimit -c unlimited -S
 RESULT=$?
 
 if [[ ${RESULT} -ne 0 ]]; then
+  ls "$TRAVIS_BUILD_DIR"/images
   zip --verbose -r "$TRAVIS_BUILD_DIR"/images.zip "$TRAVIS_BUILD_DIR"/images/*
 
   if [ ! -z ${PRINT_CRASH_LOGS+x} ]; then

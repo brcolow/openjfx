@@ -1536,7 +1536,7 @@ allprojects {
                 if (desc.parent) {
                     if (result.getResultType() == TestResult.ResultType.FAILURE) {
                         failedTestSummary += "${desc.getClassName()}#${desc.getName()} FAILED:\n" +
-                                "${result.getExceptions()}"
+                                "${result.getExceptions()}\n"
                     }
                 }
             }
