@@ -10,7 +10,7 @@ ulimit -c unlimited -S
 RESULT=$?
 
 if [[ ${RESULT} -ne 0 ]]; then
-  zip -r ~/images.zip ~/images
+  zip -r "$TRAVIS_BUILD_DIR"/images.zip "$TRAVIS_BUILD_DIR"/images
 
   if [ ! -z ${PRINT_CRASH_LOGS+x} ]; then
     if [[ "${TRAVIS_OS_NAME}" == osx ]]; then FIND="gfind"; else FIND="find"; fi
@@ -18,14 +18,14 @@ if [[ ${RESULT} -ne 0 ]]; then
 
     CORES=''
     if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
-      CORES="$(find /cores/ -type f -print)"
+      CORES="$(find /cores -type f -regex '*core.[0-9]{4}' -print)"
     else
       CORES="$(find . -type f -regex '*core.[0-9]{6}' -print)"
     fi
 
     if [ -n "${CORES}" ]; then
       for core in ${CORES}; do
-        printf '\n\n======= Core file %s =======' "$core"
+        printf '\n\n======= Core file %s =======\n' "$core"
         if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
           lldb -Q -o "bt all" -f "$(which java)" -c "${core}"
         else
