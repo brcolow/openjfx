@@ -326,12 +326,10 @@ public abstract class Robot {
     }
 
     private Color convertFromIntArgb(int color) {
-        System.out.printf("javafx.scene.robot.Robot#convertFromIntArgb(%d)", color);
         int alpha = (color >> 24) & 0xFF;
         int red   = (color >> 16) & 0xFF;
         int green = (color >>  8) & 0xFF;
         int blue  =  color        & 0xFF;
-        System.out.println("Returning color: " + new Color(red / 255d, green / 255d, blue / 255d, alpha / 255d));
         return new Color(red / 255d, green / 255d, blue / 255d, alpha / 255d);
     }
 

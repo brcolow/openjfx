@@ -1531,6 +1531,15 @@ allprojects {
                         TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR
             }
             info.events = debug.events
+            def failedTestSummary = "\n\n FAILED TESTS SUMMARY: \n\n"
+            afterTest { desc, result ->
+                if (desc.parent) {
+                    if (result.getResultType() == TestResult.ResultType.FAILURE) {
+                        failedTestSummary += "${desc.getClassName()}#${desc.getName()} FAILED:\n" +
+                                "${result.getExceptions()}"
+                    }
+                }
+            }
             afterSuite { desc, result ->
                 if (!desc.parent) {
                     def output = "Results: ${result.resultType} (${result.testCount} tests, " +
@@ -1540,6 +1549,9 @@ allprojects {
                     def startItem = '|  ', endItem = '  |'
                     def repeat = startItem + output + endItem
                     println('\n' + ('-' * repeat.length()) + '\n' + repeat + '\n' + ('-' * repeat.length()))
+                    if (result.failedTestCount > 0) {
+                        println(failedTestSummary)
+                    }
                 }
             }
         }
