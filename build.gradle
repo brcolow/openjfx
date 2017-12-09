@@ -1541,6 +1541,7 @@ allprojects {
                     def repeat = startItem + output + endItem
                     println('\n' + ('-' * repeat.length()) + '\n' + repeat + '\n' + ('-' * repeat.length()))
                 }
+            }
         }
         scanForTestClasses = false;
         include("**/*Test.*");
