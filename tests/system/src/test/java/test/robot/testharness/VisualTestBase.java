@@ -41,7 +41,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import junit.framework.AssertionFailedError;
@@ -49,6 +48,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import test.util.Util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +62,8 @@ import javax.imageio.ImageIO;
  * Common base class for testing snapshot.
  */
 public abstract class VisualTestBase {
+    @Rule
+    public TestName name = new TestName();
 
     // Used to launch the application before running any test
     private static final CountDownLatch launchLatch = new CountDownLatch(1);
@@ -174,19 +177,26 @@ public abstract class VisualTestBase {
         return "rgba(" + r + "," + g + "," + b + "," + a + ")";
     }
 
-    protected void assertColorEquals(Color expected, Color actual, double delta) {
-        if (!testColorEquals(expected, actual, delta)) {
-            Image screenCapture = robot.getScreenCapture(0, 0, (int) Screen.getPrimary().getBounds().getWidth(),
-                    (int) Screen.getPrimary().getBounds().getHeight());
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(screenCapture, null);
-            try {
-                File screenshot = new File("~/images/" + new Random().nextInt() + ".png");
+    private void saveScreenshot() {
+        Image screenCapture = robot.getScreenCapture(0, 0, (int) Screen.getPrimary().getBounds().getWidth(),
+                (int) Screen.getPrimary().getBounds().getHeight());
+        BufferedImage bufferedImage = SwingFXUtils.fromFXImage(screenCapture, null);
+        try {
+            String travisBuildDir = System.getenv("TRAVIS_BUILD_DIR");
+            if (travisBuildDir != null) {
+                File screenshot = new File(travisBuildDir + "/images/" + name.getMethodName() + ".png");
                 System.out.println("Saving screenshot to: " + screenshot.getCanonicalPath());
                 ImageIO.write(bufferedImage, "PNG", screenshot);
             }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void assertColorEquals(Color expected, Color actual, double delta) {
+        if (!testColorEquals(expected, actual, delta)) {
+            Platform.runLater(this::saveScreenshot);
             throw new AssertionFailedError("expected:" + colorToString(expected)
                     + " but was:" + colorToString(actual));
         }

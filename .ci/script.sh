@@ -12,8 +12,7 @@ RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then
   zip -r ~/images.zip ~/images
 
-  if [ "${PRINT_CRASH_LOGS}" = "true" ]; then
-
+  if [ ! -z ${PRINT_CRASH_LOGS+x} ]; then
     if [[ "${TRAVIS_OS_NAME}" == osx ]]; then FIND="gfind"; else FIND="find"; fi
     ${FIND} . -name "hs_err_pid*.log" -type f -printf '\n====== JVM CRASH LOG ======\n%p\n' -exec cat {} \;
 
