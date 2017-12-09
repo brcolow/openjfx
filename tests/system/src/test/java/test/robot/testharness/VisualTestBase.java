@@ -185,11 +185,18 @@ public abstract class VisualTestBase {
             String travisBuildDir = System.getenv("TRAVIS_BUILD_DIR");
             if (travisBuildDir != null) {
                 File screenshot = new File(travisBuildDir + "/images/" + name.getMethodName() + ".png");
+                File parent = screenshot.getParentFile();
+                if (parent != null && !parent.exists()) {
+                    if (!parent.mkdirs()) {
+                        throw new IOException("could not create directory: " + parent);
+                    }
+                }
                 System.out.println("Saving screenshot to: " + screenshot.getCanonicalPath());
                 ImageIO.write(bufferedImage, "PNG", screenshot);
             }
         }
         catch (IOException e) {
+            System.out.println("Error saving screenshot: " + e.getMessage());
             e.printStackTrace();
         }
     }
