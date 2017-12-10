@@ -32,6 +32,8 @@ addons:
       - gdb
 
 # For webkit: t5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev ?
+# Won't be able to build webkit in the time alloted by Travis
+
 # keep gradle cache.
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -80,6 +82,10 @@ deploy:
   skip_cleanup: true
   file_glob: true
   file: ${TRAVIS_BUILD_DIR}/images.zip
+  on:
+    repo: brcolow/openjfx
+    all_branches: true
+    condition: true
 
 notifications:
   email: false
