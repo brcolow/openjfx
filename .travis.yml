@@ -78,7 +78,8 @@ deploy:
   api_key:
     secure: "XwKiYOfCjaxNGbaCpNVQ067udl4S2/ijCpDhY4WBv6/vDNmAGx40SW8eLuEzm+OH05ch3vvGEp3ajRp1pHEorceXrh4A5aI9FzXI+Zqyg6oRPRSORMPjITyim/66fQFeUKTQPqU2e8u/Tf5HW/n+W/Yv7Q4hoqQtjYF/+d+bq7mp07RdE8s0eP2Flf8G9yRzBC3jCA2p6MpaMaJ7sbZAdtdmIWUoJWOg4qRGKg7NASnc0OOUnGe2V2Cr/Gz4I2tb3m5/OiSqsAmBqgFYxmTeLu1irfrd4jU3m96oBN8ysKqBICwty1HcdGyQvqMLdBolRxNmN0aSnP1eDBH/r9pOR77JlSOaEzltDOtc5iXb4/f6/ufOYA21TAZWuOR3XSoj2iMtuBcq/8yhZB/Ru8rVU+Tml/Wkcj3jthEAjeoXZeHxQs+nV265eEbVsMWgx4jbG0Mwk633yLUm72uMtAaZ3WxWJNJr+up5U586+90v0/8cxATC+uY7NKOEZ423OHSUp4yBQrpFYKlYsshs5uIwarTTC8OQjzRuw+19oBMfRktPUEC6hMBu1acHgLRNuIKrpqSk+KSzwo52YtXA47jrfyIYFJlW65ZjngWb9qKNjEp9CSawvUs+CvHbaCCnYYwadiLD9VxIODPdBxpyP6kxBcWQ9FzO3WnHYyg80tAEbR4="
   skip_cleanup: true
-  file: ~/images.zip
+  file_glob: true
+  file: ${TRAVIS_BUILD_DIR}/images.zip
 
 notifications:
   email: false
