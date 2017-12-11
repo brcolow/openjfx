@@ -79,6 +79,8 @@ public abstract class VisualTestBase {
     // the first test, and it lives through the execution of all tests.
     public static class MyApp extends Application {
 
+        Stage stage;
+
         @Override
         public void init() {
             VisualTestBase.myApp = this;
@@ -87,6 +89,7 @@ public abstract class VisualTestBase {
         @Override
         public void start(Stage primaryStage) throws Exception {
             Platform.setImplicitExit(false);
+            this.stage = primaryStage;
             assertTrue(Platform.isFxApplicationThread());
             assertNotNull(primaryStage);
 
@@ -202,6 +205,17 @@ public abstract class VisualTestBase {
     }
 
     protected void assertColorEquals(Color expected, Color actual, double delta) {
+        Platform.runLater(() -> {
+            if (!stages.isEmpty()) {
+                stages.get(stages.size() - 1).toFront();
+            }
+        });
+        try {
+            Thread.sleep(100);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (!testColorEquals(expected, actual, delta)) {
             Platform.runLater(this::saveScreenshot);
             throw new AssertionFailedError("expected:" + colorToString(expected)
