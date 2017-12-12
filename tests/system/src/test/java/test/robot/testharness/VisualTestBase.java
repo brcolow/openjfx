@@ -205,17 +205,6 @@ public abstract class VisualTestBase {
     }
 
     protected void assertColorEquals(Color expected, Color actual, double delta) {
-        Platform.runLater(() -> {
-            if (!stages.isEmpty()) {
-                stages.get(stages.size() - 1).toFront();
-            }
-        });
-        try {
-            Thread.sleep(100);
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         if (!testColorEquals(expected, actual, delta)) {
             Platform.runLater(this::saveScreenshot);
             throw new AssertionFailedError("expected:" + colorToString(expected)
