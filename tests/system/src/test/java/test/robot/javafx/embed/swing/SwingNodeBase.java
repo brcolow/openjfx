@@ -257,5 +257,4 @@ public class SwingNodeBase {
                 e.printStackTrace();
             }
         }
-    }
 }
