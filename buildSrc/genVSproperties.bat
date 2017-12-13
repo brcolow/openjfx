@@ -37,11 +37,11 @@ REM The previous officially supported VS version was 12.0
 REM So, the search order is 150, then 120, then 100
 set VSVER=150
 set "VSVARS32FILE=C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvars32.bat"
-if not "%VS150COMNTOOLS%"=="" (
-    set VS150COMNTOOLS=%VS150COMNTOOLS%
-) else (
-  if exist "%VSVARS32FILE%" set "VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build"
-)
+set "VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build"
+
+if NOT exist "%VSVARS32FILE%" set "VSVARS32FILE=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+if NOT exist "%VS150COMNTOOLS%" set "VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
+
 set VSVARSDIR=%VS150COMNTOOLS%
 if "%VSVARSDIR%"=="" set VSVER=120
 if "%VSVARSDIR%"=="" set VSVARSDIR=%VS120COMNTOOLS%
@@ -60,6 +60,7 @@ call "%VSVARS32%" > NUL
 if "%VSVER%"=="100" set VCVARSALL=%VCINSTALLDIR%\vcvarsall.bat
 if "%VSVER%"=="120" set VCVARSALL=%VCINSTALLDIR%\vcvarsall.bat
 if "%VSVER%"=="150" set VCVARSALL=%VSVARSDIR%\vcvarsall.bat
+
 call "%VCVARSALL%" %VCARCH% > NUL
 
 REM Some vars are reset by vcvarsall.bat, so save them here.
