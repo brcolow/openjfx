@@ -1,0 +1,68 @@
+version: "{branch} {build}"
+
+image: Visual Studio 2017
+
+environment:
+  matrix:
+    - JAVA_VERSION: "9"
+      JAVA_HOME: C:\jdk9
+
+shallow_clone: true
+
+build:
+  verbosity: detailed
+
+build_script:
+  - ps: |
+      if ($env:JAVA_VERSION -eq "9") {
+        choco install jdk9 --version 9.0.1.11 -params 'installdir=C:\\jdk9'
+        refreshenv
+      }
+      choco install pscx
+      choco install gradle -version 4.3.1
+
+      # Set environment to mimic the Visual Studio command prompt
+      Invoke-BatchFile 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat' -Force
+
+      # Install DirectX SDK needed by JavaFX
+      $client = new-object net.webclient
+      $client.DownloadFile("http://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe", "DXSDK_Jun10.exe")
+      Start-Process "DXSDK_Jun10.exe" -ArgumentList "/silent"
+
+      java -version
+      .\gradlew --version --no-daemon
+      .\gradlew build --no-daemon --stack-trace
+
+      # Try and print crash logs if gradle build returned non-zero exit code
+      if ($Result.ExitCode -ne 0) {
+        Get-ChildItem -Include hs_err_pid*.log -Recurse | Get-Content
+      }
+
+      # TODO use cdb to get back traces
+
+test_script:
+  - .\gradlew check --no-daemon --stack-trace
+
+# Even if tests fail we want to upload results
+on_finish:
+  - ps: |
+        # This technically works but is really inefficient as it requires an HTTP request for every
+        # single test. Ideally we want to batch the results. We can do this by POSTing to:
+        # $APPVEYOR_API_URL/api/tests/batch
+        # With JSON body:
+        # https://www.appveyor.com/docs/build-worker-api/#rest-3
+        # In order to do this we will need to iterate over all the XML files and convert them into
+        # a big JSON array.
+        Write-Verbose -Message 'Uploading test results to AppVeyor…' -Verbose
+        $wc = New-Object 'System.Net.WebClient'
+        $modules = @("javafx.base", "javafx.graphics","javafx.controls", "javafx.fxml","javafx.jmx", "javafx.media", "javafx.swing", "javafx.swt", "javafx.web")
+        ForEach ($module in $modules) {
+          ForEach ($file in Get-ChildItem ".\modules\${module}\build\test-results\test\TEST-*.xml") {
+              $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $file)
+          }
+        }
+
+cache:
+  - C:\Users\appveyor\.gradle\caches
+  - C:\Users\appveyor\.gradle\wrapper -> .gradle-wrapper\gradle-wrapper.properties
+

@@ -31,10 +31,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javafx.beans.property.ObjectProperty;
 
 import javafx.print.Paper;
 import com.sun.javafx.print.PrintHelper;
@@ -43,6 +43,11 @@ import com.sun.javafx.print.Units;
 public class PaperUnitsTest {
 
   @Test public void dummyTest() {
+  }
+
+  @BeforeClass
+  public static void beforeClass() {
+      Assume.assumeTrue(System.getenv("APPVEYOR") == null);
   }
 
   @Test public void createPaperPts() {
