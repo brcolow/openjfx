@@ -31,7 +31,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javafx.beans.property.*;
@@ -44,12 +46,16 @@ public class JobSettingsTest {
   @Test public void dummyTest() {
   }
 
-
   private PrinterJob job;
+
+  @BeforeClass
+  public static void beforeClass() {
+      Assume.assumeTrue(System.getenv("APPVEYOR") == null);
+  }
 
   @Before
   public void setUp() {
-     try {
+      try {
          job = PrinterJob.createPrinterJob();
          if (job == null) {
              System.out.println("No printers installed. Tests cannot run.");
