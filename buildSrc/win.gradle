@@ -40,19 +40,26 @@ WIN.library = { name -> return "${name}.dll" as String }
 WIN.libDest = "bin"
 WIN.modLibDest = "lib"
 
+static def unquote(str) {
+    if (str.length() >= 2 && str.charAt(0) == '"' && str.charAt(str.length() - 1) == '"') {
+        str = str.substring(1, str.length() - 1)
+    }
+    return str
+}
+
 setupTools("windows_tools",
     { propFile ->
         // Create the properties file
         ByteArrayOutputStream results = new ByteArrayOutputStream();
-        String winsdkDir = System.getenv().get("WINSDK_DIR");
+        String winsdkDir = System.getenv().get("WINSDK_DIR") ?: "C:\\Program Files (x86)\\Windows Kits\\10"
         exec({
             environment([
                     "WINSDKPATH" : winsdkDir == null ? "" : winsdkDir,
-                    "CONF"       : "/$CONF", // TODO does this mean the generated properties must be reset when in a different configuration?
+                    "CONF"       : "\\$CONF", // TODO does this mean the generated properties must be reset when in a different configuration?
                     "VCARCH"     : IS_64 ? "amd64" : "x86",
-                    "SDKARCH"    : IS_64 ? "/x64" : "/x86",
+                    "SDKARCH"    : IS_64 ? "\\x64" : "\\x86",
             ]);
-            commandLine("cmd", "/q", "/c", "buildSrc\\genVSproperties.bat");
+            commandLine("cmd", "/q", "/c", ".\\buildSrc\\genVSproperties.bat");
             setStandardOutput(results);
         });
         BufferedReader reader = new BufferedReader(new StringReader(results.toString().trim()));
@@ -60,31 +67,31 @@ setupTools("windows_tools",
         reader.readLine();
         String line;
         while ((line = reader.readLine()) != null && !line.startsWith("######")) {
-            line = line.replace("\\", "/").replace("/@@ENDOFLINE@@", "").replace("@@ENDOFLINE@@", "").replace("//", "/").replace("windows.vs.", "WINDOWS_VS_");
-            propFile << line << "\r\n";
+            line = line.replace("\\\\", "\\").replaceAll(/[\\]?@@ENDOFLINE@@/, "").replace("windows.vs.", "WINDOWS_VS_").replace("\\", "\\\\")
+            propFile << line << "\r\n"
         }
     },
     { properties ->
-        defineProperty("WINDOWS_VS_VSINSTALLDIR", properties, "c:/Program Files (x86)/Microsoft Visual Studio/2017/Professional");
-        defineProperty("WINDOWS_VS_WINSDKDLLINSTALLDIR", properties, "c:/Program Files (x86)/Windows Kits/10/Redist/ucrt/DLLs");
-        defineProperty("WINDOWS_SDK_DIR", properties, System.getenv().get("WINSDK_DIR"))
-        defineProperty("WINDOWS_SDK_VERSION", properties, "")
-        defineProperty("WINDOWS_VS_VCINSTALLDIR", properties, "$WINDOWS_VS_VSINSTALLDIR/VC")
-        defineProperty("WINDOWS_VS_DEVENVDIR", properties, "$WINDOWS_VS_VSINSTALLDIR/Common7/IDE")
-        defineProperty("WINDOWS_VS_DEVENVCMD", properties, "$WINDOWS_VS_DEVENVDIR/VCExpress.exe")
+        defineProperty("WINDOWS_VS_VSINSTALLDIR", properties, WINDOWS_VS_VSINSTALLDIR)
+        defineProperty("WINDOWS_VS_WINSDKDLLINSTALLDIR", properties, "$WINDOWS_SDK_DIR\\Redist\\ucrt\\DLLs")
+        defineProperty("WINDOWS_SDK_DIR", properties, WINDOWS_SDK_DIR)
+        defineProperty("WINDOWS_SDK_VERSION", properties, WINDOWS_SDK_VERSION)
+        defineProperty("WINDOWS_VS_VCINSTALLDIR", properties, "$WINDOWS_VS_VSINSTALLDIR\\VC")
+        defineProperty("WINDOWS_VS_DEVENVDIR", properties, "$WINDOWS_VS_VSINSTALLDIR\\Common7\\IDE")
+        defineProperty("WINDOWS_VS_DEVENVCMD", properties, "$WINDOWS_VS_DEVENVDIR\\VCExpress.exe")
         defineProperty("WINDOWS_VS_MSVCDIR", properties, WINDOWS_VS_VCINSTALLDIR)
         defineProperty("WINDOWS_DXSDK_DIR", properties, System.getenv().get("DXSDK_DIR"))
-        defineProperty("WINDOWS_VS_INCLUDE", properties, "$WINDOWS_VS_VCINSTALLDIR/INCLUDE;" + "$WINDOWS_SDK_DIR/include;")
+        defineProperty("WINDOWS_VS_INCLUDE", properties, "$WINDOWS_VS_VCINSTALLDIR\\INCLUDE;" + "$WINDOWS_SDK_DIR\\include;")
         defineProperty("WINDOWS_VS_VER", properties, "150")
-        defineProperty("WINDOWS_VS_LIB", properties, "$WINDOWS_VS_VCINSTALLDIR/LIB;" + "$WINDOWS_SDK_DIR/lib;")
-        defineProperty("WINDOWS_VS_LIBPATH", properties, "$WINDOWS_VS_VCINSTALLDIR/LIB;")
-        def parfaitPath = IS_COMPILE_PARFAIT ? System.getenv().get("PARFAIT_PATH") + ";" : "";
+        defineProperty("WINDOWS_VS_LIB", properties, "$WINDOWS_VS_VCINSTALLDIR\\LIB;" + "$WINDOWS_SDK_DIR\\lib;")
+        defineProperty("WINDOWS_VS_LIBPATH", properties, "$WINDOWS_VS_VCINSTALLDIR\\LIB;")
+        def parfaitPath = IS_COMPILE_PARFAIT ? System.getenv().get("PARFAIT_PATH") + ";" : ""
         defineProperty("WINDOWS_VS_PATH", properties, parfaitPath + "$WINDOWS_VS_DEVENVDIR;" +
-                "$WINDOWS_VS_VSINSTALLDIR/VC/BIN;" +
-                "$WINDOWS_VS_VSINSTALLDIR/Common7/Tools;" +
-                "$WINDOWS_VS_VCINSTALLDIR/VCPackages;" +
-                "$WINDOWS_SDK_DIR/bin/NETFX 4.0 Tools;" +
-                "$WINDOWS_SDK_DIR/bin;" +
+                "$WINDOWS_VS_VSINSTALLDIR\\VC\\BIN;" +
+                "$WINDOWS_VS_VSINSTALLDIR\\Common7\\Tools;" +
+                "$WINDOWS_VS_VCINSTALLDIR\\VCPackages;" +
+                "$WINDOWS_SDK_DIR\\bin\\NETFX 4.0 Tools;" +
+                "$WINDOWS_SDK_DIR\\bin;" +
                 System.getenv().get("PATH"))
     }
 )
@@ -121,67 +128,67 @@ if (WINDOWS_VS_VER != "100") {
 }
 
 ext.WINDOWS_NATIVE_COMPILE_ENVIRONMENT = [
-        "VCINSTALLDIR"         : WINDOWS_VS_VCINSTALLDIR,
-        "VSINSTALLDIR"         : WINDOWS_VS_VSINSTALLDIR,
-        "DEVENVDIR"            : WINDOWS_VS_DEVENVDIR,
-        "MSVCDIR"              : WINDOWS_VS_MSVCDIR,
-        "VS_VER"               : WINDOWS_VS_VER,
-        "PATH"                 : WINDOWS_VS_PATH,
-        "INCLUDE"              : WINDOWS_VS_INCLUDE,
-        "LIB"                  : WINDOWS_VS_LIB,
-        "LIBPATH"              : WINDOWS_VS_LIBPATH,
-        "DXSDK_DIR"            : WINDOWS_DXSDK_DIR
+        "VCINSTALLDIR"         : unquote(WINDOWS_VS_VCINSTALLDIR),
+        "VSINSTALLDIR"         : unquote(WINDOWS_VS_VSINSTALLDIR),
+        "DEVENVDIR"            : unquote(WINDOWS_VS_DEVENVDIR),
+        "MSVCDIR"              : unquote(WINDOWS_VS_MSVCDIR),
+        "VS_VER"               : unquote(WINDOWS_VS_VER),
+        "PATH"                 : unquote(WINDOWS_VS_PATH),
+        "INCLUDE"              : unquote(WINDOWS_VS_INCLUDE),
+        "LIB"                  : unquote(WINDOWS_VS_LIB),
+        "LIBPATH"              : unquote(WINDOWS_VS_LIBPATH),
+        "DXSDK_DIR"            : unquote(WINDOWS_DXSDK_DIR)
 ];
-def msvcVer = System.getenv("MSVC_VER") ?: "14.10.25017"
+
+def msvcRedistVer = System.getenv("MSVC_REDIST_VER") ?: System.getenv("APPVEYOR") ? "14.12.25827" : "14.11.25503"
+
 def msvcBinDir = ""
 if (winVsVer == 150) {
     msvcBinDir = (IS_64
-                      ? "$WINDOWS_VS_VSINSTALLDIR/VC/Tools/MSVC/$msvcVer/bin/HostX64/x64"
-                      : "$WINDOWS_VS_VSINSTALLDIR/VC/Tools/MSVC/$msvcVer/bin/HostX86/x86")
+                      ? "${unquote(WINDOWS_VS_VSINSTALLDIR)}\\VC\\Tools\\MSVC\\$msvcRedistVer\\bin\\HostX64\\x64"
+                      : "${unquote(WINDOWS_VS_VSINSTALLDIR)}\\VC\\Tools\\MSVC\\$msvcRedistVer\\bin\\HostX86\\x86")
 } else if (winVsVer <= 120) {
     msvcBinDir = (IS_64
-                      ? "$WINDOWS_VS_VSINSTALLDIR/VC/BIN/amd64"
-                      : "$WINDOWS_VS_VSINSTALLDIR/VC/BIN")
+                      ? "${unquote(WINDOWS_VS_VSINSTALLDIR)}\\VC\\BIN\\amd64"
+                      : "${unquote(WINDOWS_VS_VSINSTALLDIR)}\\VC\\BIN")
 }
-def compiler = IS_COMPILE_PARFAIT ? "cl.exe" : cygpath("$msvcBinDir/cl.exe")
-def linker = IS_COMPILE_PARFAIT ? "link.exe" : cygpath("$msvcBinDir/link.exe")
-def winSdkBinDir = "$WINDOWS_SDK_DIR/Bin"
+def compiler = IS_COMPILE_PARFAIT ? "cl.exe" : "$msvcBinDir\\cl.exe"
+def linker = IS_COMPILE_PARFAIT ? "link.exe" : "$msvcBinDir\\link.exe"
+def winSdkBinDir = "${unquote(WINDOWS_SDK_DIR)}\\Bin"
 if (WINDOWS_VS_VER != "100") {
-    winSdkBinDir += "/" + (IS_64 ? "x64" : "x86")
+    winSdkBinDir += "\\" + (IS_64 ? "x64" : "x86")
 }
 
-if (!file(cygpath("$winSdkBinDir/RC.Exe")).exists()) {
-    winSdkBinDir = "$WINDOWS_SDK_DIR/Bin/$WINDOWS_SDK_VERSION"
+if (!file(winSdkBinDir + "\\rc.Exe").exists()) {
+    winSdkBinDir = "${unquote(WINDOWS_SDK_DIR)}\\Bin\\${unquote(WINDOWS_SDK_VERSION)}"
     if (WINDOWS_VS_VER != "100") {
-        winSdkBinDir += "/" + (IS_64 ? "x64" : "x86")
+        winSdkBinDir += "\\" + (IS_64 ? "x64" : "x86")
     }
 }
-println "winSdkBinDir=$winSdkBinDir"
 
-ext.RC = cygpath("$winSdkBinDir/rc.exe")
+ext.RC = "$winSdkBinDir\\rc.exe"
 def rcCompiler = RC
-ext.FXC = cygpath("$winSdkBinDir/fxc.exe")
+ext.FXC = "$winSdkBinDir\\fxc.exe"
 
 if (!file(FXC).exists()) {
     if (WINDOWS_DXSDK_DIR == null || WINDOWS_DXSDK_DIR == "") {
         throw new GradleException("FAIL: DXSDK_DIR not defined");
     }
-    ext.FXC = cygpath("$WINDOWS_DXSDK_DIR/utilities/bin/x86/fxc.exe")
+    ext.FXC = "$WINDOWS_DXSDK_DIR\\utilities\\bin\\x86\\fxc.exe"
 }
 
-ext.MC = cygpath("$winSdkBinDir/mt.exe")
+ext.MC = "$winSdkBinDir\\mt.exe"
 
 if (!file(RC).exists()) throw new GradleException("FAIL: cannot find RC: " + RC)
 if (!file(FXC).exists()) throw new GradleException("FAIL: cannot find FXC: " + FXC)
 
-def msvcRedistVer = System.getenv("MSVC_REDIST_VER") ?: "14.10.25008"
 String msvcRedstDir = (IS_64
-                  ? "$WINDOWS_VS_VSINSTALLDIR/VC/Redist/MSVC/$msvcRedistVer/x64"
-                  : "$WINDOWS_VS_VSINSTALLDIR/VC/Redist/MSVC/$msvcRedistVer/x86")
+                  ? "${unquote(WINDOWS_VS_VSINSTALLDIR)}\\VC\\Redist\\MSVC\\$msvcRedistVer\\x64"
+                  : "${unquote(WINDOWS_VS_VSINSTALLDIR)}\\VC\\Redist\\MSVC\\$msvcRedistVer\\x86")
 
 String winSdkDllDir = (IS_64
-                  ? "$WINDOWS_VS_WINSDKDLLINSTALLDIR/x64"
-                  : "$WINDOWS_VS_WINSDKDLLINSTALLDIR/x86")
+                  ? "${unquote(WINDOWS_VS_WINSDKDLLINSTALLDIR)}\\x64"
+                  : "${unquote(WINDOWS_VS_WINSDKDLLINSTALLDIR)}\\x86")
 
 def WINDOWS_DLL_VER = WINDOWS_VS_VER
 ext.MSVCR = null
@@ -190,11 +197,13 @@ ext.MSVCP = null
 def windowsCRTVer = System.getenv("WINDOWS_CRT_VER") ?: "150"
 if (WINDOWS_VS_VER == "150") {
     WINDOWS_DLL_VER = "140"
-    ext.MSVCR = cygpath("${msvcRedstDir}/Microsoft.VC${windowsCRTVer}.CRT/vcruntime${WINDOWS_DLL_VER}.dll")
-    ext.MSVCP = cygpath("${msvcRedstDir}/Microsoft.VC${windowsCRTVer}.CRT/msvcp${WINDOWS_DLL_VER}.dll")
+    ext.MSVCR = "${msvcRedstDir}\\Microsoft.VC${windowsCRTVer}.CRT\\vcruntime${WINDOWS_DLL_VER}.dll"
+    ext.MSVCP = "${msvcRedstDir}\\Microsoft.VC${windowsCRTVer}.CRT\\msvcp${WINDOWS_DLL_VER}.dll"
 }
 
-def vs2017DllPath = cygpath("${msvcRedstDir}/Microsoft.VC${windowsCRTVer}.CRT")
+println "${ext.MSVCR}"
+println "${ext.MSVCP}"
+def vs2017DllPath = "${msvcRedstDir}/Microsoft.VC${windowsCRTVer}.CRT"
 if (file(vs2017DllPath).exists()) {
     def VS2017DLLs = [
         "concrt140.dll",
@@ -207,11 +216,10 @@ if (file(vs2017DllPath).exists()) {
         }
 }
 else {
-    ext.WIN.VS2017DLLs = [
-	];
+    ext.WIN.VS2017DLLs = []
 }
 
-def WinSDKDLLsPath = cygpath("${winSdkDllDir}")
+def WinSDKDLLsPath = "${winSdkDllDir}"
 if (file(WinSDKDLLsPath).exists()) {
     def WinSDKDLLs = [
         "api-ms-win-core-console-l1-1-0.dll",
@@ -262,8 +270,7 @@ if (file(WinSDKDLLsPath).exists()) {
         }
 }
 else {
-    ext.WIN.WinSDKDLLs = [
-    ];
+    ext.WIN.WinSDKDLLs = []
 }
 
 // Product version variables passed to RC:

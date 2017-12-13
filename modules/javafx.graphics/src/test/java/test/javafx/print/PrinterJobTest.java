@@ -31,7 +31,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javafx.beans.property.ObjectProperty;
@@ -44,8 +46,12 @@ public class PrinterJobTest {
   @Test public void dummyTest() {
   }
 
-
   private PrinterJob job;
+
+  @BeforeClass
+  public static void beforeClass() {
+      Assume.assumeTrue(System.getenv("APPVEYOR") == null);
+  }
 
   @Before
   public void setUp() {
