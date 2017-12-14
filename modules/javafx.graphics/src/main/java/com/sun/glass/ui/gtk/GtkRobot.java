@@ -24,8 +24,9 @@
  */
 package com.sun.glass.ui.gtk;
 
-import com.sun.glass.ui.*;
-import java.nio.IntBuffer;
+import javafx.scene.robot.Robot;
+
+import com.sun.glass.ui.Screen;
 
 final class GtkRobot extends Robot {
 
