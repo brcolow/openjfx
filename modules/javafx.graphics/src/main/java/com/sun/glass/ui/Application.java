@@ -33,11 +33,11 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedList;
+
+import javafx.scene.robot.Robot;
 
 public abstract class Application {
 

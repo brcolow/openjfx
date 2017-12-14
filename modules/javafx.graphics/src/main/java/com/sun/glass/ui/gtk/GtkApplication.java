@@ -30,7 +30,6 @@ import com.sun.glass.ui.CommonDialogs.FileChooserResult;
 import com.sun.glass.ui.Cursor;
 import com.sun.glass.ui.InvokeLaterDispatcher;
 import com.sun.glass.ui.Pixels;
-import com.sun.glass.ui.Robot;
 import com.sun.glass.ui.Screen;
 import com.sun.glass.ui.Size;
 import com.sun.glass.ui.Timer;
@@ -50,6 +49,8 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.lang.annotation.Native;
+
+import javafx.scene.robot.Robot;
 
 final class GtkApplication extends Application implements
                                     InvokeLaterDispatcher.InvokeLaterSubmitter {

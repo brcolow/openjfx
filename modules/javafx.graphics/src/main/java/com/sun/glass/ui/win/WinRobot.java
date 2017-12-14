@@ -24,8 +24,7 @@
  */
 package com.sun.glass.ui.win;
 
-import com.sun.glass.ui.*;
-import java.nio.IntBuffer;
+import javafx.scene.robot.Robot;
 
 /**
  * MS Windows platform implementation class for Robot.
