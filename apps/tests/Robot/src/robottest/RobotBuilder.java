@@ -25,7 +25,6 @@
 package robottest;
 
 import com.sun.glass.events.KeyEvent;
-import com.sun.glass.ui.Robot;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -50,6 +49,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
@@ -211,14 +211,14 @@ public class RobotBuilder {
                 } else if (field.isFocused()) {
                     stop();
                     Robot robot = com.sun.glass.ui.Application.GetApplication().createRobot();
-                    robot.keyPress(KeyEvent.VK_T);
-                    robot.keyRelease(KeyEvent.VK_T);
-                    robot.keyPress(KeyEvent.VK_E);
-                    robot.keyRelease(KeyEvent.VK_E);
-                    robot.keyPress(KeyEvent.VK_S);
-                    robot.keyRelease(KeyEvent.VK_S);
-                    robot.keyPress(KeyEvent.VK_T);
-                    robot.keyRelease(KeyEvent.VK_T);
+                    robot.keyPress(KeyCode.T);
+                    robot.keyRelease(KeyCode.T);
+                    robot.keyPress(KeyCode.E);
+                    robot.keyRelease(KeyCode.E);
+                    robot.keyPress(KeyCode.S);
+                    robot.keyRelease(KKeyCode.S);
+                    robot.keyPress(KeyCode.T);
+                    robot.keyRelease(KeyCode.T);
                     robot.destroy();
                     new AnimationTimer() {
                         long startTime = System.nanoTime();
@@ -251,8 +251,8 @@ public class RobotBuilder {
         final Robot robot =
                     com.sun.glass.ui.Application.GetApplication().createRobot();
         robot.mouseMove(x, y);
-        robot.mousePress(Robot.MOUSE_LEFT_BTN);
-        robot.mouseRelease(Robot.MOUSE_LEFT_BTN);
+        robot.mousePress(MouseButton.PRIMARY);
+        robot.mouseRelease(MouseButton.PRIMARY);
 
         new AnimationTimer() {
             long startTime = System.nanoTime();
@@ -264,8 +264,8 @@ public class RobotBuilder {
                 } else if (lv.isFocused()) {
                     stop();
                     robot.mouseWheel(-5);
-                    robot.mousePress(Robot.MOUSE_LEFT_BTN);
-                    robot.mouseRelease(Robot.MOUSE_LEFT_BTN);
+                    robot.mousePress(MouseButton.PRIMARY);
+                    robot.mouseRelease(MouseButton.PRIMARY);
                     robot.destroy();
                     new AnimationTimer() {
                         long startTime = System.nanoTime();

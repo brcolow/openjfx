@@ -35,12 +35,15 @@ import junit.framework.AssertionFailedError;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import test.util.Util;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
 import java.awt.AWTException;
 import java.awt.Frame;
 import java.awt.Robot;
@@ -57,7 +60,6 @@ public class SwingNodeBase {
     public static final int WAIT_TIME = 300;
     public static final int LONG_WAIT_TIME = 2500;
 
-
     protected static Robot robot;
 
     // Used to launch the application before running any test
@@ -65,7 +67,6 @@ public class SwingNodeBase {
 
     // Singleton Application instance
     static MyApp myApp;
-
 
     @BeforeClass
     public static void setupOnce() throws AWTException, InvocationTargetException, InterruptedException {
@@ -206,7 +207,7 @@ public class SwingNodeBase {
         }
     }
 
-    public void testAbove(boolean above) throws InterruptedException, InvocationTargetException {
+    public void testAbove(boolean above) {
         int checkLoc = BASE_LOCATION + 3 * BASE_SIZE /4;
         int clickLoc = BASE_LOCATION + BASE_SIZE / 4;
 
@@ -218,7 +219,7 @@ public class SwingNodeBase {
 
         if (above) {
             Assert.assertEquals("JDialog is not above JavaFX stage",
-                    java.awt.Color.BLUE, robot.getPixelColor(checkLoc, checkLoc));
+                java.awt.Color.BLUE, robot.getPixelColor(checkLoc, checkLoc));
         } else {
             Assert.assertFalse("JDialog is above JavaFX stage",
                     java.awt.Color.BLUE.equals(robot.getPixelColor(checkLoc, checkLoc)));
