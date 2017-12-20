@@ -26,9 +26,15 @@
 package com.sun.glass.ui.monocle;
 
 import com.sun.glass.events.MouseEvent;
+import com.sun.glass.ui.Application;
+import com.sun.glass.ui.GlassRobot;
 import com.sun.glass.ui.Pixels;
-import com.sun.glass.ui.Robot;
 import javafx.application.Platform;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -36,35 +42,37 @@ import java.nio.ShortBuffer;
 
 class MonocleRobot extends Robot {
     @Override
-    protected void _create() {
+    public void create() {
+        // no-op
     }
 
     @Override
-    protected void _destroy() {
+    public void destroy() {
+        // no-op
     }
 
     @Override
-    protected void _keyPress(int code) {
+    public void keyPress(KeyCode code) {
         Platform.runLater(() -> {
             KeyState state = new KeyState();
             KeyInput.getInstance().getState(state);
-            state.pressKey(code);
+            state.pressKey(code.getCode());
             KeyInput.getInstance().setState(state);
         });
     }
 
     @Override
-    protected void _keyRelease(int code) {
+    public void keyRelease(KeyCode code) {
         Platform.runLater(() -> {
             KeyState state = new KeyState();
             KeyInput.getInstance().getState(state);
-            state.releaseKey(code);
+            state.releaseKey(code.getCode());
             KeyInput.getInstance().setState(state);
         });
     }
 
     @Override
-    protected void _mouseMove(int x, int y) {
+    public void mouseMove(int x, int y) {
         Platform.runLater(() -> {
             MouseState state = new MouseState();
             MouseInput.getInstance().getState(state);
@@ -75,43 +83,27 @@ class MonocleRobot extends Robot {
     }
 
     @Override
-    protected void _mousePress(int buttons) {
+    public void mousePress(MouseButton button) {
         Platform.runLater(() -> {
             MouseState state = new MouseState();
             MouseInput.getInstance().getState(state);
-            if ((buttons & MOUSE_LEFT_BTN) != 0) {
-                state.pressButton(MouseEvent.BUTTON_LEFT);
-            }
-            if ((buttons & MOUSE_MIDDLE_BTN) != 0) {
-                state.pressButton(MouseEvent.BUTTON_OTHER);
-            }
-            if ((buttons & MOUSE_RIGHT_BTN) != 0) {
-                state.pressButton(MouseEvent.BUTTON_RIGHT);
-            }
+            state.pressButton(GlassRobot.convertToRobotMouseButton(button));
             MouseInput.getInstance().setState(state, false);
         });
     }
 
     @Override
-    protected void _mouseRelease(int buttons) {
+    public void mouseRelease(MouseButton button) {
         Platform.runLater(() -> {
             MouseState state = new MouseState();
             MouseInput.getInstance().getState(state);
-            if ((buttons & MOUSE_LEFT_BTN) != 0) {
-                state.releaseButton(MouseEvent.BUTTON_LEFT);
-            }
-            if ((buttons & MOUSE_MIDDLE_BTN) != 0) {
-                state.releaseButton(MouseEvent.BUTTON_OTHER);
-            }
-            if ((buttons & MOUSE_RIGHT_BTN) != 0) {
-                state.releaseButton(MouseEvent.BUTTON_RIGHT);
-            }
+            state.pressButton(GlassRobot.convertToRobotMouseButton(button));
             MouseInput.getInstance().setState(state, false);
         });
     }
 
     @Override
-    protected void _mouseWheel(int wheelAmt) {
+    public void mouseWheel(int wheelAmt) {
         Platform.runLater(() -> {
             MouseState state = new MouseState();
             MouseInput mouse = MouseInput.getInstance();
@@ -129,28 +121,30 @@ class MonocleRobot extends Robot {
     }
 
     @Override
-    protected int _getMouseX() {
+    public int getMouseX() {
+        Application.checkEventThread();
         MouseState state = new MouseState();
         MouseInput.getInstance().getState(state);
         return state.getX();
     }
 
     @Override
-    protected int _getMouseY() {
+    public int getMouseY() {
+        Application.checkEventThread();
         MouseState state = new MouseState();
         MouseInput.getInstance().getState(state);
         return state.getY();
     }
 
     @Override
-    protected int _getPixelColor(int x, int y) {
+    public Color getPixelColor(int x, int y) {
         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
         final int byteDepth = screen.getDepth() >>> 3;
         final int bwidth = screen.getWidth();
         final int bheight = screen.getHeight();
 
         if (x < 0 || x > bwidth || y < 0 || y > bheight) {
-            return 0;
+            return GlassRobot.convertFromIntArgb(0);
         }
 
         synchronized (NativeScreen.framebufferSwapLock) {
@@ -169,10 +163,10 @@ class MonocleRobot extends Robot {
                         | (red << 16)
                         | (green << 8)
                         | blue);
-                return p;
+                return GlassRobot.convertFromIntArgb(p);
             } else if (byteDepth >= 4) {
                 IntBuffer intbuf = buffer.asIntBuffer();
-                return intbuf.get((y * bwidth) + x);
+                return GlassRobot.convertFromIntArgb(intbuf.get((y * bwidth) + x));
             } else {
                 throw new RuntimeException("Unknown bit depth");
             }
@@ -180,8 +174,8 @@ class MonocleRobot extends Robot {
     }
 
     @Override
-    protected Pixels _getScreenCapture(int x, int y, int width, int height,
-            boolean isHiDPI) {
+    public Image getScreenCapture(int x, int y, int width, int height,
+                                  boolean isHiDPI) {
         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
         final int byteDepth = screen.getDepth() >>> 3;
         final int scrWidth = screen.getWidth();
@@ -191,7 +185,7 @@ class MonocleRobot extends Robot {
             IntBuffer buffer = screen.getScreenCapture().asIntBuffer();
 
             if (x == 0 && y == 0 && width == scrWidth && height == scrHeight) {
-                return new MonoclePixels(width, height, buffer);
+                return GlassRobot.convertFromPixels(new MonoclePixels(width, height, buffer));
             }
 
             IntBuffer ret = IntBuffer.allocate(width * height);
@@ -204,7 +198,7 @@ class MonocleRobot extends Robot {
             }
 
             ret.rewind();
-            return new MonoclePixels(width, height, ret);
+            return GlassRobot.convertFromPixels(new MonoclePixels(width, height, ret));
         }
     }
 }
