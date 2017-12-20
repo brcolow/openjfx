@@ -24,7 +24,14 @@
  */
 package com.sun.glass.ui.mac;
 
-import com.sun.glass.ui.*;
+import com.sun.glass.ui.GlassRobot;
+import com.sun.glass.ui.Pixels;
+
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 
 /**
  * MacOSX platform implementation class for Robot.
@@ -34,65 +41,85 @@ final class MacRobot extends Robot {
     // TODO: get rid of native Robot object
     private long ptr;
 
-    private native long _init();
-    @Override protected void _create() {
+    native protected long _init();
+    @Override public void create() {
         ptr = _init();
     }
 
-    private native void _destroy(long ptr);
-    @Override protected void _destroy() {
+    native protected void _destroy(long ptr);
+    @Override public void destroy() {
         if (ptr == 0) {
             return;
         }
         _destroy(ptr);
     }
 
-    @Override native protected void _keyPress(int code);
-    @Override native protected void _keyRelease(int code);
+    native protected void _keyPress(int code);
 
-    private native void _mouseMove(long ptr, int x, int y);
-    @Override protected void _mouseMove(int x, int y) {
+    @Override public void keyPress(KeyCode code) {
+        _keyPress(code.getCode());
+    }
+
+    native protected void _keyRelease(int code);
+
+    @Override public void keyRelease(KeyCode code) {
+        _keyRelease(code.getCode());
+    }
+
+    native protected void _mouseMove(long ptr, int x, int y);
+    @Override public void mouseMove(int x, int y) {
         if (ptr == 0) {
             return;
         }
         _mouseMove(ptr, x, y);
     }
 
-    private native void _mousePress(long ptr, int buttons);
-    @Override protected void _mousePress(int buttons) {
+    native protected void _mousePress(long ptr, int buttons);
+    @Override public void mousePress(MouseButton button) {
         if (ptr == 0) {
             return;
         }
-        _mousePress(ptr, buttons);
+        _mousePress(ptr, GlassRobot.convertToRobotMouseButton(button));
     }
 
-    private native void _mouseRelease(long ptr, int buttons);
-    @Override protected void _mouseRelease(int buttons) {
+    native protected void _mouseRelease(long ptr, int buttons);
+    @Override public void mouseRelease(MouseButton button) {
         if (ptr == 0) {
             return;
         }
-        _mouseRelease(ptr, buttons);
+        _mouseRelease(ptr, GlassRobot.convertToRobotMouseButton(button));
     }
 
-    @Override native protected void _mouseWheel(int wheelAmt);
+    @Override native public void mouseWheel(int wheelAmt);
 
-    private native int _getMouseX(long ptr);
-    @Override protected int _getMouseX() {
+    native protected int _getMouseX(long ptr);
+    @Override public int getMouseX() {
         if (ptr == 0) {
             return 0;
         }
         return _getMouseX(ptr);
     }
 
-    private native int _getMouseY(long ptr);
-    @Override protected int _getMouseY() {
+    native protected int _getMouseY(long ptr);
+    @Override public int getMouseY() {
         if (ptr == 0) {
             return 0;
         }
         return _getMouseY(ptr);
     }
 
-    @Override native protected int _getPixelColor(int x, int y);
-    @Override native protected Pixels _getScreenCapture(int x, int y, int width, int height, boolean isHiDPI);
+    native protected int _getPixelColor(int x, int y);
+    @Override public Color getPixelColor(int x, int y) {
+        return GlassRobot.convertFromIntArgb(_getPixelColor(x, y));
+    }
+
+    native protected Pixels _getScreenCapture(int x, int y, int width, int height, boolean isHiDPI);
+
+    @Override protected Image getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {
+        if (ptr == 0) {
+            return null;
+        }
+        return GlassRobot.convertFromPixels(_getScreenCapture(x, y, width, height, isHiDPI));
+    }
 }
 

@@ -119,10 +119,10 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1keyRelease
 
 /*
  * Class:     com_sun_glass_ui_gtk_GtkRobot
- * Method:    _mouseMove
+ * Method:    mouseMove
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseMove
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot_1mouseMove
   (JNIEnv *env, jobject obj, jint x, jint y)
 {
     (void)obj;
@@ -185,10 +185,10 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseRelease
 
 /*
  * Class:     com_sun_glass_ui_gtk_GtkRobot
- * Method:    _mouseWheel
+ * Method:    mouseWheel
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseWheel
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot_1mouseWheel
   (JNIEnv *env, jobject obj, jint amt)
 {
     (void)obj;
@@ -208,10 +208,10 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseWheel
 
 /*
  * Class:     com_sun_glass_ui_gtk_GtkRobot
- * Method:    _getMouseX
+ * Method:    getMouseX
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getMouseX
+JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot_1getMouseX
   (JNIEnv *env, jobject obj)
 {
     (void)env;
@@ -224,10 +224,10 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getMouseX
 
 /*
  * Class:     com_sun_glass_ui_gtk_GtkRobot
- * Method:    _getMouseY
+ * Method:    getMouseY
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getMouseY
+JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot_1getMouseY
   (JNIEnv *env, jobject obj)
 {
     (void)env;
@@ -240,10 +240,10 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getMouseY
 
 /*
  * Class:     com_sun_glass_ui_gtk_GtkRobot
- * Method:    _getScreenCapture
+ * Method:    getScreenCapture
  * Signature: (IIII[I)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getScreenCapture
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot_1getScreenCapture
   (JNIEnv * env, jobject obj, jint x, jint y, jint width, jint height, jintArray data)
 {
     (void)obj;

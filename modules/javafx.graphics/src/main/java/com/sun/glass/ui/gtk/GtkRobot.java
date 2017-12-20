@@ -24,54 +24,75 @@
  */
 package com.sun.glass.ui.gtk;
 
-import com.sun.glass.ui.*;
-import java.nio.IntBuffer;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
+
+import com.sun.glass.ui.GlassRobot;
+import com.sun.glass.ui.Screen;
 
 final class GtkRobot extends Robot {
 
     @Override
-    protected void _create() {
+    public void create() {
         // no-op
     }
 
     @Override
-    protected void _destroy() {
+    public void destroy() {
         // no-op
     }
 
     @Override
+    public void keyPress(KeyCode code) {
+        _keyPress(code.getCode());
+    }
+
     protected native void _keyPress(int code);
 
     @Override
+    public void keyRelease(KeyCode code) {
+        _keyRelease(code.getCode());
+    }
+
     protected native void _keyRelease(int code);
 
     @Override
-    protected native void _mouseMove(int x, int y);
+    public native void mouseMove(int x, int y);
 
     @Override
-    protected native void _mousePress(int buttons);
+    public void mousePress(MouseButton button) {
+        _mousePress(GlassRobot.convertToRobotMouseButton(button));
+    }
+
+    protected native void _mousePress(int button);
 
     @Override
+    public void mouseRelease(MouseButton button) {
+        _mouseRelease(GlassRobot.convertToRobotMouseButton(button));
+    }
+
     protected native void _mouseRelease(int buttons);
 
     @Override
-    protected native void _mouseWheel(int wheelAmt);
+    public native void mouseWheel(int wheelAmt);
 
     @Override
-    protected native int _getMouseX();
+    public native int getMouseX();
 
     @Override
-    protected native int _getMouseY();
+    public native int getMouseY();
 
     @Override
-    protected int _getPixelColor(int x, int y) {
+    public Color getPixelColor(int x, int y) {
         Screen mainScreen = Screen.getMainScreen();
         x = (int) Math.floor((x + 0.5) * mainScreen.getPlatformScaleX());
         y = (int) Math.floor((y + 0.5) * mainScreen.getPlatformScaleY());
         int[] result = new int[1];
-        _getScreenCapture(x, y, 1, 1, result);
-        return result[0];
+        getScreenCapture(x, y, 1, 1, result);
+        return GlassRobot.convertFromIntArgb(result[0]);
     }
 
-    @Override native protected void _getScreenCapture(int x, int y, int width, int height, int[] data);
+    @Override native public void getScreenCapture(int x, int y, int width, int height, int[] data);
 }
