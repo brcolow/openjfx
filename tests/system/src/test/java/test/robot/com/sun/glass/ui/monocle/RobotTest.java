@@ -26,10 +26,13 @@
 package test.robot.com.sun.glass.ui.monocle;
 
 import com.sun.glass.ui.monocle.TestLogShim;
-import com.sun.glass.events.KeyEvent;
 import com.sun.glass.ui.Application;
-import com.sun.glass.ui.Robot;
 import javafx.application.Platform;
+import javafx.geometry.VerticalDirection;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.robot.Robot;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,8 +61,8 @@ public class RobotTest {
         Platform.runLater(() -> {
             Robot robot = Application.GetApplication().createRobot();
             robot.mouseMove(300, 400);
-            robot.mousePress(Robot.MOUSE_LEFT_BTN);
-            robot.mouseRelease(Robot.MOUSE_LEFT_BTN);
+            robot.mousePress(MouseButton.PRIMARY);
+            robot.mouseRelease(MouseButton.PRIMARY);
         });
         TestLogShim.waitForLog("Clicked at 300, 400");
     }
@@ -70,16 +73,16 @@ public class RobotTest {
                 (e) ->TestLogShim.format("Typed '%s'", e.getCharacter()));
         Platform.runLater(() -> {
             Robot robot = Application.GetApplication().createRobot();
-            robot.keyPress(KeyEvent.VK_A);
-            robot.keyRelease(KeyEvent.VK_A);
+            robot.keyPress(KeyCode.A);
+            robot.keyRelease(KeyCode.A);
         });
         TestLogShim.waitForLog("Typed 'a'");
         Platform.runLater(() -> {
             Robot robot = Application.GetApplication().createRobot();
-            robot.keyPress(KeyEvent.VK_SHIFT);
-            robot.keyPress(KeyEvent.VK_B);
-            robot.keyRelease(KeyEvent.VK_B);
-            robot.keyRelease(KeyEvent.VK_SHIFT);
+            robot.keyPress(KeyCode.SHIFT);
+            robot.keyPress(KeyCode.B);
+            robot.keyRelease(KeyCode.B);
+            robot.keyRelease(KeyCode.SHIFT);
         });
         TestLogShim.waitForLog("Typed 'B'");
     }
@@ -94,13 +97,13 @@ public class RobotTest {
         Platform.runLater(() -> {
             Robot robot = Application.GetApplication().createRobot();
             robot.mouseMove(300, 300);
-            robot.mouseWheel(10);
+            robot.mouseWheel(10, VerticalDirection.UP);
         });
         TestLogShim.waitForLog("Scroll: 1 at 300, 300");
         Platform.runLater(() -> {
             Robot robot = Application.GetApplication().createRobot();
             robot.mouseMove(310, 320);
-            robot.mouseWheel(-10);
+            robot.mouseWheel(10, VerticalDirection.DOWN);
         });
         TestLogShim.waitForLog("Scroll: -1 at 310, 320");
     }

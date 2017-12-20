@@ -31,6 +31,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 
+#include <com_sun_glass_ui_GlassRobot.h>
 #include <com_sun_glass_ui_gtk_GtkRobot.h>
 #include <com_sun_glass_events_MouseEvent.h>
 #include "glass_general.h"
@@ -142,13 +143,13 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseMove
 static void mouseButtons(jint buttons, gboolean press)
 {
     Display *xdisplay = gdk_x11_get_default_xdisplay();
-    if (buttons & com_sun_glass_ui_gtk_GtkRobot_MOUSE_LEFT_BTN) {
+    if (buttons & com_sun_glass_ui_GlassRobot_MOUSE_LEFT_BTN) {
         XTestFakeButtonEvent(xdisplay, 1, press, CurrentTime);
     }
-    if (buttons & com_sun_glass_ui_gtk_GtkRobot_MOUSE_MIDDLE_BTN) {
+    if (buttons & com_sun_glass_ui_GlassRobot_MOUSE_MIDDLE_BTN) {
         XTestFakeButtonEvent(xdisplay, 2, press, CurrentTime);
     }
-    if (buttons & com_sun_glass_ui_gtk_GtkRobot_MOUSE_RIGHT_BTN) {
+    if (buttons & com_sun_glass_ui_GlassRobot_MOUSE_RIGHT_BTN) {
         XTestFakeButtonEvent(xdisplay, 3, press, CurrentTime);
     }
 
@@ -240,10 +241,10 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getMouseY
 
 /*
  * Class:     com_sun_glass_ui_gtk_GtkRobot
- * Method:    _getScreenCapture
+ * Method:    getScreenCapture
  * Signature: (IIII[I)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getScreenCapture
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot_getScreenCapture
   (JNIEnv * env, jobject obj, jint x, jint y, jint width, jint height, jintArray data)
 {
     (void)obj;

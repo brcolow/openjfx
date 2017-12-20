@@ -24,10 +24,18 @@
  */
 package com.sun.glass.ui.win;
 
-import com.sun.glass.ui.*;
+import com.sun.glass.ui.Accessible;
+import com.sun.glass.ui.Application;
 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
-import com.sun.glass.utils.NativeLibLoader;
+import com.sun.glass.ui.Cursor;
+import com.sun.glass.ui.InvokeLaterDispatcher;
+import com.sun.glass.ui.Pixels;
+import com.sun.glass.ui.Screen;
+import com.sun.glass.ui.Size;
+import com.sun.glass.ui.Timer;
+import com.sun.glass.ui.View;
+import com.sun.glass.ui.Window;
 import com.sun.prism.impl.PrismSettings;
 import com.sun.javafx.tk.Toolkit;
 
@@ -36,6 +44,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+
+import javafx.scene.robot.Robot;
 
 final class WinApplication extends Application implements InvokeLaterDispatcher.InvokeLaterSubmitter {
     static float   overrideUIScale;

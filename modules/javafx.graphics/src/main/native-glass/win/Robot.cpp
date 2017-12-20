@@ -28,7 +28,6 @@
 
 #include "KeyTable.h"
 
-#include "com_sun_glass_ui_Robot.h"
 #include "com_sun_glass_ui_win_WinRobot.h"
 #include "GlassScreen.h"
 
@@ -294,10 +293,10 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_win_WinRobot__1getPixelColor
 
 /*
  * Class:     com_sun_glass_ui_win_WinRobot
- * Method:    _getScreenCapture
+ * Method:    getScreenCapture
  * Signature: (IIII[I;)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot__1getScreenCapture
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot_getScreenCapture
     (JNIEnv *env, jobject jrobot, jint x, jint y, jint width, jint height, jintArray pixelArray)
 {
     int numPixels = width * height;

@@ -34,6 +34,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class SwingNodeJDialogTest extends SwingNodeBase {
 
+    // TODO: Failing: expected: r=0, g=0, b=255 but was: r=0, g=128, b=0
     @Test
     public void testJDialogAbove() throws InterruptedException, InvocationTargetException {
         myApp.createStageAndDialog();
@@ -44,6 +45,7 @@ public class SwingNodeJDialogTest extends SwingNodeBase {
         myApp.closeStageAndDialog();
     }
 
+    // TODO: Failing: expected: r=0, g=0, b=255 but was: r=0, g=128, b=0
     @Test
     public void testNodeRemovalAfterShow() throws InterruptedException, InvocationTargetException {
         myApp.createStageAndDialog();
@@ -70,6 +72,7 @@ public class SwingNodeJDialogTest extends SwingNodeBase {
         myApp.attachSwingNode();
     }
 
+    // TODO: Failing: expected: r=0, g=0, b=255 but was: r=0, g=128, b=0
     @Test
     public void testStageCloseAfterShow() throws InvocationTargetException, InterruptedException {
         myApp.createStageAndDialog();

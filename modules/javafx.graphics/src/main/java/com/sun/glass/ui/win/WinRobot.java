@@ -24,32 +24,92 @@
  */
 package com.sun.glass.ui.win;
 
-import com.sun.glass.ui.*;
-import java.nio.IntBuffer;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
+
+import com.sun.glass.ui.Application;
+import com.sun.glass.ui.GlassRobot;
 
 /**
  * MS Windows platform implementation class for Robot.
  */
 final class WinRobot extends Robot {
 
-    @Override protected void _create() {
+    @Override protected void create() {
         // no-op
     }
-    @Override protected void _destroy() {
+    @Override protected void destroy() {
         // no-op
     }
 
-    @Override native protected void _keyPress(int code);
-    @Override native protected void _keyRelease(int code);
+    native protected void _keyPress(int code);
+    @Override public void keyPress(KeyCode code) {
+        Application.checkEventThread();
+        _keyPress(code.getCode());
+    }
 
-    @Override native protected void _mouseMove(int x, int y);
-    @Override native protected void _mousePress(int buttons);
-    @Override native protected void _mouseRelease(int buttons);
-    @Override native protected void _mouseWheel(int wheelAmt);
+    native protected void _keyRelease(int code);
+    @Override public void keyRelease(KeyCode code) {
+        Application.checkEventThread();
+        _keyRelease(code.getCode());
+    }
 
-    @Override native protected int _getMouseX();
-    @Override native protected int _getMouseY();
 
-    @Override native protected int _getPixelColor(int x, int y);
-    @Override native protected void _getScreenCapture(int x, int y, int width, int height, int[] data);
+    native protected void _mouseMove(int x, int y);
+    @Override public void mouseMove(int x, int y) {
+        Application.checkEventThread();
+        _mouseMove(x, y);
+    }
+
+    native protected void _mousePress(int buttons);
+    @Override public void mousePress(MouseButton button) {
+        Application.checkEventThread();
+        _mousePress(GlassRobot.convertToRobotMouseButton(button));
+    }
+
+    @Override
+    public void mousePress(MouseButton... buttons) {
+        Application.checkEventThread();
+        _mousePress(GlassRobot.convertToRobotMouseButton(buttons));
+    }
+
+    native protected void _mouseRelease(int buttons);
+    @Override public void mouseRelease(MouseButton button) {
+        Application.checkEventThread();
+        _mouseRelease(GlassRobot.convertToRobotMouseButton(button));
+    }
+
+    @Override
+    public void mouseRelease(MouseButton... buttons) {
+        Application.checkEventThread();
+        _mouseRelease(GlassRobot.convertToRobotMouseButton(buttons));
+    }
+
+    native protected void _mouseWheel(int wheelAmt);
+    @Override protected void mouseWheel(int wheelAmt) {
+        Application.checkEventThread();
+        _mouseWheel(wheelAmt);
+    }
+
+    native protected int _getMouseX();
+    @Override public int getMouseX() {
+        Application.checkEventThread();
+        return _getMouseX();
+    }
+
+    native protected int _getMouseY();
+    @Override public int getMouseY() {
+        Application.checkEventThread();
+        return _getMouseY();
+    }
+
+    native protected int _getPixelColor(int x, int y);
+    @Override public Color getPixelColor(int x, int y) {
+        Application.checkEventThread();
+        return GlassRobot.convertFromIntArgb(_getPixelColor(x, y));
+    }
+
+    @Override native protected void getScreenCapture(int x, int y, int width, int height, int[] data);
 }
