@@ -28,7 +28,7 @@
 
 #include "KeyTable.h"
 
-#include "com_sun_glass_ui_Robot.h"
+#include "javafx_scene_robot_Robot.h"
 #include "com_sun_glass_ui_win_WinRobot.h"
 #include "GlassScreen.h"
 
@@ -96,10 +96,10 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot__1keyRelease
 
 /*
  * Class:     com_sun_glass_ui_win_WinRobot
- * Method:    _mouseMove
+ * Method:    mouseMove
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot__1mouseMove
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot_1mouseMove
     (JNIEnv *env, jobject jrobot, jint x, jint y)
 {
     int oldAccel[3], newAccel[3];
@@ -143,10 +143,10 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot__1mouseMove
 
 /*
  * Class:     com_sun_glass_ui_win_WinRobot
- * Method:    _getMouseX
+ * Method:    getMouseX
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_com_sun_glass_ui_win_WinRobot__1getMouseX
+JNIEXPORT jint JNICALL Java_com_sun_glass_ui_win_WinRobot_1getMouseX
     (JNIEnv *env, jobject jrobot)
 {
     POINT curPos;
@@ -159,10 +159,10 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_win_WinRobot__1getMouseX
 
 /*
  * Class:     com_sun_glass_ui_win_WinRobot
- * Method:    _getMouseY
+ * Method:    getMouseY
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_com_sun_glass_ui_win_WinRobot__1getMouseY
+JNIEXPORT jint JNICALL Java_com_sun_glass_ui_win_WinRobot_1getMouseY
     (JNIEnv *env, jobject jrobot)
 {
     POINT curPos;
@@ -259,10 +259,10 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot__1mouseRelease
 
 /*
  * Class:     com_sun_glass_ui_win_WinRobot
- * Method:    _mouseWheel
+ * Method:    mouseWheel
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot__1mouseWheel
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot_1mouseWheel
     (JNIEnv *env, jobject jrobot, jint wheelAmt)
 {
     ::mouse_event(MOUSEEVENTF_WHEEL, 0, 0, wheelAmt * -1 * WHEEL_DELTA, 0);
@@ -294,10 +294,10 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_win_WinRobot__1getPixelColor
 
 /*
  * Class:     com_sun_glass_ui_win_WinRobot
- * Method:    _getScreenCapture
+ * Method:    getScreenCapture
  * Signature: (IIII[I;)V
  */
-JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot__1getScreenCapture
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_win_WinRobot_1getScreenCapture
     (JNIEnv *env, jobject jrobot, jint x, jint y, jint width, jint height, jintArray pixelArray)
 {
     int numPixels = width * height;
