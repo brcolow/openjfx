@@ -26,7 +26,6 @@
 package test.robot.com.sun.glass.ui.monocle;
 
 import com.sun.glass.ui.monocle.TestLogShim;
-import com.sun.glass.ui.Robot;
 import com.sun.glass.ui.monocle.TouchInputShim;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -38,6 +37,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.TouchEvent;
 import javafx.scene.input.TouchPoint;
 import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
