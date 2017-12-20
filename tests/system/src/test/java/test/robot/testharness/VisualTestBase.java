@@ -27,30 +27,43 @@ package test.robot.testharness;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import com.sun.glass.ui.Robot;
 import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import test.util.Util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static test.util.Util.TIMEOUT;
 
+import javax.imageio.ImageIO;
+
 /**
  * Common base class for testing snapshot.
  */
 public abstract class VisualTestBase {
+    @Rule
+    public TestName name = new TestName();
 
     // Used to launch the application before running any test
     private static final CountDownLatch launchLatch = new CountDownLatch(1);
@@ -153,14 +166,7 @@ public abstract class VisualTestBase {
 
     // This must be called on the FX app thread
     protected Color getColor(int x, int y) {
-        int pixColor = robot.getPixelColor(x, y);
-        int a = (pixColor >> 24) & 0xff;
-        int r = (pixColor >> 16) & 0xff;
-        int g = (pixColor >>  8) & 0xff;
-        int b =  pixColor        & 0xff;
-
-        Color color = Color.rgb(r, g, b, (double)a / 255.0);
-        return color;
+        return robot.getPixelColor(x, y);
     }
 
     private static String colorToString(Color c) {
@@ -171,8 +177,38 @@ public abstract class VisualTestBase {
         return "rgba(" + r + "," + g + "," + b + "," + a + ")";
     }
 
+    private void saveScreenshot() {
+        Image screenCapture = robot.getScreenCapture(0, 0, (int) Screen.getPrimary().getBounds().getWidth(),
+                (int) Screen.getPrimary().getBounds().getHeight());
+        BufferedImage bufferedImage = SwingFXUtils.fromFXImage(screenCapture, null);
+        try {
+            String screenshotPath;
+            if (System.getenv("TRAVIS").equalsIgnoreCase("true")) {
+                screenshotPath = System.getenv("TRAVIS_BUILD_DIR") + "/images/";
+            } else {
+                final char sep = File.separatorChar;
+                screenshotPath = System.getenv("USER.HOME") + sep + "openjfx" + sep + "images" + sep;
+            }
+            File screenshot = new File(screenshotPath + name.getMethodName() + ".png");
+            File parent = screenshot.getParentFile();
+            if (parent != null && !parent.exists()) {
+                if (!parent.mkdirs()) {
+                    throw new IOException("could not create directory: " + parent);
+                }
+            }
+            System.out.println("Saving screenshot to: " + screenshot.getCanonicalPath());
+            ImageIO.write(bufferedImage, "PNG", screenshot);
+
+        }
+        catch (IOException e) {
+            System.out.println("Error saving screenshot: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     protected void assertColorEquals(Color expected, Color actual, double delta) {
         if (!testColorEquals(expected, actual, delta)) {
+            Platform.runLater(this::saveScreenshot);
             throw new AssertionFailedError("expected:" + colorToString(expected)
                     + " but was:" + colorToString(actual));
         }
