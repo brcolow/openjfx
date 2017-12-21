@@ -89,7 +89,8 @@ setupTools("windows_tools",
     }
 )
 // def msvcVer = System.getenv("MSVC_VER") ?: "14"
-def msvcRedistVer = System.getenv("MSVC_REDIST_VER") ?: "14.11.25503"
+
+def msvcRedistVer = System.getenv("MSVC_REDIST_VER") ?: System.getenv("APPVEYOR") ? "14.12.25827" : "14.11.25503"
 
 WINDOWS_VS_MSVCDIR = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\"
 WINDOWS_SDK_VERSION = "10.0.26624.0"
