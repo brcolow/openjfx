@@ -88,16 +88,17 @@ setupTools("windows_tools",
                 System.getenv().get("PATH"))
     }
 )
+def msvcVer = System.getenv("MSVC_VER") ?: "14.11.25503"
 
 WINDOWS_VS_MSVCDIR = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC"
-WINDOWS_SDK_VERSION = "10.0.16299.0"
+WINDOWS_SDK_VERSION = "10.0.26624.0"
 WINDOWS_SDK_DIR = "C:\\Program Files (x86)\\Windows Kits\\10"
-WINDOWS_VS_VSINSTALLDIR = "C:/Program Files (x86)\\Microsoft Visual Studio\\2017\\Community"
+WINDOWS_VS_VSINSTALLDIR = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community"
 WINDOWS_VS_WINSDKDLLINSTALLDIR = "C:\\Program Files (x86)\\Windows Kits\\10\\Redist\\ucrt\\DLLs"
-WINDOWS_VS_VCINSTALLDIR = "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC"
-WINDOWS_VS_LIBPATH = "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.16299.0\\um\\x64;"
-WINDOWS_VS_INCLUDE = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\ucrt;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.11.25503\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\um;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\shared"
-WINDOWS_VS_LIB = "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.16299.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.16299.0\\um\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.11.25503\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.16299.0\\um"
+WINDOWS_VS_VCINSTALLDIR = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC"
+WINDOWS_VS_LIBPATH = "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\$WINDOWS_SDK_DIR\\um\\x64;"
+WINDOWS_VS_INCLUDE = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\$WINDOWS_SDK_DIR\\ucrt;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\$msvcVer\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\$WINDOWS_SDK_DIR\\um;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\$WINDOWS_SDK_DIR\\shared"
+WINDOWS_VS_LIB = "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\$WINDOWS_SDK_DIR\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\$WINDOWS_SDK_DIR\\um\\x64;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Tools\\MSVC\\$msvcVer\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\$WINDOWS_SDK_DIR\\um"
 WINDOWS_VS_DEVENVDIR = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE"
 WINDOWS_VS_DEVENVCMD="C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.com"
 WINDOWS_VS_PATH = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Common7\\Tools;C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\VC\\vcpackages;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\NETFX 4.0 Tools;C:\\Program Files (x86)\\Windows Kits\\10\\bin"
@@ -146,7 +147,6 @@ ext.WINDOWS_NATIVE_COMPILE_ENVIRONMENT = [
         "LIBPATH"              : WINDOWS_VS_LIBPATH,
         "DXSDK_DIR"            : WINDOWS_DXSDK_DIR
 ];
-def msvcVer = System.getenv("MSVC_VER") ?: "14.11.25503"
 def msvcBinDir = ""
 if (winVsVer == 150) {
     msvcBinDir = (IS_64
