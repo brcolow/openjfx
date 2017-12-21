@@ -31,7 +31,9 @@ build_script:
 
       java -version
       .\gradlew --version
+
       .\gradlew build --stacktrace
+
 
       # Try and print crash logs if gradle build returned non-zero exit code
       if ($Result.ExitCode -ne 0) {
