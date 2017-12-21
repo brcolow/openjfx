@@ -25,10 +25,8 @@
 
 package com.sun.glass.ui.monocle;
 
-import com.sun.glass.events.MouseEvent;
 import com.sun.glass.ui.Application;
 import com.sun.glass.ui.GlassRobot;
-import com.sun.glass.ui.Pixels;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -155,9 +153,9 @@ class MonocleRobot extends Robot {
                 ShortBuffer shortbuf = buffer.asShortBuffer();
 
                 int v = shortbuf.get((y * bwidth) + x);
-                int red = (int) ((v & 0xF800) >> 11) << 3;
-                int green = (int) ((v & 0x7E0) >> 5) << 2;
-                int blue = (int) (v & 0x1F) << 3;
+                int red = (v & 0xF800) >> 11 << 3;
+                int green = (v & 0x7E0) >> 5 << 2;
+                int blue = (v & 0x1F) << 3;
 
                 int p = (0xff000000
                         | (red << 16)
@@ -177,7 +175,6 @@ class MonocleRobot extends Robot {
     public Image getScreenCapture(int x, int y, int width, int height,
                                   boolean isHiDPI) {
         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
-        final int byteDepth = screen.getDepth() >>> 3;
         final int scrWidth = screen.getWidth();
         final int scrHeight = screen.getHeight();
 

@@ -41,13 +41,13 @@ final class MacRobot extends Robot {
     // TODO: get rid of native Robot object
     private long ptr;
 
-    native protected long _init();
-    @Override public void create() {
+    native private long _init();
+    @Override protected void create() {
         ptr = _init();
     }
 
     native protected void _destroy(long ptr);
-    @Override public void destroy() {
+    @Override protected void destroy() {
         if (ptr == 0) {
             return;
         }

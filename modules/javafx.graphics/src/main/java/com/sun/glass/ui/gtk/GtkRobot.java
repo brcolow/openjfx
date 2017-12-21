@@ -35,12 +35,12 @@ import com.sun.glass.ui.Screen;
 final class GtkRobot extends Robot {
 
     @Override
-    public void create() {
+    protected void create() {
         // no-op
     }
 
     @Override
-    public void destroy() {
+    protected void destroy() {
         // no-op
     }
 
@@ -94,5 +94,5 @@ final class GtkRobot extends Robot {
         return GlassRobot.convertFromIntArgb(result[0]);
     }
 
-    @Override native public void getScreenCapture(int x, int y, int width, int height, int[] data);
+    @Override native protected void getScreenCapture(int x, int y, int width, int height, int[] data);
 }

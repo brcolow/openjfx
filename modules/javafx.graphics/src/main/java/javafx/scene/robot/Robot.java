@@ -41,7 +41,9 @@ import com.sun.glass.ui.Screen;
 
 /**
  * A {@code Robot} is used for simulating user interaction such as
- * typing keys, using the mouse, and capturing portions of the screen.
+ * typing keys on the keyboard and using the mouse as well as capturing
+ * graphical information without requiring a {@link javafx.scene.Scene}
+ * instance.
  *
  * @since 11
  */
@@ -50,9 +52,9 @@ public abstract class Robot {
     /**
      * Initializes any state needed for this {@code Robot}.
      */
-    public abstract void create();
+    protected abstract void create();
 
-    public Robot() {
+    protected Robot() {
         // Ensure proper permission
         final SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -65,7 +67,7 @@ public abstract class Robot {
     /**
      * Frees any resources allocated by this {@code Robot}.
      */
-    public abstract void destroy();
+    protected abstract void destroy();
 
     /**
      * Generates a keyboard key pressed event for the given {@link KeyCode}.
@@ -155,7 +157,8 @@ public abstract class Robot {
         return getPixelColor((int) location.getX(), (int) location.getY());
     }
 
-    public void getScreenCapture(int x, int y, int width, int height, int[] data) {
+    // TODO(mike): This should not be exposed as part of the public API.
+    protected void getScreenCapture(int x, int y, int width, int height, int[] data) {
         throw new UnsupportedOperationException("Not implemented in base class.");
     }
 
@@ -222,7 +225,7 @@ public abstract class Robot {
     }
 
     /**
-     * Returns a capture of the specified area of the screen.
+     * Returns a capture of the specified rectangular area of the screen.
      * <p>
      * It is equivalent to calling getScreenCapture(x, y, width, height, false),
      * i.e. this method takes a "LowDPI" screen shot.
@@ -234,7 +237,7 @@ public abstract class Robot {
     }
 
     /**
-     * Returns a capture of the specified area of the screen.
+     * Returns a capture of the specified rectangular area of the screen.
      * <p>
      * It is equivalent to calling getScreenCapture(x, y, width, height, false),
      * i.e. this method takes a "LowDPI" screen shot.

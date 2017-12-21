@@ -46,13 +46,13 @@ final class IosRobot extends Robot {
     // init and create native robot object
     private native long _init();
 
-    @Override public void create() {
+    @Override protected void create() {
         ptr = _init();
     }
 
     // release native robot object
     private native void _destroy(long ptr);
-    @Override public void destroy() {
+    @Override protected void destroy() {
         _destroy(ptr);
         ptr = 0;
     }
@@ -137,7 +137,7 @@ final class IosRobot extends Robot {
     }
 
     @Override
-    public void getScreenCapture(int x, int y, int width, int height, int[] data) {
+    protected void getScreenCapture(int x, int y, int width, int height, int[] data) {
         _getScreenCapture(ptr, x, y, width, height, data);
     }
 

@@ -36,10 +36,10 @@ import com.sun.glass.ui.GlassRobot;
  */
 final class WinRobot extends Robot {
 
-    @Override public void create() {
+    @Override protected void create() {
         // no-op
     }
-    @Override public void destroy() {
+    @Override protected void destroy() {
         // no-op
     }
 
@@ -75,5 +75,5 @@ final class WinRobot extends Robot {
         return GlassRobot.convertFromIntArgb(_getPixelColor(x, y));
     }
 
-    @Override native public void getScreenCapture(int x, int y, int width, int height, int[] data);
+    @Override native protected void getScreenCapture(int x, int y, int width, int height, int[] data);
 }
