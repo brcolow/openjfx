@@ -24,6 +24,7 @@ build_script:
       # Set environment to mimic the Visual Studio command prompt
       Invoke-BatchFile 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat' -Force
 
+      Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC" –Recurse
       # Install DirectX SDK needed by JavaFX
       $client = new-object net.webclient
       $client.DownloadFile("http://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe", "DXSDK_Jun10.exe")
