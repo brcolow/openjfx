@@ -642,6 +642,8 @@ public class FXCanvas extends Canvas {
         boolean primaryBtnDown = (me.stateMask & SWT.BUTTON1) != 0;
         boolean middleBtnDown = (me.stateMask & SWT.BUTTON2) != 0;
         boolean secondaryBtnDown = (me.stateMask & SWT.BUTTON3) != 0;
+        boolean backBtnDown = (me.stateMask & SWT.BUTTON4) != 0;
+        boolean forwardBtnDown = (me.stateMask & SWT.BUTTON5) != 0;
         boolean shift = (me.stateMask & SWT.SHIFT) != 0;
         boolean control = (me.stateMask & SWT.CONTROL) != 0;
         boolean alt = (me.stateMask & SWT.ALT) != 0;
@@ -652,11 +654,15 @@ public class FXCanvas extends Canvas {
                 primaryBtnDown |= me.button == 1;
                 middleBtnDown |= me.button == 2;
                 secondaryBtnDown |= me.button == 3;
+                backBtnDown |= me.button == 4;
+                forwardBtnDown |= me.button == 5;
                 break;
             case AbstractEvents.MOUSEEVENT_RELEASED:
                 primaryBtnDown &= me.button != 1;
                 middleBtnDown &= me.button != 2;
                 secondaryBtnDown &= me.button != 3;
+                backBtnDown &= me.button == 4;
+                forwardBtnDown &= me.button == 5;
                 break;
             case AbstractEvents.MOUSEEVENT_CLICKED:
                 // Don't send click events to FX, as they are generated in Scene
@@ -676,6 +682,10 @@ public class FXCanvas extends Canvas {
                         button = 2;
                     } else if ((me.stateMask & SWT.BUTTON3) != 0) {
                         button = 3;
+                    } else if ((me.stateMask & SWT.BUTTON4) != 0) {
+                        button = 4;
+                    } else if ((me.stateMask & SWT.BUTTON5) != 0) {
+                        button = 5;
                     }
                 }
                 break;
@@ -688,6 +698,7 @@ public class FXCanvas extends Canvas {
                 embedMouseType,
                 SWTEvents.mouseButtonToEmbedMouseButton(button, me.stateMask),
                 primaryBtnDown, middleBtnDown, secondaryBtnDown,
+                backBtnDown, forwardBtnDown,
                 me.x, me.y,
                 los.x, los.y,
                 shift, control, alt, meta,
