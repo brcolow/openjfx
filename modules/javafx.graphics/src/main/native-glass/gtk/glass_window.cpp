@@ -242,6 +242,10 @@ static inline jint gtk_button_number_to_mouse_button(guint button) {
             return com_sun_glass_events_MouseEvent_BUTTON_OTHER;
         case 3:
             return com_sun_glass_events_MouseEvent_BUTTON_RIGHT;
+        case 4:
+            return com_sun_glass_events_MouseEvent_BUTTON_BACK;
+        case 5:
+            return com_sun_glass_events_MouseEvent_BUTTON_FORWARD;
         default:
             // Other buttons are not supported by quantum and are not reported by other platforms
             return com_sun_glass_events_MouseEvent_BUTTON_NONE;
@@ -265,6 +269,12 @@ void WindowContextBase::process_mouse_button(GdkEventButton* event) {
             break;
         case 3:
             mask = GDK_BUTTON3_MASK;
+            break;
+        case 4:
+            mask = GDK_BUTTON4_MASK;
+            break;
+        case 5:
+            mask = GDK_BUTTON5_MASK;
             break;
     }
 
@@ -333,6 +343,10 @@ void WindowContextBase::process_mouse_motion(GdkEventMotion* event) {
         button = com_sun_glass_events_MouseEvent_BUTTON_OTHER;
     } else if (glass_modifier & com_sun_glass_events_KeyEvent_MODIFIER_BUTTON_SECONDARY) {
         button = com_sun_glass_events_MouseEvent_BUTTON_RIGHT;
+    } else if (glass_modifier & com_sun_glass_events_KeyEvent_MODIFIER_BUTTON_BACK) {
+        button = com_sun_glass_events_MouseEvent_BUTTON_BACK;
+    } else if (glass_modifier & com_sun_glass_events_KeyEvent_MODIFIER_BUTTON_FORWARD) {
+        button = com_sun_glass_events_MouseEvent_BUTTON_FORWARD;
     }
 
     if (jview) {

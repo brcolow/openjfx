@@ -153,6 +153,9 @@ static void mouseButtons(jint buttons, gboolean press)
         XTestFakeButtonEvent(xdisplay, 3, press, CurrentTime);
     }
 
+    // The mouse forward/back buttons could be added with 8 and 9
+    // as the second argument to XTestFakeButtonEvent if they are
+    // added to the JavaFX MouseButton enum.
     XSync(xdisplay, False);
 }
 

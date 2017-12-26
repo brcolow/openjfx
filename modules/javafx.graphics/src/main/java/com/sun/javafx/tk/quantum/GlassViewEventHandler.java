@@ -319,6 +319,12 @@ class GlassViewEventHandler extends View.EventHandler {
                 case MouseEvent.BUTTON_RIGHT:
                     buttonMask = KeyEvent.MODIFIER_BUTTON_SECONDARY;
                     break;
+                case MouseEvent.BUTTON_BACK:
+                    buttonMask = KeyEvent.MODIFIER_BUTTON_BACK;
+                    break;
+                case MouseEvent.BUTTON_FORWARD:
+                    buttonMask = KeyEvent.MODIFIER_BUTTON_FORWARD;
+                    break;
                 default:
                     buttonMask = 0;
                     break;
@@ -375,6 +381,8 @@ class GlassViewEventHandler extends View.EventHandler {
                     boolean primaryButtonDown = (modifiers & KeyEvent.MODIFIER_BUTTON_PRIMARY) != 0;
                     boolean middleButtonDown = (modifiers & KeyEvent.MODIFIER_BUTTON_MIDDLE) != 0;
                     boolean secondaryButtonDown = (modifiers & KeyEvent.MODIFIER_BUTTON_SECONDARY) != 0;
+                    boolean backButtonDown = (modifiers & KeyEvent.MODIFIER_BUTTON_BACK) != 0;
+                    boolean forwardButtonDown = (modifiers & KeyEvent.MODIFIER_BUTTON_FORWARD) != 0;
                     final Window w = view.getWindow();
                     double pScaleX, pScaleY, spx, spy, sx, sy;
                     if (w != null) {
@@ -399,7 +407,8 @@ class GlassViewEventHandler extends View.EventHandler {
                             sx + (xAbs - spx) / pScaleX, sy + (yAbs - spy) / pScaleY,
                             mouseEventButton(button), isPopupTrigger, isSynthesized,
                             shiftDown, controlDown, altDown, metaDown,
-                            primaryButtonDown, middleButtonDown, secondaryButtonDown);
+                            primaryButtonDown, middleButtonDown, secondaryButtonDown,
+                            backButtonDown, forwardButtonDown);
                 }
             } finally {
                 if (stage != null) {

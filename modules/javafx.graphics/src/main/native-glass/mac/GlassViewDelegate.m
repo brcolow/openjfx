@@ -491,6 +491,12 @@ static jint getSwipeDirFromEvent(NSEvent *theEvent)
                     case com_sun_glass_events_MouseEvent_BUTTON_OTHER:
                         modifiers |= com_sun_glass_events_KeyEvent_MODIFIER_BUTTON_MIDDLE;
                         break;
+                    case com_sun_glass_events_MouseEvent_BUTTON_BACK:
+                        modifiers |= com_sun_glass_events_KeyEvent_MODIFIER_BUTTON_BACK;
+                        break;
+                    case com_sun_glass_events_MouseEvent_BUTTON_FORWARD:
+                        modifiers |= com_sun_glass_events_KeyEvent_MODIFIER_BUTTON_FORWARD;
+                        break;
                 }
             }
         }
@@ -988,7 +994,7 @@ static jint getSwipeDirFromEvent(NSEvent *theEvent)
 static jstring convertNSStringToJString(id aString, int length)
 {
     GET_MAIN_JENV;
-    
+
     jstring jStr;
     if ([aString isKindOfClass:[NSAttributedString class]]) {
         NSData *data = [[aString string] dataUsingEncoding:NSUTF16LittleEndianStringEncoding];
@@ -1001,7 +1007,7 @@ static jstring convertNSStringToJString(id aString, int length)
     } else {
         jStr = (*env)->NewStringUTF(env, [aString UTF8String]);
     }
-    
+
     GLASS_CHECK_EXCEPTION(env);
 
     return jStr;
@@ -1013,7 +1019,7 @@ static jstring convertNSStringToJString(id aString, int length)
     if ([NSThread isMainThread] == YES)
     {
         GET_MAIN_JENV;
-        
+
         jstring jStr = convertNSStringToJString(aString, length);
         if (jStr != NULL) {
             (*env)->CallVoidMethod(env, self->jView, jViewNotifyInputMethodMac, jStr, attr,
