@@ -38,10 +38,11 @@
 #include "glass_key.h"
 #include "glass_screen.h"
 
+static int32_t num_mouse_buttons = 0;
 
 static void checkXTest(JNIEnv* env) {
     int32_t major_opcode, first_event, first_error;
-    int32_t  event_basep, error_basep, majorp, minorp;
+    int32_t event_basep, error_basep, majorp, minorp;
     static int32_t isXTestAvailable;
     static gboolean checkDone = FALSE;
     if (!checkDone) {
@@ -51,10 +52,11 @@ static void checkXTest(JNIEnv* env) {
             /* check if XTest version is OK */
             XTestQueryExtension(gdk_x11_get_default_xdisplay(), &event_basep, &error_basep, &majorp, &minorp);
             if (majorp < 2 || (majorp == 2 && minorp < 2)) {
-                    isXTestAvailable = False;
+                isXTestAvailable = False;
             } else {
                 XTestGrabControl(gdk_x11_get_default_xdisplay(), True);
             }
+            queryNumMouseButtons();
         }
         checkDone = TRUE;
     }
@@ -63,6 +65,59 @@ static void checkXTest(JNIEnv* env) {
         if (env->ExceptionCheck()) return;
         env->ThrowNew(cls, "Glass Robot needs XTest extension to work");
     }
+}
+
+static void queryNumMouseButtons() {
+    int32_t major_opcode, first_event, first_error;
+    int32_t event_basep, error_basep, majorp, minorp;
+    int32_t xinputAvailable;
+    XDeviceInfo* devices;
+    XDeviceInfo* aDevice;
+    int32_t numDevices, devIdx, clsIdx;
+    XButtonInfo* bInfo;
+    int32_t local_num_buttons = 0;
+
+    /* check if XInput extension is available */
+    xinputAvailable = XQueryExtension(gdk_x11_get_default_xdisplay(), "XInputExtension", &major_opcode, &first_event, &first_error);
+    if (xinputAvailable) {
+        /* check how many mouse buttons are supported on the XPointer */
+        devices = XListInputDevices(gdk_x11_get_default_xdisplay(), &numDevices);
+        for (devIdx = 0; devIdx < numDevices; devIdx++) {
+            aDevice = &(devices[devIdx]);
+#ifdef IsXExtensionPointer
+            if (aDevice->use == IsXExtensionPointer) {
+                for (clsIdx = 0; clsIdx < aDevice->num_classes; clsIdx++) {
+                    if (aDevice->inputclassinfo[clsIdx].class == ButtonClass) {
+                        bInfo = (XButtonInfo*)(&(aDevice->inputclassinfo[clsIdx]));
+                        local_num_buttons = bInfo->num_buttons;
+                        break;
+                    }
+                }
+                break;
+            }
+#endif
+            if (local_num_buttons <= 0 ) {
+                if (aDevice->use == IsXPointer) {
+                    for (clsIdx = 0; clsIdx < aDevice->num_classes; clsIdx++) {
+                        if (aDevice->inputclassinfo[clsIdx].class == ButtonClass) {
+                            bInfo = (XButtonInfo*)(&(aDevice->inputclassinfo[clsIdx]));
+                            local_num_buttons = bInfo->num_buttons;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            XFreeDeviceList(devices);
+        }
+    } else {
+        // Assume 3 mouse buttons
+        num_mouse_buttons = 3;
+        return;
+    }
+
+    num_mouse_buttons = local_num_buttons == 0 ? 3 : local_num_buttons;
 }
 
 static void keyButton(jint code, gboolean press)
@@ -153,9 +208,14 @@ static void mouseButtons(jint buttons, gboolean press)
         XTestFakeButtonEvent(xdisplay, 3, press, CurrentTime);
     }
 
-    // The mouse forward/back buttons could be added with 8 and 9
-    // as the second argument to XTestFakeButtonEvent if they are
-    // added to the JavaFX MouseButton enum.
+    if (num_mouse_buttons > 3) {
+        if (buttons & com_sun_glass_ui_GlassRobot_MOUSE_BACK_BTN) {
+            XTestFakeButtonEvent(xdisplay, 8, press, CurrentTime);
+        }
+        if (buttons & com_sun_glass_ui_GlassRobot_MOUSE_FORWARD_BTN) {
+            XTestFakeButtonEvent(xdisplay, 9, press, CurrentTime);
+        }
+    }
     XSync(xdisplay, False);
 }
 
