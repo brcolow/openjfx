@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>openjfx Sdiff modules/javafx.graphics/src/main/java </title>
+</head><body id="SUNWwebrev">
+<center><a href='../../../../../modules/javafx.graphics/src/main/java/javafx/application/Application.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../index.html' target='_top'>index</a> <a href='../../../../../modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.sdiff.html' target='_top'>next &gt</a></center>
+<h2>modules/javafx.graphics/src/main/java/module-info.java</h2>
+<a class="print" href="javascript:print()">Print this page</a>
+<pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+
+<table><tr valign="top">
+<td><pre>
+
+</pre><hr></hr><pre>
+  36 module javafx.graphics {
+  37     requires java.desktop;
+  38     requires java.xml;
+  39 
+  40     requires transitive javafx.base;
+  41 
+  42     exports javafx.animation;
+  43     exports javafx.application;
+  44     exports javafx.concurrent;
+  45     exports javafx.css;
+  46     exports javafx.css.converter;
+  47     exports javafx.geometry;
+  48     exports javafx.print;
+  49     exports javafx.scene;
+  50     exports javafx.scene.canvas;
+  51     exports javafx.scene.effect;
+  52     exports javafx.scene.image;
+  53     exports javafx.scene.input;
+  54     exports javafx.scene.layout;
+  55     exports javafx.scene.paint;
+
+  56     exports javafx.scene.shape;
+  57     exports javafx.scene.text;
+  58     exports javafx.scene.transform;
+  59     exports javafx.stage;
+  60 
+  61     exports com.sun.glass.ui to
+  62         javafx.media,
+  63         javafx.web;
+  64     exports com.sun.glass.utils to
+  65         javafx.media,
+  66         javafx.web;
+  67     exports com.sun.javafx.application to
+  68         java.base,
+  69         javafx.controls,
+  70         javafx.swing,
+  71         javafx.web;
+  72     exports com.sun.javafx.css to
+  73         javafx.controls;
+  74     exports com.sun.javafx.css.parser to
+  75         jdk.packager;
+
+</pre><hr></hr>
+</pre></td><td><pre>
+
+</pre><hr></hr><pre>
+  36 module javafx.graphics {
+  37     requires java.desktop;
+  38     requires java.xml;
+  39 
+  40     requires transitive javafx.base;
+  41 
+  42     exports javafx.animation;
+  43     exports javafx.application;
+  44     exports javafx.concurrent;
+  45     exports javafx.css;
+  46     exports javafx.css.converter;
+  47     exports javafx.geometry;
+  48     exports javafx.print;
+  49     exports javafx.scene;
+  50     exports javafx.scene.canvas;
+  51     exports javafx.scene.effect;
+  52     exports javafx.scene.image;
+  53     exports javafx.scene.input;
+  54     exports javafx.scene.layout;
+  55     exports javafx.scene.paint;
+<span class="new">  56     exports javafx.scene.robot;</span>
+  57     exports javafx.scene.shape;
+  58     exports javafx.scene.text;
+  59     exports javafx.scene.transform;
+  60     exports javafx.stage;
+  61 
+  62     exports com.sun.glass.ui to
+  63         javafx.media,
+  64         javafx.web;
+  65     exports com.sun.glass.utils to
+  66         javafx.media,
+  67         javafx.web;
+  68     exports com.sun.javafx.application to
+  69         java.base,
+  70         javafx.controls,
+  71         javafx.swing,
+  72         javafx.web;
+  73     exports com.sun.javafx.css to
+  74         javafx.controls;
+  75     exports com.sun.javafx.css.parser to
+  76         jdk.packager;
+
+</pre><hr></hr>
+</pre></td>
+</tr></table>
+<center><a href='../../../../../modules/javafx.graphics/src/main/java/javafx/application/Application.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../index.html' target='_top'>index</a> <a href='../../../../../modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.sdiff.html' target='_top'>next &gt</a></center>
+</body></html>

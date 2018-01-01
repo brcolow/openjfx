@@ -1,0 +1,10 @@
+--- old/modules/javafx.graphics/src/test/addExports	2018-01-01 14:51:40.553734700 -0700
++++ new/modules/javafx.graphics/src/test/addExports	2018-01-01 14:51:40.193714700 -0700
+@@ -45,6 +45,7 @@
+ --add-exports javafx.graphics/com.sun.scenario.effect.light=ALL-UNNAMED
+ --add-exports javafx.graphics/com.sun.scenario=ALL-UNNAMED
+ --add-opens javafx.graphics/javafx.scene=ALL-UNNAMED
++--add-opens javafx.graphics/javafx.scene.robot=ALL-UNNAMED
+ --add-opens javafx.graphics/javafx.scene.layout=ALL-UNNAMED
+ #
+ --add-exports java.base/sun.util.logging=ALL-UNNAMED

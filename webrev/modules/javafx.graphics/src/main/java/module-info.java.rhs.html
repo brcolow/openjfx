@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 
+  26 /**
+  27  * Defines the core scenegraph APIs for the JavaFX UI toolkit
+  28  * (such as layout containers, application lifecycle, shapes,
+  29  * transformations, canvas, input, painting, image handling, and effects),
+  30  * as well as APIs for animation, css, concurrency, geometry, printing, and
+  31  * windowing.
+  32  *
+  33  * @moduleGraph
+  34  * @since 9
+  35  */
+  36 module javafx.graphics {
+  37     requires java.desktop;
+  38     requires java.xml;
+  39 
+  40     requires transitive javafx.base;
+  41 
+  42     exports javafx.animation;
+  43     exports javafx.application;
+  44     exports javafx.concurrent;
+  45     exports javafx.css;
+  46     exports javafx.css.converter;
+  47     exports javafx.geometry;
+  48     exports javafx.print;
+  49     exports javafx.scene;
+  50     exports javafx.scene.canvas;
+  51     exports javafx.scene.effect;
+  52     exports javafx.scene.image;
+  53     exports javafx.scene.input;
+  54     exports javafx.scene.layout;
+  55     exports javafx.scene.paint;
+<a name="1" id="anc1"></a><span class="new">  56     exports javafx.scene.robot;</span>
+  57     exports javafx.scene.shape;
+  58     exports javafx.scene.text;
+  59     exports javafx.scene.transform;
+  60     exports javafx.stage;
+  61 
+  62     exports com.sun.glass.ui to
+  63         javafx.media,
+  64         javafx.web;
+  65     exports com.sun.glass.utils to
+  66         javafx.media,
+  67         javafx.web;
+  68     exports com.sun.javafx.application to
+  69         java.base,
+  70         javafx.controls,
+  71         javafx.swing,
+  72         javafx.web;
+  73     exports com.sun.javafx.css to
+  74         javafx.controls;
+  75     exports com.sun.javafx.css.parser to
+  76         jdk.packager;
+  77     exports com.sun.javafx.cursor to
+  78         javafx.swing;
+  79     exports com.sun.javafx.embed to
+  80         javafx.swing;
+  81     exports com.sun.javafx.font to
+  82         javafx.web;
+  83     exports com.sun.javafx.geom to
+  84         javafx.controls,
+  85         javafx.media,
+  86         javafx.swing,
+  87         javafx.web;
+  88     exports com.sun.javafx.geom.transform to
+  89         javafx.controls,
+  90         javafx.media,
+  91         javafx.swing,
+  92         javafx.web;
+  93     exports com.sun.javafx.iio to
+  94         javafx.web;
+  95     exports com.sun.javafx.jmx to
+  96         javafx.media,
+  97         javafx.swing,
+  98         javafx.web;
+  99     exports com.sun.javafx.menu to
+ 100         javafx.controls;
+ 101     exports com.sun.javafx.scene to
+ 102         javafx.controls,
+ 103         javafx.media,
+ 104         javafx.swing,
+ 105         javafx.web;
+ 106     exports com.sun.javafx.scene.input to
+ 107         javafx.controls,
+ 108         javafx.swing,
+ 109         javafx.web;
+ 110     exports com.sun.javafx.scene.layout to
+ 111         javafx.controls,
+ 112         javafx.web;
+ 113     exports com.sun.javafx.scene.text to
+ 114         javafx.controls,
+ 115         javafx.web;
+ 116     exports com.sun.javafx.scene.traversal to
+ 117         javafx.controls,
+ 118         javafx.web;
+ 119     exports com.sun.javafx.sg.prism to
+ 120         javafx.media,
+ 121         javafx.swing,
+ 122         javafx.web;
+ 123     exports com.sun.javafx.stage to
+ 124         javafx.controls,
+ 125         javafx.swing;
+ 126     exports com.sun.javafx.text to
+ 127         javafx.web;
+ 128     exports com.sun.javafx.tk to
+ 129         javafx.controls,
+ 130         javafx.media,
+ 131         javafx.swing,
+ 132         javafx.web;
+ 133     exports com.sun.javafx.util to
+ 134         javafx.controls,
+ 135         javafx.fxml,
+ 136         javafx.media,
+ 137         javafx.swing,
+ 138         javafx.web;
+ 139     exports com.sun.prism to
+ 140         javafx.media,
+ 141         javafx.web;
+ 142     exports com.sun.prism.image to
+ 143         javafx.web;
+ 144     exports com.sun.prism.paint to
+ 145         javafx.web;
+ 146     exports com.sun.scenario.effect to
+ 147         javafx.web;
+ 148     exports com.sun.scenario.effect.impl to
+ 149         javafx.web;
+ 150     exports com.sun.scenario.effect.impl.prism to
+ 151         javafx.web;
+ 152 }
+<a name="2" id="anc2"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="2" type="hidden" /></form></body></html>

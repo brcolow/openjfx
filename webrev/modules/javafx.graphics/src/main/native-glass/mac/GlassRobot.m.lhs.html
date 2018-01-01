@@ -1,0 +1,681 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 
+  26 #import "common.h"
+  27 #import "com_sun_glass_ui_mac_MacRobot.h"
+  28 
+  29 #import &lt;CoreServices/CoreServices.h&gt;
+  30 #import &lt;ApplicationServices/ApplicationServices.h&gt;
+  31 
+  32 #import "GlassMacros.h"
+  33 #import "GlassKey.h"
+  34 #import "GlassHelper.h"
+  35 
+  36 //#define VERBOSE
+  37 #ifndef VERBOSE
+  38     #define LOG(MSG, ...)
+  39 #else
+  40     #define LOG(MSG, ...) GLASS_LOG(MSG, ## __VA_ARGS__);
+  41 #endif
+  42 
+  43 #define kMouseButtonNone 0
+  44 
+  45 static inline void DumpImage(CGImageRef image)
+  46 {
+  47     fprintf(stderr, "CGImageRef: %p\n", image);
+  48     if (image != NULL)
+  49     {
+  50         fprintf(stderr, "    CGImageGetWidth(): %d\n", (int)CGImageGetWidth(image));
+  51         fprintf(stderr, "    CGImageGetHeight(): %d\n", (int)CGImageGetHeight(image));
+  52         fprintf(stderr, "    CGImageGetBitsPerComponent(): %d\n", (int)CGImageGetBitsPerComponent(image));
+  53         fprintf(stderr, "    CGImageGetBitsPerPixel(): %d\n", (int)CGImageGetBitsPerPixel(image));
+  54         fprintf(stderr, "    CGImageGetBytesPerRow(): %d\n", (int)CGImageGetBytesPerRow(image));
+  55         CGImageAlphaInfo alpha = CGImageGetAlphaInfo(image) &amp; kCGBitmapAlphaInfoMask;
+  56         switch (alpha)
+  57         {
+  58             case kCGImageAlphaNone: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaNone\n"); break;
+  59             case kCGImageAlphaPremultipliedLast: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaPremultipliedLast\n"); break;
+  60             case kCGImageAlphaPremultipliedFirst: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaPremultipliedFirst\n"); break;
+  61             case kCGImageAlphaLast: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaLast\n"); break;
+  62             case kCGImageAlphaFirst: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaFirst\n"); break;
+  63             case kCGImageAlphaNoneSkipLast: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaNoneSkipLast\n"); break;
+  64             case kCGImageAlphaNoneSkipFirst: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaNoneSkipFirst\n"); break;
+  65             case kCGImageAlphaOnly: fprintf(stderr, "    CGImageGetAlphaInfo(): kCGImageAlphaOnly\n"); break;
+  66             default: fprintf(stderr, "    CGImageGetAlphaInfo(): unknown\n");
+  67         }
+  68         CGBitmapInfo bitmap = CGImageGetBitmapInfo(image) &amp; kCGBitmapByteOrderMask;
+  69         switch (bitmap)
+  70         {
+  71             case kCGBitmapByteOrderDefault: fprintf(stderr, "    CGImageGetBitmapInfo(): kCGBitmapByteOrderDefault\n"); break;
+  72             case kCGBitmapByteOrder16Little: fprintf(stderr, "    CGImageGetBitmapInfo(): kCGBitmapByteOrder16Little\n"); break;
+  73             case kCGBitmapByteOrder32Little: fprintf(stderr, "    CGImageGetBitmapInfo(): kCGBitmapByteOrder32Little\n"); break;
+  74             case kCGBitmapByteOrder16Big: fprintf(stderr, "    CGImageGetBitmapInfo(): kCGBitmapByteOrder16Big\n"); break;
+  75             case kCGBitmapByteOrder32Big: fprintf(stderr, "    CGImageGetBitmapInfo(): kCGBitmapByteOrder32Big\n"); break;
+  76             default: fprintf(stderr, "    CGImageGetBitmapInfo(): unknown\n");
+  77         }
+  78     }
+  79 }
+  80 
+  81 static inline void PostGlassMouseEvent(CGPoint location, UInt32 buttons, BOOL buttonPressed)
+  82 {
+  83     // for each one bit in buttons, post a new mouse {press/release} event
+  84     if (buttons != 0) {
+  85         for (UInt32 index = 0; buttons != 0; index++, buttons &gt;&gt;= 1) {
+  86             if (buttons &amp; 1) {
+  87                 CGEventType type;
+  88                 switch (index) {
+  89                     case 0:
+  90                         type = buttonPressed ? kCGEventLeftMouseDown : kCGEventLeftMouseUp;
+  91                         break;
+  92                     case 1:
+  93                         type = buttonPressed ? kCGEventRightMouseDown : kCGEventRightMouseUp;
+  94                         break;
+  95                     default:
+  96                         type = buttonPressed ? kCGEventOtherMouseDown : kCGEventOtherMouseUp;
+  97                         break;
+  98                 }
+  99 
+ 100                 CGEventRef newEvent = CGEventCreateMouseEvent(NULL, type, location, (CGMouseButton)index);
+ 101                 CGEventPost(kCGHIDEventTap, newEvent);
+ 102                 CFRelease(newEvent);
+ 103             }
+ 104         }
+ 105     }
+ 106 }
+ 107 
+ 108 static inline void PostGlassKeyEvent(jint code, BOOL keyPressed)
+ 109 {
+ 110     unsigned short macCode;
+ 111     if (GetMacKey(code, &amp;macCode)) {
+ 112         // Using CGEvent API proved to be problematic - events for some keys were missing sometimes.
+ 113         // So we use the A11Y API instead - just as we do in AWT. It works fine in all cases.
+ 114         AXUIElementRef elem = AXUIElementCreateSystemWide();
+ 115         AXUIElementPostKeyboardEvent(elem, (CGCharCode)0, macCode, keyPressed);
+ 116         CFRelease(elem);
+ 117     }
+ 118 }
+ 119 
+ 120 @interface GlassRobot : NSObject
+ 121 {
+ 122     UInt32 mouseButtons;
+ 123 }
+ 124 
+ 125 - (void)mouseMove:(NSPoint)p;
+ 126 - (void)mousePress:(UInt32)buttons;
+ 127 - (void)mouseRelease:(UInt32)buttons;
+ 128 - (CGPoint)getMousePosFlipped;
+ 129 @end
+ 130 
+ 131 @implementation GlassRobot
+ 132 
+ 133 - (id)init
+ 134 {
+ 135     self = [super init];
+ 136     if (self != nil)
+ 137     {
+ 138         self-&gt;mouseButtons = kMouseButtonNone;
+ 139     }
+ 140     return self;
+ 141 }
+ 142 
+ 143 
+ 144 - (void)mouseMove:(NSPoint)p
+ 145 {
+ 146     CGPoint location = NSPointToCGPoint(p);
+ 147     UInt32 buttons = self-&gt;mouseButtons;
+ 148     CGEventType type=kCGEventMouseMoved;
+ 149     UInt32 index=0;
+ 150     for (; buttons != 0; index++, buttons &gt;&gt;= 1)
+ 151     {
+ 152         if (buttons &amp; 1)
+ 153         {
+ 154             switch (index)
+ 155             {
+ 156                 case 0:
+ 157                     type = kCGEventLeftMouseDragged;
+ 158                     break;
+ 159                 case 1:
+ 160                     type = kCGEventRightMouseDragged;
+ 161                     break;
+ 162                 default:
+ 163                     type = kCGEventOtherMouseDragged;
+ 164                     break;
+ 165             }
+ 166         }
+ 167     }
+ 168     CGEventRef newEvent = CGEventCreateMouseEvent(NULL, type, location, (CGMouseButton)index);
+ 169     CGEventPost(kCGHIDEventTap, newEvent);
+ 170     CGWarpMouseCursorPosition(location);
+ 171     CFRelease(newEvent);
+ 172 
+ 173 }
+ 174 
+ 175 - (CGPoint)getMousePosFlipped
+ 176 {
+ 177     CGPoint where = NSPointToCGPoint([NSEvent mouseLocation]);
+ 178     NSScreen * screen = [[NSScreen screens] objectAtIndex: 0];
+ 179     NSRect screenFrame = screen.frame;
+ 180     where.y = screenFrame.size.height - where.y;
+ 181     return where;
+ 182 }
+ 183 
+ 184 - (void)mousePress:(UInt32)buttons
+ 185 {
+ 186     //Add new pressed buttons
+ 187     self-&gt;mouseButtons = self-&gt;mouseButtons | buttons;
+ 188     PostGlassMouseEvent([self getMousePosFlipped], buttons, YES);
+ 189 }
+ 190 
+ 191 - (void)mouseRelease:(UInt32)buttons
+ 192 {
+ 193     PostGlassMouseEvent([self getMousePosFlipped], buttons, NO);
+ 194     //reset buttons
+ 195     self-&gt;mouseButtons = self-&gt;mouseButtons &amp; (~buttons);
+ 196 }
+ 197 
+ 198 @end
+ 199 
+ 200 /*
+ 201  * Class:     com_sun_glass_ui_mac_MacRobot
+ 202  * Method:    _init
+ 203  * Signature: ()J
+ 204  */
+ 205 JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_mac_MacRobot__1init
+ 206 (JNIEnv *env, jobject jrobot)
+ 207 {
+ 208     LOG("Java_com_sun_glass_ui_mac_MacRobot__1init");
+ 209 
+ 210     return ptr_to_jlong([[GlassRobot alloc] init]);
+ 211 }
+ 212 
+ 213 /*
+ 214  * Class:     com_sun_glass_ui_mac_MacRobot
+ 215  * Method:    _destroy
+ 216  * Signature: (J)V
+ 217  */
+ 218 JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot__1destroy
+ 219 (JNIEnv *env, jobject jThis, jlong ptr)
+ 220 {
+ 221     LOG("Java_com_sun_glass_ui_mac_MacRobot__1destroy");
+ 222 
+ 223     [(GlassRobot*)jlong_to_ptr(ptr) release];
+ 224 }
+ 225 
+ 226 /*
+ 227  * Class:     com_sun_glass_ui_mac_MacRobot
+ 228  * Method:    _keyPress
+ 229  * Signature: (I)V
+ 230  */
+ 231 JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot__1keyPress
+ 232 (JNIEnv *env, jobject jrobot, jint code)
+ 233 {
+ 234     LOG("Java_com_sun_glass_ui_mac_MacRobot__1keyPress");
+ 235 
+ 236     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 237     GLASS_POOL_ENTER
+ 238     {
+ 239         PostGlassKeyEvent(code, YES);
+ 240     }
+ 241     GLASS_POOL_EXIT;
+ 242 }
+ 243 
+ 244 /*
+ 245  * Class:     com_sun_glass_ui_mac_MacRobot
+ 246  * Method:    _keyRelease
+ 247  * Signature: (I)V
+ 248  */
+ 249 JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot__1keyRelease
+ 250 (JNIEnv *env, jobject jrobot, jint code)
+ 251 {
+ 252     LOG("Java_com_sun_glass_ui_mac_MacRobot__1keyRelease");
+ 253 
+ 254     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 255     GLASS_POOL_ENTER
+ 256     {
+ 257         PostGlassKeyEvent(code, NO);
+ 258     }
+ 259     GLASS_POOL_EXIT;
+ 260 }
+ 261 
+ 262 /*
+ 263  * Class:     com_sun_glass_ui_mac_MacRobot
+ 264  * Method:    _mouseMove
+ 265  * Signature: (JII)V
+ 266  */
+ 267 JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot__1mouseMove
+ 268 (JNIEnv *env, jobject jrobot, jlong ptr, jint x, jint y)
+ 269 {
+ 270     LOG("Java_com_sun_glass_ui_mac_MacRobot__1mouseMove");
+ 271 
+ 272     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 273     GLASS_POOL_ENTER
+ 274     {
+ 275         GlassRobot * robot = (GlassRobot*)jlong_to_ptr(ptr);
+ 276         [robot mouseMove:NSMakePoint((float)x, (float)y)];
+ 277     }
+ 278     GLASS_POOL_EXIT;
+ 279 }
+ 280 
+ 281 /*
+ 282  * Class:     com_sun_glass_ui_mac_MacRobot
+ 283  * Method:    _getMouseX
+ 284  * Signature: (J)I
+ 285  */
+ 286 JNIEXPORT jint JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getMouseX
+ 287 (JNIEnv *env, jobject jrobot, jlong ptr)
+ 288 {
+ 289     LOG("Java_com_sun_glass_ui_mac_MacRobot__1getMouseX");
+ 290 
+ 291     jint x = 0;
+ 292 
+ 293     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 294     GLASS_POOL_ENTER
+ 295     {
+ 296         GlassRobot * robot = (GlassRobot*)jlong_to_ptr(ptr);
+ 297         x = (jint)[robot getMousePosFlipped].x;
+ 298     }
+ 299     GLASS_POOL_EXIT;
+ 300 
+ 301     return x;
+ 302 }
+ 303 
+ 304 /*
+ 305  * Class:     com_sun_glass_ui_mac_MacRobot
+ 306  * Method:    _getMouseY
+ 307  * Signature: (J)I
+ 308  */
+ 309 JNIEXPORT jint JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getMouseY
+ 310 (JNIEnv *env, jobject jrobot, jlong ptr)
+ 311 {
+ 312     LOG("Java_com_sun_glass_ui_mac_MacRobot__1getMouseY");
+ 313 
+ 314     jint y = 0;
+ 315 
+ 316     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 317     GLASS_POOL_ENTER
+ 318     {
+ 319         GlassRobot * robot = (GlassRobot*)jlong_to_ptr(ptr);
+ 320         y = (jint)[robot getMousePosFlipped].y;
+ 321     }
+ 322     GLASS_POOL_EXIT;
+ 323 
+ 324     return y;
+ 325 }
+ 326 
+ 327 /*
+ 328  * Class:     com_sun_glass_ui_mac_MacRobot
+ 329  * Method:    _mousePress
+ 330  * Signature: (JI)V
+ 331  */
+ 332 JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot__1mousePress
+ 333 (JNIEnv *env, jobject jrobot, jlong ptr, jint buttons)
+ 334 {
+ 335     LOG("Java_com_sun_glass_ui_mac_MacRobot__1mousePress");
+ 336 
+ 337     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 338     GLASS_POOL_ENTER
+ 339     {
+ 340         GlassRobot * robot = (GlassRobot*)jlong_to_ptr(ptr);
+ 341         [robot mousePress:(UInt32)buttons];
+ 342     }
+ 343     GLASS_POOL_EXIT;
+ 344 }
+ 345 
+ 346 /*
+ 347  * Class:     com_sun_glass_ui_mac_MacRobot
+ 348  * Method:    _mouseRelease
+ 349  * Signature: (JI)V
+ 350  */
+ 351 JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot__1mouseRelease
+ 352 (JNIEnv *env, jobject jrobot, jlong ptr, jint buttons)
+ 353 {
+ 354     LOG("Java_com_sun_glass_ui_mac_MacRobot__1mouseRelease");
+ 355 
+ 356     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 357     GLASS_POOL_ENTER
+ 358     {
+ 359         GlassRobot * robot = (GlassRobot*)jlong_to_ptr(ptr);
+ 360         [robot mouseRelease:(UInt32)buttons];
+ 361     }
+ 362     GLASS_POOL_EXIT;
+ 363 }
+ 364 
+ 365 /*
+ 366  * Class:     com_sun_glass_ui_mac_MacRobot
+ 367  * Method:    _mouseWheel
+ 368  * Signature: (I)V
+ 369  */
+ 370 JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot__1mouseWheel
+ 371 (JNIEnv *env, jobject jrobot, jint wheelAmt)
+ 372 {
+ 373     LOG("Java_com_sun_glass_ui_mac_MacRobot__1mouseWheel");
+ 374 
+ 375     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 376     GLASS_POOL_ENTER
+ 377     {
+ 378         CGEventRef newEvent = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, (int32_t)wheelAmt);
+ 379         CGEventPost(kCGHIDEventTap, newEvent);
+ 380         CFRelease(newEvent);
+ 381     }
+ 382     GLASS_POOL_EXIT;
+ 383 }
+ 384 
+ 385 /*
+ 386  * Class:     com_sun_glass_ui_mac_MacRobot
+ 387  * Method:    _getPixelColor
+ 388  * Signature: (II)I
+ 389  */
+ 390 JNIEXPORT jint JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getPixelColor
+ 391 (JNIEnv *env, jobject jrobot, jint x, jint y)
+ 392 {
+ 393     LOG("Java_com_sun_glass_ui_mac_MacRobot__1getPixelColor");
+ 394 
+ 395     jint color = 0;
+ 396 
+ 397     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 398     GLASS_POOL_ENTER
+ 399     {
+ 400         CGRect bounds = CGRectMake((CGFloat)x, (CGFloat)y, 1.0f, 1.0f);
+ 401         CGImageRef screenImage = CGWindowListCreateImage(bounds, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+ 402         if (screenImage != NULL)
+ 403         {
+ 404             //DumpImage(screenImage);
+ 405             CGDataProviderRef provider = CGImageGetDataProvider(screenImage);
+ 406             if (provider != NULL)
+ 407             {
+ 408                 CFDataRef data = CGDataProviderCopyData(provider);
+ 409                 if (data != NULL)
+ 410                 {
+ 411                     jint *pixels = (jint*)CFDataGetBytePtr(data);
+ 412                     if (pixels != NULL)
+ 413                     {
+ 414                         color = *pixels;
+ 415                     }
+ 416                 }
+ 417                 CFRelease(data);
+ 418             }
+ 419             CGImageRelease(screenImage);
+ 420         }
+ 421     }
+ 422     GLASS_POOL_EXIT;
+ 423 
+ 424     return color;
+ 425 }
+ 426 
+ 427 /*
+ 428  * Class:     com_sun_glass_ui_mac_MacRobot
+<a name="1" id="anc1"></a><span class="changed"> 429  * Method:    _getScreenCapture</span>
+<span class="changed"> 430  * Signature: (IIIIZ)Lcom/sun/glass/ui/Pixels;</span>
+ 431  */
+<a name="2" id="anc2"></a><span class="changed"> 432 JNIEXPORT jobject JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture</span>
+<span class="changed"> 433 (JNIEnv *env, jobject jrobot, jint x, jint y, jint width, jint height, jboolean isHiDPI)</span>
+ 434 {
+<a name="3" id="anc3"></a><span class="changed"> 435     LOG("Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture");</span>
+ 436 
+ 437     jobject pixels = NULL;
+ 438 
+ 439     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+ 440     GLASS_POOL_ENTER
+ 441     {
+ 442         CGRect bounds = CGRectMake((CGFloat)x, (CGFloat)y, (CGFloat)width, (CGFloat)height);
+<a name="4" id="anc4"></a>
+ 443         CGImageRef screenImage = CGWindowListCreateImage(bounds, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+ 444         if (screenImage != NULL)
+ 445         {
+ 446             jint pixWidth, pixHeight;
+ 447 
+<a name="5" id="anc5"></a>
+
+
+
+
+ 448             if (isHiDPI) {
+ 449                 pixWidth = (jint)CGImageGetWidth(screenImage);
+ 450                 pixHeight = (jint)CGImageGetHeight(screenImage);
+ 451             } else {
+ 452                 pixWidth = width;
+ 453                 pixHeight = height;
+ 454             }
+ 455 
+ 456             jintArray pixelArray = (*env)-&gt;NewIntArray(env, (jsize)pixWidth*pixHeight);
+ 457             if (pixelArray)
+ 458             {
+ 459                 jint *javaPixels = (jint*)(*env)-&gt;GetIntArrayElements(env, pixelArray, 0);
+ 460                 if (javaPixels != NULL)
+ 461                 {
+ 462                     // create a graphics context around the Java int array
+ 463                     CGColorSpaceRef picColorSpace = CGColorSpaceCreateWithName(
+ 464                             kCGColorSpaceGenericRGB);
+ 465                     CGContextRef jPicContextRef = CGBitmapContextCreate(
+ 466                             javaPixels,
+ 467                             pixWidth, pixHeight,
+ 468                             8, pixWidth * sizeof(jint),
+ 469                             picColorSpace,
+ 470                             kCGBitmapByteOrder32Host |
+ 471                             kCGImageAlphaPremultipliedFirst);
+ 472 
+ 473                     CGColorSpaceRelease(picColorSpace);
+ 474 
+ 475                     // flip, scale, and color correct the screen image into the Java pixels
+ 476                     CGRect zeroBounds = { { 0, 0 }, { pixWidth, pixHeight } };
+ 477                     CGContextDrawImage(jPicContextRef, zeroBounds, screenImage);
+ 478                     CGContextFlush(jPicContextRef);
+ 479 
+<a name="6" id="anc6"></a><span class="changed"> 480                     // cleanup</span>
+<span class="changed"> 481                     CGContextRelease(jPicContextRef);</span>
+<span class="changed"> 482                     (*env)-&gt;ReleaseIntArrayElements(env, pixelArray, javaPixels, 0);</span>
+<span class="changed"> 483 </span>
+<span class="changed"> 484                     jclass applicationClass =</span>
+<span class="changed"> 485                         [GlassHelper ClassForName:"com.sun.glass.ui.Application" withEnv:env];</span>
+<span class="changed"> 486                     if (!applicationClass) return NULL;</span>
+<span class="changed"> 487 </span>
+<span class="changed"> 488                     jfloat scale = (*env)-&gt;CallStaticFloatMethod(env,</span>
+<span class="changed"> 489                             applicationClass,</span>
+<span class="changed"> 490                             javaIDs.Application.getScaleFactor, x, y, width, height);</span>
+<span class="changed"> 491                     if ((*env)-&gt;ExceptionCheck(env)) return NULL;</span>
+<span class="changed"> 492 </span>
+<span class="changed"> 493                     // create Pixels</span>
+<span class="changed"> 494                     pixels = (*env)-&gt;CallStaticObjectMethod(env, applicationClass,</span>
+<span class="changed"> 495                                                             javaIDs.Application.createPixels,</span>
+<span class="changed"> 496                                                             pixWidth, pixHeight,</span>
+<span class="changed"> 497                                                             pixelArray, scale, scale);</span>
+<span class="changed"> 498                     if ((*env)-&gt;ExceptionCheck(env)) return NULL;</span>
+ 499                 }
+ 500             }
+ 501 
+ 502             CGImageRelease(screenImage);
+ 503         }
+<a name="7" id="anc7"></a>
+ 504     }
+ 505     GLASS_POOL_EXIT;
+<a name="8" id="anc8"></a><span class="removed"> 506 </span>
+<span class="removed"> 507     return pixels;</span>
+ 508 }
+<a name="9" id="anc9"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="9" type="hidden" /></form></body></html>

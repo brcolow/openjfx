@@ -1,0 +1,520 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.monocle;
+  26 
+  27 import com.sun.glass.ui.Application;
+  28 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  29 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  30 import com.sun.glass.ui.Cursor;
+  31 import com.sun.glass.ui.Pixels;
+<a name="1" id="anc1"></a><span class="removed">  32 import com.sun.glass.ui.Robot;</span>
+  33 import com.sun.glass.ui.Screen;
+  34 import com.sun.glass.ui.Size;
+  35 import com.sun.glass.ui.Timer;
+  36 import com.sun.glass.ui.View;
+  37 import com.sun.glass.ui.Window;
+  38 import javafx.collections.SetChangeListener;
+<a name="2" id="anc2"></a>
+  39 
+  40 import java.io.File;
+<a name="3" id="anc3"></a><span class="removed">  41 import java.lang.reflect.Constructor;</span>
+  42 import java.nio.ByteBuffer;
+  43 import java.nio.IntBuffer;
+  44 import java.security.AccessController;
+  45 import java.security.PrivilegedAction;
+  46 
+  47 public final class MonocleApplication extends Application {
+  48 
+  49     private final NativePlatform platform =
+  50             NativePlatformFactory.getNativePlatform();
+  51     private final RunnableProcessor runnableProcessor = platform.getRunnableProcessor();
+  52 
+  53     /** Bit to indicate that a device has touch support */
+  54     private static final int DEVICE_TOUCH = 0;
+  55     /** Bit to indicate that a device has multitouch support */
+  56     private static final int DEVICE_MULTITOUCH = 1;
+  57     /** Bit to indicate that a device has relative motion pointer support */
+  58     private static final int DEVICE_POINTER = 2;
+  59     /** Bit to indicate that a device has arrow keys and a select key */
+  60     private static final int DEVICE_5WAY = 3;
+  61     /** Bit to indicate that a device has a full PC keyboard */
+  62     private static final int DEVICE_PC_KEYBOARD = 4;
+  63     /** Largest bit used in device capability bitmasks */
+  64     private static final int DEVICE_MAX = 4;
+  65     /** A running count of the numbers of devices with each device capability */
+  66     private int[] deviceFlags = new int[DEVICE_MAX + 1];
+  67     private Thread shutdownHookThread;
+  68     private Runnable renderEndNotifier = () -&gt; platform.getScreen().swapBuffers();
+  69 
+  70     MonocleApplication() {
+  71         for (InputDevice device : platform.getInputDeviceRegistry().getInputDevices()) {
+  72             updateDeviceFlags(device, true);
+  73         }
+  74         platform.getInputDeviceRegistry().getInputDevices().addListener(
+  75                 (SetChangeListener&lt;InputDevice&gt;) change -&gt; {
+  76                     if (change.wasAdded()) {
+  77                         InputDevice device = change.getElementAdded();
+  78                         updateDeviceFlags(device, true);
+  79                     } else if (change.wasRemoved()) {
+  80                         InputDevice device = change.getElementRemoved();
+  81                         updateDeviceFlags(device, false);
+  82                     }
+  83                 }
+  84         );
+  85     }
+  86 
+  87     private void updateDeviceFlags(InputDevice device, boolean added) {
+  88         int modifier = added ? 1 : -1;
+  89         if (device.isTouch()) {
+  90             deviceFlags[DEVICE_TOUCH] += modifier;
+  91         }
+  92         if (device.isMultiTouch()) {
+  93             deviceFlags[DEVICE_MULTITOUCH] += modifier;
+  94         }
+  95         if (device.isRelative()) {
+  96             deviceFlags[DEVICE_POINTER] += modifier;
+  97             if (deviceFlags[DEVICE_POINTER] &gt;= 1  &amp;&amp; added) {
+  98                 staticCursor_setVisible(true);
+  99             } else if (deviceFlags[DEVICE_POINTER] &lt; 1 &amp;&amp; !added) {
+ 100                 staticCursor_setVisible(false);
+ 101             }
+ 102         }
+ 103         if (device.isFullKeyboard()) {
+ 104             deviceFlags[DEVICE_PC_KEYBOARD] += modifier;
+ 105         }
+ 106         if (device.is5Way()) {
+ 107             deviceFlags[DEVICE_5WAY] += modifier;
+ 108         }
+ 109     }
+ 110 
+ 111     @Override
+ 112     protected void runLoop(Runnable launchable) {
+ 113         runnableProcessor.invokeLater(launchable);
+ 114         long stackSize = AccessController.doPrivileged(
+ 115                 (PrivilegedAction&lt;Long&gt;)
+ 116                         () -&gt; Long.getLong("monocle.stackSize", 0));
+ 117         Thread t = new Thread(
+ 118                 new ThreadGroup("Event"),
+ 119                 runnableProcessor,
+ 120                 "Event Thread",
+ 121                 stackSize);
+ 122         setEventThread(t);
+ 123         t.start();
+ 124         shutdownHookThread = new Thread("Monocle shutdown hook") {
+ 125             @Override public void run() {
+ 126             platform.shutdown();
+ 127             }
+ 128         };
+ 129         Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+ 130     }
+ 131 
+ 132     @Override
+ 133     protected void _invokeAndWait(Runnable runnable) {
+ 134         runnableProcessor.invokeAndWait(runnable);
+ 135     }
+ 136 
+ 137     @Override
+ 138     protected void _invokeLater(Runnable runnable) {
+ 139         runnableProcessor.invokeLater(runnable);
+ 140     }
+ 141 
+ 142     @Override
+ 143     protected Object _enterNestedEventLoop() {
+ 144         return runnableProcessor.enterNestedEventLoop();
+ 145     }
+ 146 
+ 147     @Override
+ 148     protected void _leaveNestedEventLoop(Object retValue) {
+ 149         runnableProcessor.leaveNestedEventLoop(retValue);
+ 150     }
+ 151 
+ 152     @Override
+ 153     public Window createWindow(Window owner, Screen screen, int styleMask) {
+ 154         return new MonocleWindow(owner, screen, styleMask);
+ 155     }
+ 156 
+ 157     @Override
+ 158     public Window createWindow(long parent) {
+ 159         return new MonocleWindow(parent);
+ 160     }
+ 161 
+ 162     @Override
+ 163     public View createView() {
+ 164         return new MonocleView();
+ 165     }
+ 166 
+ 167     @Override
+ 168     public Cursor createCursor(int type) {
+ 169         return new MonocleCursor(type);
+ 170     }
+ 171 
+ 172     @Override
+ 173     public Cursor createCursor(int x, int y, Pixels pixels) {
+ 174         return new MonocleCursor(x, y, pixels);
+ 175     }
+ 176 
+ 177     @Override
+ 178     protected void staticCursor_setVisible(boolean visible) {
+ 179         NativeCursor cursor = NativePlatformFactory.getNativePlatform().getCursor();
+ 180         cursor.setVisibility(deviceFlags[DEVICE_POINTER] &gt;= 1 ? visible : false);
+ 181     }
+ 182 
+ 183     @Override
+ 184     protected Size staticCursor_getBestSize(int width, int height) {
+ 185         NativeCursor cursor = NativePlatformFactory.getNativePlatform().getCursor();
+ 186         return cursor.getBestSize();
+ 187     }
+ 188 
+ 189     @Override
+ 190     public Pixels createPixels(int width, int height, ByteBuffer data) {
+ 191         return new MonoclePixels(width, height, data);
+ 192     }
+ 193 
+ 194     @Override
+ 195     public Pixels createPixels(int width, int height, IntBuffer data) {
+ 196         return new MonoclePixels(width, height, data);
+ 197     }
+ 198 
+ 199     @Override
+ 200     public Pixels createPixels(int width, int height, IntBuffer data,
+ 201                                float scalex, float scaley)
+ 202     {
+ 203         return new MonoclePixels(width, height, data, scalex, scaley);
+ 204     }
+ 205 
+ 206     @Override
+ 207     protected int staticPixels_getNativeFormat() {
+ 208         return platform.getScreen().getNativeFormat();
+ 209     }
+ 210 
+ 211     @Override
+ 212     public Robot createRobot() {
+ 213         return new MonocleRobot();
+ 214     }
+ 215 
+ 216     @Override
+ 217     protected double staticScreen_getVideoRefreshPeriod() {
+ 218         return 0.0;
+ 219     }
+ 220 
+ 221     @Override
+ 222     protected Screen[] staticScreen_getScreens() {
+ 223         NativeScreen ns = platform.getScreen();
+ 224         Screen screen = new Screen(1l, // dummy native pointer;
+ 225                                    ns.getDepth(),
+ 226                                    0, 0, ns.getWidth(), ns.getHeight(),
+ 227                                    0, 0, ns.getWidth(), ns.getHeight(),
+ 228                                    0, 0, ns.getWidth(), ns.getHeight(),
+ 229                                    ns.getDPI(), ns.getDPI(),
+ 230                                    ns.getScale(), ns.getScale(),
+ 231                                    ns.getScale(), ns.getScale());
+ 232         // Move the cursor to the middle of the screen
+ 233         MouseState mouseState = new MouseState();
+ 234         mouseState.setX(ns.getWidth() / 2);
+ 235         mouseState.setY(ns.getHeight() / 2);
+ 236         MouseInput.getInstance().setState(mouseState, false);
+ 237         return new Screen[] { screen };
+ 238     }
+ 239 
+ 240     @Override
+ 241     public Timer createTimer(Runnable runnable) {
+ 242         return new MonocleTimer(runnable);
+ 243     }
+ 244 
+ 245     @Override
+ 246     protected int staticTimer_getMinPeriod() {
+ 247         return MonocleTimer.getMinPeriod_impl();
+ 248     }
+ 249 
+ 250     @Override
+ 251     protected int staticTimer_getMaxPeriod() {
+ 252         return MonocleTimer.getMaxPeriod_impl();
+ 253     }
+ 254 
+ 255     public boolean hasWindowManager() {
+ 256         return false;
+ 257     }
+ 258 
+ 259     @Override
+ 260     protected FileChooserResult staticCommonDialogs_showFileChooser(
+ 261             Window owner, String folder, String filename, String title,
+ 262             int type, boolean multipleMode,
+ 263             ExtensionFilter[] extensionFilters,
+ 264             int defaultFilterIndex) {
+ 265         throw new UnsupportedOperationException();
+ 266     }
+ 267 
+ 268     @Override
+ 269     protected File staticCommonDialogs_showFolderChooser(Window owner,
+ 270                                                          String folder,
+ 271                                                          String title) {
+ 272         Thread.dumpStack();
+ 273         throw new UnsupportedOperationException();
+ 274     }
+ 275 
+ 276     @Override
+ 277     protected long staticView_getMultiClickTime() {
+ 278         return MonocleView._getMultiClickTime();
+ 279     }
+ 280 
+ 281     @Override
+ 282     protected int staticView_getMultiClickMaxX() {
+ 283         return MonocleView._getMultiClickMaxX();
+ 284     }
+ 285 
+ 286     @Override
+ 287     protected int staticView_getMultiClickMaxY() {
+ 288         return MonocleView._getMultiClickMaxY();
+ 289     }
+ 290 
+ 291     @Override
+ 292     protected boolean _supportsTransparentWindows() {
+ 293         return true;
+ 294     }
+ 295 
+ 296     @Override
+ 297     protected boolean _supportsUnifiedWindows() {
+ 298         return false;
+ 299     }
+ 300 
+ 301     @Override
+ 302     public boolean hasTwoLevelFocus() {
+ 303         return deviceFlags[DEVICE_PC_KEYBOARD] == 0 &amp;&amp; deviceFlags[DEVICE_5WAY] &gt; 0;
+ 304     }
+ 305 
+ 306     @Override
+ 307     public boolean hasVirtualKeyboard() {
+ 308         return deviceFlags[DEVICE_PC_KEYBOARD] == 0 &amp;&amp; deviceFlags[DEVICE_TOUCH] &gt; 0;
+ 309     }
+ 310 
+ 311     @Override
+ 312     public boolean hasTouch() {
+ 313         return deviceFlags[DEVICE_TOUCH] &gt; 0;
+ 314     }
+ 315 
+ 316     @Override
+ 317     public boolean hasMultiTouch() {
+ 318         return deviceFlags[DEVICE_MULTITOUCH] &gt; 0;
+ 319     }
+ 320 
+ 321     @Override
+ 322     public boolean hasPointer() {
+ 323         return deviceFlags[DEVICE_POINTER] &gt; 0;
+ 324     }
+ 325 
+ 326     @Override
+ 327     public void notifyRenderingFinished() {
+ 328         invokeLater(renderEndNotifier);
+ 329     }
+ 330 
+ 331     @Override
+ 332     protected void finishTerminating() {
+ 333         //if this method is getting called, we don't need the shutdown hook
+ 334         Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
+ 335         setEventThread(null);
+ 336         platform.shutdown();
+ 337         super.finishTerminating();
+ 338     }
+ 339 
+ 340     void enterDnDEventLoop() {
+ 341         _enterNestedEventLoop();
+ 342     }
+ 343 
+ 344     void leaveDndEventLoop() {
+ 345         _leaveNestedEventLoop(null);
+ 346     }
+ 347 
+ 348     @Override
+ 349     protected int _getKeyCodeForChar(char c) {
+ 350         return KeyInput.getInstance().getKeyCodeForChar(c);
+ 351     }
+ 352 
+ 353 }
+<a name="4" id="anc4"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="4" type="hidden" /></form></body></html>

@@ -1,0 +1,464 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 
+  26 package com.sun.glass.ui.ios;
+  27 
+<a name="1" id="anc1"></a><span class="changed">  28 import com.sun.glass.ui.Application;</span>
+  29 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  30 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+<a name="2" id="anc2"></a><span class="new">  31 import com.sun.glass.ui.Cursor;</span>
+<span class="new">  32 import com.sun.glass.ui.Pixels;</span>
+<span class="new">  33 import com.sun.glass.ui.Screen;</span>
+<span class="new">  34 import com.sun.glass.ui.Size;</span>
+<span class="new">  35 import com.sun.glass.ui.Timer;</span>
+<span class="new">  36 import com.sun.glass.ui.View;</span>
+<span class="new">  37 import com.sun.glass.ui.Window;</span>
+<span class="new">  38 </span>
+  39 import java.io.File;
+  40 import java.nio.ByteBuffer;
+  41 import java.nio.IntBuffer;
+  42 import java.security.AccessController;
+  43 import java.security.PrivilegedAction;
+<a name="3" id="anc3"></a><span class="changed">  44 </span>
+<span class="changed">  45 import javafx.scene.robot.Robot;</span>
+  46 
+  47 public final class IosApplication extends Application {
+  48 
+  49     private static native void _initIDs(); // init IDs for java callbacks from native
+  50     static {
+  51         AccessController.doPrivileged((PrivilegedAction&lt;Void&gt;) () -&gt; {
+  52             Application.loadNativeLibrary();
+  53             return null;
+  54         });
+  55         _initIDs();
+  56     }
+  57 
+  58     /**
+  59      * @inheritDoc
+  60      */
+  61     @Override
+  62     protected void runLoop(final Runnable launchable) {
+  63         ClassLoader ccl = IosApplication.class.getClassLoader();
+  64         _runLoop(launchable, ccl);
+  65     }
+  66     private native void _runLoop(Runnable launchable, ClassLoader contextClassLoader);
+  67 
+  68     /**
+  69      * @inheritDoc
+  70      */
+  71     @Override
+  72     protected void finishTerminating() {
+  73         setEventThread(null);
+  74         super.finishTerminating();
+  75     }
+  76 
+  77     // Called from the native code
+  78     private void setEventThread() {
+  79         setEventThread(Thread.currentThread());
+  80     }
+  81 
+  82     /**
+  83      * @inheritDoc
+  84      */
+  85     @Override
+  86     public Window createWindow(Window owner, Screen screen, int styleMask) {
+  87         return new IosWindow(owner, screen, styleMask);
+  88     }
+  89 
+  90     /**
+  91      * @inheritDoc
+  92      */
+  93     @Override
+  94     public Window createWindow(long parent) {
+  95         return new IosWindow(parent);
+  96     }
+  97 
+  98     /**
+  99      * @inheritDoc
+ 100      */
+ 101     @Override
+ 102     public View createView() {
+ 103         return new IosView();
+ 104     }
+ 105 
+ 106     /**
+ 107      * @inheritDoc
+ 108      */
+ 109     @Override
+ 110     public Cursor createCursor(int type) {
+ 111         return new IosCursor(type);
+ 112     }
+ 113 
+ 114     /**
+ 115      * @inheritDoc
+ 116      * On iOS, there is no cursor.
+ 117      */
+ 118     @Override
+ 119     public Cursor createCursor(int x, int y, Pixels pixels) {
+ 120         return new IosCursor(x, y, pixels);
+ 121     }
+ 122 
+ 123     @Override
+ 124     protected void staticCursor_setVisible(boolean visible) { }
+ 125 
+ 126     @Override
+ 127     protected Size staticCursor_getBestSize(int width, int height) {
+ 128         return null;
+ 129     }
+ 130 
+ 131     /**
+ 132      * @inheritDoc
+ 133      */
+ 134     @Override
+ 135     public Pixels createPixels(int width, int height, ByteBuffer data) {
+ 136         return new IosPixels(width, height, data);
+ 137     }
+ 138 
+ 139     /**
+ 140      * @inheritDoc
+ 141      */
+ 142     @Override
+ 143     public Pixels createPixels(int width, int height, IntBuffer data) {
+ 144         return new IosPixels(width, height, data);
+ 145     }
+ 146 
+ 147     @Override
+ 148     public Pixels createPixels(int width, int height, IntBuffer data, float scalex, float scaley) {
+ 149         return new IosPixels(width, height, data, scalex, scaley);
+ 150     }
+ 151 
+ 152     @Override
+ 153     protected int staticPixels_getNativeFormat() {
+ 154         return 0;
+ 155     }
+ 156 
+ 157     /**
+ 158      * @inheritDoc
+ 159      */
+ 160     @Override
+ 161     public Robot createRobot() {
+ 162         return new IosRobot();
+ 163     }
+ 164 
+ 165     @Override
+ 166     protected native double staticScreen_getVideoRefreshPeriod();
+ 167 
+ 168     @Override
+ 169     protected native Screen[] staticScreen_getScreens();
+ 170 
+ 171     /**
+ 172      * @inheritDoc
+ 173      */
+ 174     @Override
+ 175     public Timer createTimer(Runnable runnable) {
+ 176         return new IosTimer(runnable);
+ 177     }
+ 178 
+ 179     @Override
+ 180     protected int staticTimer_getMinPeriod() {
+ 181         return IosTimer.getMinPeriod_impl();
+ 182     }
+ 183 
+ 184     @Override
+ 185     protected int staticTimer_getMaxPeriod() {
+ 186         return IosTimer.getMaxPeriod_impl();
+ 187     }
+ 188 
+ 189     @Override
+ 190     protected FileChooserResult staticCommonDialogs_showFileChooser(Window owner, String folder, String filename, String title, int type, boolean multipleMode, ExtensionFilter[] extensionFilters, int defaultFilterIndex) {
+ 191         return new FileChooserResult();
+ 192     }
+ 193 
+ 194     @Override
+ 195     protected File staticCommonDialogs_showFolderChooser(Window owner, String folder, String title) {
+ 196         return null;
+ 197     }
+ 198 
+ 199     private native Object _enterNestedEventLoopImpl();
+ 200     private native void _leaveNestedEventLoopImpl();
+ 201 
+ 202     @Override
+ 203     protected Object _enterNestedEventLoop() {
+ 204         return _enterNestedEventLoopImpl();
+ 205     }
+ 206 
+ 207     @Override
+ 208     protected void _leaveNestedEventLoop(Object retValue) {
+ 209         _leaveNestedEventLoopImpl();
+ 210     }
+ 211 
+ 212     @Override
+ 213     protected long staticView_getMultiClickTime() {
+ 214         return IosView._getMultiClickTime();
+ 215     }
+ 216 
+ 217     @Override
+ 218     protected int staticView_getMultiClickMaxX() {
+ 219         return IosView._getMultiClickMaxX();
+ 220     }
+ 221 
+ 222     @Override
+ 223     protected int staticView_getMultiClickMaxY() {
+ 224         return IosView._getMultiClickMaxY();
+ 225     }
+ 226 
+ 227     @Override
+ 228     native protected void _invokeAndWait(Runnable runnable);
+ 229 
+ 230     @Override
+ 231     native protected void _invokeLater(Runnable runnable);
+ 232 
+ 233     @Override
+ 234     protected boolean _supportsTransparentWindows() {
+ 235         return true;
+ 236     }
+ 237 
+ 238     @Override protected boolean _supportsUnifiedWindows() {
+ 239         return false;
+ 240     }
+ 241 
+ 242     /**
+ 243      * Hides / Shows iOS status bar.
+ 244      * @param hidden
+ 245      */
+ 246     public native static void _setStatusBarHidden(boolean hidden);
+ 247 
+ 248     /**
+ 249      * Hides / Shows iOS status bar, possibly animating transition.
+ 250      * @param hidden
+ 251      * @param animation - 0 none, 1 fade, 2 slide
+ 252      */
+ 253     public native static void _setStatusBarHiddenWithAnimation(boolean hidden, int animation);
+ 254 
+ 255     /**
+ 256      * Adjust status bar orientation with animation. See iOS UIApplication developers
+ 257      * documentation for details.
+ 258      * @param interfaceOrientation
+ 259      * @param animated
+ 260      */
+ 261     public native static void _setStatusBarOrientationAnimated(int interfaceOrientation, boolean animated);
+ 262 
+ 263     /**
+ 264      * See iOS developers documentation. (UIApplication).
+ 265      * @param statusBarStyle
+ 266      * @param animated
+ 267      */
+ 268     public native static void _setStatusBarStyleAnimated(int statusBarStyle, boolean animated);
+ 269 
+ 270     /**
+ 271      * Status bar visibility getter.
+ 272      * @return true if hidden
+ 273      */
+ 274     public native static boolean _getStatusBarHidden();
+ 275 
+ 276     /**
+ 277      * See iOS developers documentation.
+ 278      */
+ 279     public native static int _getStatusBarStyle();
+ 280 
+ 281     /**
+ 282      * See iOS developers documentation.
+ 283      */
+ 284     public native static int _getStatusBarOrientation();
+ 285 
+ 286     @Override
+ 287     public boolean hasTouch() {
+ 288         return true;
+ 289     }
+ 290 
+ 291     @Override
+ 292     public boolean hasMultiTouch() {
+ 293         return true;
+ 294     }
+ 295 
+ 296     @Override
+ 297     protected native int _getKeyCodeForChar(char c);
+ 298 }
+<a name="4" id="anc4"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="4" type="hidden" /></form></body></html>

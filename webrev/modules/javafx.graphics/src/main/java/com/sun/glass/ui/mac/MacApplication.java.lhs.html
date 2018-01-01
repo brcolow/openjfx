@@ -1,0 +1,513 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.mac;
+  26 
+<a name="1" id="anc1"></a><span class="changed">  27 import com.sun.glass.ui.*;</span>
+
+  28 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  29 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  30 import com.sun.glass.events.KeyEvent;
+<a name="2" id="anc2"></a>
+
+
+
+
+
+
+
+
+
+
+  31 
+  32 import java.io.File;
+  33 import java.nio.ByteBuffer;
+  34 import java.nio.IntBuffer;
+  35 
+  36 import java.security.AccessController;
+  37 import java.security.PrivilegedAction;
+<a name="3" id="anc3"></a>
+
+  38 
+  39 final class MacApplication extends Application implements InvokeLaterDispatcher.InvokeLaterSubmitter {
+  40 
+  41     private native static void _initIDs(boolean disableSyncRendering);
+  42     static {
+  43         AccessController.doPrivileged((PrivilegedAction&lt;Void&gt;) () -&gt; {
+  44             Application.loadNativeLibrary();
+  45             return null;
+  46         });
+  47         boolean disableSyncRendering = AccessController
+  48                 .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt;
+  49                         Boolean.getBoolean("glass.disableSyncRendering"));
+  50         _initIDs(disableSyncRendering);
+  51     }
+  52 
+  53     native static int _getMacKey(int code);
+  54 
+  55     private boolean isTaskbarApplication = false;
+  56     private final InvokeLaterDispatcher invokeLaterDispatcher;
+  57 
+  58     MacApplication() {
+  59         // Embedded in SWT, with shared event thread
+  60         boolean isEventThread = AccessController
+  61                 .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("javafx.embed.isEventThread"));
+  62         if (!isEventThread) {
+  63             invokeLaterDispatcher = new InvokeLaterDispatcher(this);
+  64             invokeLaterDispatcher.start();
+  65         } else {
+  66             invokeLaterDispatcher = null;
+  67         }
+  68     }
+  69 
+  70     private Menu appleMenu;
+  71 
+  72     native void _runLoop(ClassLoader classLoader, Runnable launchable,
+  73                          boolean isTaskbarApplication);
+  74     @Override
+  75     protected void runLoop(final Runnable launchable) {
+  76         isTaskbarApplication =
+  77             AccessController.doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; {
+  78                 String taskbarAppProp = System.getProperty("glass.taskbarApplication");
+  79                 return  !"false".equalsIgnoreCase(taskbarAppProp);
+  80             });
+  81 
+  82         ClassLoader classLoader = MacApplication.class.getClassLoader();
+  83         _runLoop(classLoader, launchable, isTaskbarApplication);
+  84     }
+  85 
+  86     native private void _finishTerminating();
+  87     @Override
+  88     protected void finishTerminating() {
+  89         _finishTerminating();
+  90 
+  91         super.finishTerminating();
+  92     }
+  93 
+  94     private void notifyApplicationDidTerminate() {
+  95         setEventThread(null);
+  96     }
+  97 
+  98     // Called from the native code
+  99     private void setEventThread() {
+ 100         setEventThread(Thread.currentThread());
+ 101     }
+ 102 
+ 103     native private Object _enterNestedEventLoopImpl();
+ 104     @Override protected Object _enterNestedEventLoop() {
+ 105         if (invokeLaterDispatcher != null) {
+ 106             invokeLaterDispatcher.notifyEnteringNestedEventLoop();
+ 107         }
+ 108         try {
+ 109             return _enterNestedEventLoopImpl();
+ 110         } finally {
+ 111             if (invokeLaterDispatcher != null) {
+ 112                 invokeLaterDispatcher.notifyLeftNestedEventLoop();
+ 113             }
+ 114         }
+ 115     }
+ 116 
+ 117     native private void _leaveNestedEventLoopImpl(Object retValue);
+ 118     @Override protected void _leaveNestedEventLoop(Object retValue) {
+ 119         if (invokeLaterDispatcher != null) {
+ 120             invokeLaterDispatcher.notifyLeavingNestedEventLoop();
+ 121         }
+ 122         _leaveNestedEventLoopImpl(retValue);
+ 123     }
+ 124 
+ 125     native private void _hide();
+ 126     native private void _hideOtherApplications();
+ 127     native private void _unhideAllApplications();
+ 128 
+ 129     public void installAppleMenu(MenuBar menubar) {
+ 130         this.appleMenu = createMenu("Apple");
+ 131 
+ 132         MenuItem hideMenu = createMenuItem("Hide " + getName(), new MenuItem.Callback() {
+ 133             @Override public void action() {
+ 134                 MacApplication.this._hide();
+ 135             }
+ 136             @Override public void validate() {
+ 137             }
+ 138         }, 'h', KeyEvent.MODIFIER_COMMAND);
+ 139         this.appleMenu.add(hideMenu);
+ 140 
+ 141         MenuItem hideOthersMenu = createMenuItem("Hide Others", new MenuItem.Callback() {
+ 142             @Override public void action() {
+ 143                 MacApplication.this._hideOtherApplications();
+ 144             }
+ 145             @Override public void validate() {
+ 146             }
+ 147         }, 'h', KeyEvent.MODIFIER_COMMAND | KeyEvent.MODIFIER_ALT);
+ 148         this.appleMenu.add(hideOthersMenu);
+ 149 
+ 150         MenuItem unhideAllMenu = createMenuItem("Show All", new MenuItem.Callback() {
+ 151             @Override public void action() {
+ 152                 MacApplication.this._unhideAllApplications();
+ 153             }
+ 154             @Override public void validate() {
+ 155             }
+ 156         });
+ 157         this.appleMenu.add(unhideAllMenu);
+ 158 
+ 159         this.appleMenu.add(MenuItem.Separator);
+ 160 
+ 161         MenuItem quitMenu = createMenuItem("Quit " + getName(), new MenuItem.Callback() {
+ 162             @Override public void action() {
+ 163                 Application.EventHandler eh = getEventHandler();
+ 164                 if (eh != null) {
+ 165                     eh.handleQuitAction(Application.GetApplication(), System.nanoTime());
+ 166                 }
+ 167             }
+ 168             @Override public void validate() {
+ 169             }
+ 170         }, 'q', KeyEvent.MODIFIER_COMMAND);
+ 171         this.appleMenu.add(quitMenu);
+ 172 
+ 173         menubar.add(this.appleMenu);
+ 174     }
+ 175 
+ 176     public Menu getAppleMenu() {
+ 177         return this.appleMenu;
+ 178     }
+ 179 
+ 180     @Override public void installDefaultMenus(MenuBar menubar) {
+ 181         installAppleMenu(menubar);
+ 182     }
+ 183 
+ 184 
+ 185     // FACTORY METHODS
+ 186 
+ 187     @Override public Window createWindow(Window owner, Screen screen, int styleMask) {
+ 188         return new MacWindow(owner, screen, styleMask);
+ 189     }
+ 190 
+ 191     final static long BROWSER_PARENT_ID = -1L;
+ 192     @Override public Window createWindow(long parent) {
+ 193         Window window = new MacWindow(parent);
+ 194         if (parent == BROWSER_PARENT_ID) {
+ 195             // Special case: a Mac embedded window, which is a parent to other child Windows.
+ 196             // Needs implicit view, with a layer that will be provided to the plugin
+ 197             window.setView(createView());
+ 198         }
+ 199         return window;
+ 200     }
+ 201 
+ 202     @Override public View createView() {
+ 203         return new MacView();
+ 204     }
+ 205 
+ 206     @Override public Cursor createCursor(int type) {
+ 207         return new MacCursor(type);
+ 208     }
+ 209 
+ 210     @Override public Cursor createCursor(int x, int y, Pixels pixels) {
+ 211         return new MacCursor(x, y, pixels);
+ 212     }
+ 213 
+ 214     @Override protected void staticCursor_setVisible(boolean visible) {
+ 215         MacCursor.setVisible_impl(visible);
+ 216     }
+ 217 
+ 218     @Override protected Size staticCursor_getBestSize(int width, int height) {
+ 219         return MacCursor.getBestSize_impl(width, height);
+ 220     }
+ 221 
+ 222     @Override public Pixels createPixels(int width, int height, ByteBuffer data) {
+ 223         return new MacPixels(width, height, data);
+ 224     }
+ 225 
+ 226     @Override public Pixels createPixels(int width, int height, IntBuffer data) {
+ 227         return new MacPixels(width, height, data);
+ 228     }
+ 229 
+ 230     @Override
+ 231     public Pixels createPixels(int width, int height, IntBuffer data, float scalex, float scaley) {
+ 232         return new MacPixels(width, height, data, scalex, scaley);
+ 233     }
+ 234 
+ 235     @Override protected int staticPixels_getNativeFormat() {
+ 236         return MacPixels.getNativeFormat_impl();
+ 237     }
+ 238 
+ 239     @Override public Robot createRobot() {
+ 240         return new MacRobot();
+ 241     }
+ 242 
+ 243     @Override native protected double staticScreen_getVideoRefreshPeriod();
+ 244     @Override native protected Screen[] staticScreen_getScreens();
+ 245 
+ 246     @Override public Timer createTimer(Runnable runnable) {
+ 247         return new MacTimer(runnable);
+ 248     }
+ 249 
+ 250     @Override protected int staticTimer_getMinPeriod() {
+ 251         return MacTimer.getMinPeriod_impl();
+ 252     }
+ 253 
+ 254     @Override protected int staticTimer_getMaxPeriod() {
+ 255         return MacTimer.getMaxPeriod_impl();
+ 256     }
+ 257 
+ 258     @Override public Accessible createAccessible() {
+ 259         return new MacAccessible();
+ 260     }
+ 261 
+ 262     @Override protected FileChooserResult staticCommonDialogs_showFileChooser(Window owner, String folder, String filename, String title, int type,
+ 263                                                      boolean multipleMode, ExtensionFilter[] extensionFilters, int defaultFilterIndex) {
+ 264         return MacCommonDialogs.showFileChooser_impl(owner, folder, filename,
+ 265                 title, type, multipleMode, extensionFilters, defaultFilterIndex);
+ 266     }
+ 267 
+ 268     @Override protected File staticCommonDialogs_showFolderChooser(Window owner, String folder, String title) {
+ 269         return MacCommonDialogs.showFolderChooser_impl(owner, folder, title);
+ 270     }
+ 271 
+ 272     @Override protected long staticView_getMultiClickTime() {
+ 273         return MacView.getMultiClickTime_impl();
+ 274     }
+ 275 
+ 276     @Override protected int staticView_getMultiClickMaxX() {
+ 277         return MacView.getMultiClickMaxX_impl();
+ 278     }
+ 279 
+ 280     @Override protected int staticView_getMultiClickMaxY() {
+ 281         return MacView.getMultiClickMaxY_impl();
+ 282     }
+ 283 
+ 284     @Override native protected void _invokeAndWait(Runnable runnable);
+ 285 
+ 286     private native void _submitForLaterInvocation(Runnable r);
+ 287     // InvokeLaterDispatcher.InvokeLaterSubmitter
+ 288     @Override public void submitForLaterInvocation(Runnable r) {
+ 289         _submitForLaterInvocation(r);
+ 290     }
+ 291 
+ 292     @Override protected void _invokeLater(Runnable runnable) {
+ 293         if (invokeLaterDispatcher != null) {
+ 294             invokeLaterDispatcher.invokeLater(runnable);
+ 295         } else {
+ 296             submitForLaterInvocation(runnable);
+ 297         }
+ 298     }
+ 299 
+ 300     @Override
+ 301     protected boolean _supportsInputMethods() {
+ 302         return true;
+ 303     }
+ 304 
+ 305     @Override
+ 306     protected boolean _supportsTransparentWindows() {
+ 307         return true;
+ 308     }
+ 309 
+ 310     @Override protected boolean _supportsUnifiedWindows() {
+ 311         return true;
+ 312     }
+ 313 
+ 314     @Override native protected boolean _supportsSystemMenu();
+ 315 
+ 316     native protected String _getRemoteLayerServerName();
+ 317     public String getRemoteLayerServerName() {
+ 318         return _getRemoteLayerServerName();
+ 319     }
+ 320 
+ 321     private native String _getDataDirectory();
+ 322     public String getDataDirectory() {
+ 323         checkEventThread();
+ 324         String baseDirectory = _getDataDirectory();
+ 325         if (baseDirectory == null || baseDirectory.length() == 0) {
+ 326             return super.getDataDirectory();
+ 327         }
+ 328         return baseDirectory + File.separator + name + File.separator;
+ 329     }
+ 330 
+ 331     @Override
+ 332     protected native int _getKeyCodeForChar(char c);
+ 333 }
+<a name="4" id="anc4"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="4" type="hidden" /></form></body></html>

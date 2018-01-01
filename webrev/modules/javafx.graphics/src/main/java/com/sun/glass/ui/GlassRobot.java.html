@@ -1,0 +1,255 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>New modules/javafx.graphics/src/main/java/com/sun/glass/ui/GlassRobot.java</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui;
+  26 
+  27 import java.lang.annotation.Native;
+  28 import java.nio.ByteBuffer;
+  29 import java.nio.IntBuffer;
+  30 
+  31 import javafx.scene.image.PixelWriter;
+  32 import javafx.scene.image.WritableImage;
+  33 import javafx.scene.input.MouseButton;
+  34 import javafx.scene.paint.Color;
+  35 
+  36 import com.sun.javafx.image.PixelUtils;
+  37 
+  38 public class GlassRobot {
+  39 
+  40     @Native public static final int MOUSE_LEFT_BTN    = 1 &lt;&lt; 0;
+  41     @Native public static final int MOUSE_RIGHT_BTN   = 1 &lt;&lt; 1;
+  42     @Native public static final int MOUSE_MIDDLE_BTN  = 1 &lt;&lt; 2;
+  43 
+  44     public static int convertToRobotMouseButton(MouseButton button) {
+  45         switch (button) {
+  46             case PRIMARY: return MOUSE_LEFT_BTN;
+  47             case SECONDARY: return MOUSE_RIGHT_BTN;
+  48             case MIDDLE: return MOUSE_MIDDLE_BTN;
+  49             default: throw new IllegalArgumentException("MouseButton: " + button + " not supported by Robot");
+  50         }
+  51     }
+  52 
+  53     public static int convertToRobotMouseButton(MouseButton[] buttons) {
+  54         int ret = 0;
+  55         for (MouseButton button : buttons) {
+  56             switch (button) {
+  57                 case PRIMARY: ret &amp;= MOUSE_LEFT_BTN; break;
+  58                 case SECONDARY: ret &amp;= MOUSE_RIGHT_BTN; break;
+  59                 case MIDDLE: ret &amp;= MOUSE_MIDDLE_BTN; break;
+  60                 default: throw new IllegalArgumentException("MouseButton: " + button + " not supported by Robot");
+  61             }
+  62         }
+  63         return ret;
+  64     }
+  65 
+  66     public static Color convertFromIntArgb(int color) {
+  67         int alpha = (color &gt;&gt; 24) &amp; 0xFF;
+  68         int red   = (color &gt;&gt; 16) &amp; 0xFF;
+  69         int green = (color &gt;&gt;  8) &amp; 0xFF;
+  70         int blue  =  color        &amp; 0xFF;
+  71         return new Color(red / 255d, green / 255d, blue / 255d, alpha / 255d);
+  72     }
+  73 
+  74     public static WritableImage convertFromPixels(Pixels pixels) {
+  75         int width = pixels.getWidth();
+  76         int height = pixels.getHeight();
+  77         WritableImage image = new WritableImage(width, height);
+  78 
+  79         int bytesPerComponent = pixels.getBytesPerComponent();
+  80         if (bytesPerComponent == 4) {
+  81             IntBuffer intBuffer = (IntBuffer) pixels.getPixels();
+  82             writeIntBufferToImage(intBuffer, image);
+  83         }
+  84         else if (bytesPerComponent == 1) {
+  85             ByteBuffer byteBuffer = (ByteBuffer) pixels.getPixels();
+  86             writeByteBufferToImage(byteBuffer, image);
+  87         }
+  88 
+  89         return image;
+  90     }
+  91 
+  92     private static void writeIntBufferToImage(IntBuffer intBuffer, WritableImage image) {
+  93         PixelWriter pixelWriter = image.getPixelWriter();
+  94         double width = image.getWidth();
+  95         double height = image.getHeight();
+  96 
+  97         for (int y = 0; y &lt; height; y++) {
+  98             for (int x = 0; x &lt; width; x++) {
+  99                 int argb = intBuffer.get();
+ 100                 pixelWriter.setArgb(x, y, argb);
+ 101             }
+ 102         }
+ 103     }
+ 104 
+ 105     private static void writeByteBufferToImage(ByteBuffer byteBuffer, WritableImage image) {
+ 106         PixelWriter pixelWriter = image.getPixelWriter();
+ 107         double width = image.getWidth();
+ 108         double height = image.getHeight();
+ 109 
+ 110         int format = Pixels.getNativeFormat();
+ 111 
+ 112         for (int y = 0; y &lt; height; y++) {
+ 113             for (int x = 0; x &lt; width; x++) {
+ 114                 if (format == Pixels.Format.BYTE_BGRA_PRE) {
+ 115                     pixelWriter.setArgb(x, y, PixelUtils.PretoNonPre(bgraPreToRgbaPre(byteBuffer.getInt())));
+ 116                 } else if (format == Pixels.Format.BYTE_ARGB) {
+ 117                     pixelWriter.setArgb(x, y, byteBuffer.getInt());
+ 118                 }
+ 119             }
+ 120         }
+ 121     }
+ 122 
+ 123     private static int bgraPreToRgbaPre(int bgraPre) {
+ 124         return (bgraPre &amp; 0xff) | ((bgraPre &amp; 0xff) &lt;&lt; 8) |
+ 125                 ((bgraPre &amp; 0xff) &lt;&lt; 16) | (bgraPre &lt;&lt; 24);
+ 126     }
+ 127 
+ 128     public static int interp(int pixels[], int x, int y, int w, int h, int fractx1, int fracty1) {
+ 129         int fractx0 = 256 - fractx1;
+ 130         int fracty0 = 256 - fracty1;
+ 131         int i = y * w + x;
+ 132         int rgb00 = (x &lt; 0 || y &lt; 0 || x &gt;= w || y &gt;= h) ? 0 : pixels[i];
+ 133         if (fracty1 == 0) {
+ 134             // No interpolation with pixels[y+1]
+ 135             if (fractx1 == 0) {
+ 136                 // No interpolation with any neighbors
+ 137                 return rgb00;
+ 138             }
+ 139             int rgb10 = (y &lt; 0 || x+1 &gt;= w || y &gt;= h) ? 0 : pixels[i+1];
+ 140             return interp(rgb00, rgb10, fractx0, fractx1);
+ 141         } else if (fractx1 == 0) {
+ 142             // No interpolation with pixels[x+1]
+ 143             int rgb01 = (x &lt; 0 || x &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w];
+ 144             return interp(rgb00, rgb01, fracty0, fracty1);
+ 145         } else {
+ 146             // All 4 neighbors must be interpolated
+ 147             int rgb10 = (y &lt; 0 || x+1 &gt;= w || y &gt;= h) ? 0 : pixels[i+1];
+ 148             int rgb01 = (x &lt; 0 || x &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w];
+ 149             int rgb11 = (x+1 &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w+1];
+ 150             return interp(interp(rgb00, rgb10, fractx0, fractx1),
+ 151                     interp(rgb01, rgb11, fractx0, fractx1),
+ 152                     fracty0, fracty1);
+ 153         }
+ 154     }
+ 155 
+ 156     public static int interp(int rgb0, int rgb1, int fract0, int fract1) {
+ 157         int a0 = (rgb0 &gt;&gt; 24) &amp; 0xff;
+ 158         int r0 = (rgb0 &gt;&gt; 16) &amp; 0xff;
+ 159         int g0 = (rgb0 &gt;&gt;  8) &amp; 0xff;
+ 160         int b0 = (rgb0      ) &amp; 0xff;
+ 161         int a1 = (rgb1 &gt;&gt; 24) &amp; 0xff;
+ 162         int r1 = (rgb1 &gt;&gt; 16) &amp; 0xff;
+ 163         int g1 = (rgb1 &gt;&gt;  8) &amp; 0xff;
+ 164         int b1 = (rgb1      ) &amp; 0xff;
+ 165         int a = (a0 * fract0 + a1 * fract1) &gt;&gt; 8;
+ 166         int r = (r0 * fract0 + r1 * fract1) &gt;&gt; 8;
+ 167         int g = (g0 * fract0 + g1 * fract1) &gt;&gt; 8;
+ 168         int b = (b0 * fract0 + b1 * fract1) &gt;&gt; 8;
+ 169         return (a &lt;&lt; 24) | (r &lt;&lt; 16) | (g &lt;&lt; 8) | b;
+ 170     }
+ 171 
+ 172 }
+</pre></body></html>

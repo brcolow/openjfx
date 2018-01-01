@@ -1,0 +1,74 @@
+--- old/modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m	2018-01-01 14:51:36.959528400 -0700
++++ new/modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m	2018-01-01 14:51:36.595507200 -0700
+@@ -426,13 +426,13 @@
+ 
+ /*
+  * Class:     com_sun_glass_ui_mac_MacRobot
+- * Method:    _getScreenCapture
+- * Signature: (IIIIZ)Lcom/sun/glass/ui/Pixels;
++ * Method:    getScreenCapture
++ * Signature: (IIII[I)V
+  */
+-JNIEXPORT jobject JNICALL Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture
+-(JNIEnv *env, jobject jrobot, jint x, jint y, jint width, jint height, jboolean isHiDPI)
++JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacRobot_getScreenCapture
++(JNIEnv *env, jobject jrobot, jint x, jint y, jint width, jint height, jintArray data)
+ {
+-    LOG("Java_com_sun_glass_ui_mac_MacRobot__1getScreenCapture");
++    LOG("Java_com_sun_glass_ui_mac_MacRobot_getScreenCapture");
+ 
+     jobject pixels = NULL;
+ 
+@@ -440,11 +440,17 @@
+     GLASS_POOL_ENTER
+     {
+         CGRect bounds = CGRectMake((CGFloat)x, (CGFloat)y, (CGFloat)width, (CGFloat)height);
++        // installLayoutTestColorProfile();
+         CGImageRef screenImage = CGWindowListCreateImage(bounds, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+         if (screenImage != NULL)
+         {
+             jint pixWidth, pixHeight;
+ 
++            jboolean isHiDPI = FALSE;
++
++            if ([[NSScreen mainScreen] respondsToSelector:@selector(backingScaleFactor)]) {
++                isHiDPI = [[NSScreen mainScreen] backingScaleFactor] > 1.0;
++            }
+             if (isHiDPI) {
+                 pixWidth = (jint)CGImageGetWidth(screenImage);
+                 pixHeight = (jint)CGImageGetHeight(screenImage);
+@@ -477,32 +483,13 @@
+                     CGContextDrawImage(jPicContextRef, zeroBounds, screenImage);
+                     CGContextFlush(jPicContextRef);
+ 
+-                    // cleanup
+-                    CGContextRelease(jPicContextRef);
+-                    (*env)->ReleaseIntArrayElements(env, pixelArray, javaPixels, 0);
+-
+-                    jclass applicationClass =
+-                        [GlassHelper ClassForName:"com.sun.glass.ui.Application" withEnv:env];
+-                    if (!applicationClass) return NULL;
+-
+-                    jfloat scale = (*env)->CallStaticFloatMethod(env,
+-                            applicationClass,
+-                            javaIDs.Application.getScaleFactor, x, y, width, height);
+-                    if ((*env)->ExceptionCheck(env)) return NULL;
+-
+-                    // create Pixels
+-                    pixels = (*env)->CallStaticObjectMethod(env, applicationClass,
+-                                                            javaIDs.Application.createPixels,
+-                                                            pixWidth, pixHeight,
+-                                                            pixelArray, scale, scale);
+-                    if ((*env)->ExceptionCheck(env)) return NULL;
++                    (*env)->SetIntArrayRegion(env, data, 0, (jsize)pixWidth * pixHeight, pixelArray);
+                 }
+             }
+ 
+             CGImageRelease(screenImage);
+         }
++        // restoreUserColorProfile();
+     }
+     GLASS_POOL_EXIT;
+-
+-    return pixels;
+ }

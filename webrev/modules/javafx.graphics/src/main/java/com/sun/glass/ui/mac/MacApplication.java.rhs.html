@@ -1,0 +1,513 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.mac;
+  26 
+<a name="1" id="anc1"></a><span class="changed">  27 import com.sun.glass.ui.Accessible;</span>
+<span class="changed">  28 import com.sun.glass.ui.Application;</span>
+  29 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  30 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  31 import com.sun.glass.events.KeyEvent;
+<a name="2" id="anc2"></a><span class="new">  32 import com.sun.glass.ui.Cursor;</span>
+<span class="new">  33 import com.sun.glass.ui.InvokeLaterDispatcher;</span>
+<span class="new">  34 import com.sun.glass.ui.Menu;</span>
+<span class="new">  35 import com.sun.glass.ui.MenuBar;</span>
+<span class="new">  36 import com.sun.glass.ui.MenuItem;</span>
+<span class="new">  37 import com.sun.glass.ui.Pixels;</span>
+<span class="new">  38 import com.sun.glass.ui.Screen;</span>
+<span class="new">  39 import com.sun.glass.ui.Size;</span>
+<span class="new">  40 import com.sun.glass.ui.Timer;</span>
+<span class="new">  41 import com.sun.glass.ui.View;</span>
+<span class="new">  42 import com.sun.glass.ui.Window;</span>
+  43 
+  44 import java.io.File;
+  45 import java.nio.ByteBuffer;
+  46 import java.nio.IntBuffer;
+  47 
+  48 import java.security.AccessController;
+  49 import java.security.PrivilegedAction;
+<a name="3" id="anc3"></a><span class="new">  50 </span>
+<span class="new">  51 import javafx.scene.robot.Robot;</span>
+  52 
+  53 final class MacApplication extends Application implements InvokeLaterDispatcher.InvokeLaterSubmitter {
+  54 
+  55     private native static void _initIDs(boolean disableSyncRendering);
+  56     static {
+  57         AccessController.doPrivileged((PrivilegedAction&lt;Void&gt;) () -&gt; {
+  58             Application.loadNativeLibrary();
+  59             return null;
+  60         });
+  61         boolean disableSyncRendering = AccessController
+  62                 .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt;
+  63                         Boolean.getBoolean("glass.disableSyncRendering"));
+  64         _initIDs(disableSyncRendering);
+  65     }
+  66 
+  67     native static int _getMacKey(int code);
+  68 
+  69     private boolean isTaskbarApplication = false;
+  70     private final InvokeLaterDispatcher invokeLaterDispatcher;
+  71 
+  72     MacApplication() {
+  73         // Embedded in SWT, with shared event thread
+  74         boolean isEventThread = AccessController
+  75                 .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("javafx.embed.isEventThread"));
+  76         if (!isEventThread) {
+  77             invokeLaterDispatcher = new InvokeLaterDispatcher(this);
+  78             invokeLaterDispatcher.start();
+  79         } else {
+  80             invokeLaterDispatcher = null;
+  81         }
+  82     }
+  83 
+  84     private Menu appleMenu;
+  85 
+  86     native void _runLoop(ClassLoader classLoader, Runnable launchable,
+  87                          boolean isTaskbarApplication);
+  88     @Override
+  89     protected void runLoop(final Runnable launchable) {
+  90         isTaskbarApplication =
+  91             AccessController.doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; {
+  92                 String taskbarAppProp = System.getProperty("glass.taskbarApplication");
+  93                 return  !"false".equalsIgnoreCase(taskbarAppProp);
+  94             });
+  95 
+  96         ClassLoader classLoader = MacApplication.class.getClassLoader();
+  97         _runLoop(classLoader, launchable, isTaskbarApplication);
+  98     }
+  99 
+ 100     native private void _finishTerminating();
+ 101     @Override
+ 102     protected void finishTerminating() {
+ 103         _finishTerminating();
+ 104 
+ 105         super.finishTerminating();
+ 106     }
+ 107 
+ 108     private void notifyApplicationDidTerminate() {
+ 109         setEventThread(null);
+ 110     }
+ 111 
+ 112     // Called from the native code
+ 113     private void setEventThread() {
+ 114         setEventThread(Thread.currentThread());
+ 115     }
+ 116 
+ 117     native private Object _enterNestedEventLoopImpl();
+ 118     @Override protected Object _enterNestedEventLoop() {
+ 119         if (invokeLaterDispatcher != null) {
+ 120             invokeLaterDispatcher.notifyEnteringNestedEventLoop();
+ 121         }
+ 122         try {
+ 123             return _enterNestedEventLoopImpl();
+ 124         } finally {
+ 125             if (invokeLaterDispatcher != null) {
+ 126                 invokeLaterDispatcher.notifyLeftNestedEventLoop();
+ 127             }
+ 128         }
+ 129     }
+ 130 
+ 131     native private void _leaveNestedEventLoopImpl(Object retValue);
+ 132     @Override protected void _leaveNestedEventLoop(Object retValue) {
+ 133         if (invokeLaterDispatcher != null) {
+ 134             invokeLaterDispatcher.notifyLeavingNestedEventLoop();
+ 135         }
+ 136         _leaveNestedEventLoopImpl(retValue);
+ 137     }
+ 138 
+ 139     native private void _hide();
+ 140     native private void _hideOtherApplications();
+ 141     native private void _unhideAllApplications();
+ 142 
+ 143     public void installAppleMenu(MenuBar menubar) {
+ 144         this.appleMenu = createMenu("Apple");
+ 145 
+ 146         MenuItem hideMenu = createMenuItem("Hide " + getName(), new MenuItem.Callback() {
+ 147             @Override public void action() {
+ 148                 MacApplication.this._hide();
+ 149             }
+ 150             @Override public void validate() {
+ 151             }
+ 152         }, 'h', KeyEvent.MODIFIER_COMMAND);
+ 153         this.appleMenu.add(hideMenu);
+ 154 
+ 155         MenuItem hideOthersMenu = createMenuItem("Hide Others", new MenuItem.Callback() {
+ 156             @Override public void action() {
+ 157                 MacApplication.this._hideOtherApplications();
+ 158             }
+ 159             @Override public void validate() {
+ 160             }
+ 161         }, 'h', KeyEvent.MODIFIER_COMMAND | KeyEvent.MODIFIER_ALT);
+ 162         this.appleMenu.add(hideOthersMenu);
+ 163 
+ 164         MenuItem unhideAllMenu = createMenuItem("Show All", new MenuItem.Callback() {
+ 165             @Override public void action() {
+ 166                 MacApplication.this._unhideAllApplications();
+ 167             }
+ 168             @Override public void validate() {
+ 169             }
+ 170         });
+ 171         this.appleMenu.add(unhideAllMenu);
+ 172 
+ 173         this.appleMenu.add(MenuItem.Separator);
+ 174 
+ 175         MenuItem quitMenu = createMenuItem("Quit " + getName(), new MenuItem.Callback() {
+ 176             @Override public void action() {
+ 177                 Application.EventHandler eh = getEventHandler();
+ 178                 if (eh != null) {
+ 179                     eh.handleQuitAction(Application.GetApplication(), System.nanoTime());
+ 180                 }
+ 181             }
+ 182             @Override public void validate() {
+ 183             }
+ 184         }, 'q', KeyEvent.MODIFIER_COMMAND);
+ 185         this.appleMenu.add(quitMenu);
+ 186 
+ 187         menubar.add(this.appleMenu);
+ 188     }
+ 189 
+ 190     public Menu getAppleMenu() {
+ 191         return this.appleMenu;
+ 192     }
+ 193 
+ 194     @Override public void installDefaultMenus(MenuBar menubar) {
+ 195         installAppleMenu(menubar);
+ 196     }
+ 197 
+ 198 
+ 199     // FACTORY METHODS
+ 200 
+ 201     @Override public Window createWindow(Window owner, Screen screen, int styleMask) {
+ 202         return new MacWindow(owner, screen, styleMask);
+ 203     }
+ 204 
+ 205     final static long BROWSER_PARENT_ID = -1L;
+ 206     @Override public Window createWindow(long parent) {
+ 207         Window window = new MacWindow(parent);
+ 208         if (parent == BROWSER_PARENT_ID) {
+ 209             // Special case: a Mac embedded window, which is a parent to other child Windows.
+ 210             // Needs implicit view, with a layer that will be provided to the plugin
+ 211             window.setView(createView());
+ 212         }
+ 213         return window;
+ 214     }
+ 215 
+ 216     @Override public View createView() {
+ 217         return new MacView();
+ 218     }
+ 219 
+ 220     @Override public Cursor createCursor(int type) {
+ 221         return new MacCursor(type);
+ 222     }
+ 223 
+ 224     @Override public Cursor createCursor(int x, int y, Pixels pixels) {
+ 225         return new MacCursor(x, y, pixels);
+ 226     }
+ 227 
+ 228     @Override protected void staticCursor_setVisible(boolean visible) {
+ 229         MacCursor.setVisible_impl(visible);
+ 230     }
+ 231 
+ 232     @Override protected Size staticCursor_getBestSize(int width, int height) {
+ 233         return MacCursor.getBestSize_impl(width, height);
+ 234     }
+ 235 
+ 236     @Override public Pixels createPixels(int width, int height, ByteBuffer data) {
+ 237         return new MacPixels(width, height, data);
+ 238     }
+ 239 
+ 240     @Override public Pixels createPixels(int width, int height, IntBuffer data) {
+ 241         return new MacPixels(width, height, data);
+ 242     }
+ 243 
+ 244     @Override
+ 245     public Pixels createPixels(int width, int height, IntBuffer data, float scalex, float scaley) {
+ 246         return new MacPixels(width, height, data, scalex, scaley);
+ 247     }
+ 248 
+ 249     @Override protected int staticPixels_getNativeFormat() {
+ 250         return MacPixels.getNativeFormat_impl();
+ 251     }
+ 252 
+ 253     @Override public Robot createRobot() {
+ 254         return new MacRobot();
+ 255     }
+ 256 
+ 257     @Override native protected double staticScreen_getVideoRefreshPeriod();
+ 258     @Override native protected Screen[] staticScreen_getScreens();
+ 259 
+ 260     @Override public Timer createTimer(Runnable runnable) {
+ 261         return new MacTimer(runnable);
+ 262     }
+ 263 
+ 264     @Override protected int staticTimer_getMinPeriod() {
+ 265         return MacTimer.getMinPeriod_impl();
+ 266     }
+ 267 
+ 268     @Override protected int staticTimer_getMaxPeriod() {
+ 269         return MacTimer.getMaxPeriod_impl();
+ 270     }
+ 271 
+ 272     @Override public Accessible createAccessible() {
+ 273         return new MacAccessible();
+ 274     }
+ 275 
+ 276     @Override protected FileChooserResult staticCommonDialogs_showFileChooser(Window owner, String folder, String filename, String title, int type,
+ 277                                                      boolean multipleMode, ExtensionFilter[] extensionFilters, int defaultFilterIndex) {
+ 278         return MacCommonDialogs.showFileChooser_impl(owner, folder, filename,
+ 279                 title, type, multipleMode, extensionFilters, defaultFilterIndex);
+ 280     }
+ 281 
+ 282     @Override protected File staticCommonDialogs_showFolderChooser(Window owner, String folder, String title) {
+ 283         return MacCommonDialogs.showFolderChooser_impl(owner, folder, title);
+ 284     }
+ 285 
+ 286     @Override protected long staticView_getMultiClickTime() {
+ 287         return MacView.getMultiClickTime_impl();
+ 288     }
+ 289 
+ 290     @Override protected int staticView_getMultiClickMaxX() {
+ 291         return MacView.getMultiClickMaxX_impl();
+ 292     }
+ 293 
+ 294     @Override protected int staticView_getMultiClickMaxY() {
+ 295         return MacView.getMultiClickMaxY_impl();
+ 296     }
+ 297 
+ 298     @Override native protected void _invokeAndWait(Runnable runnable);
+ 299 
+ 300     private native void _submitForLaterInvocation(Runnable r);
+ 301     // InvokeLaterDispatcher.InvokeLaterSubmitter
+ 302     @Override public void submitForLaterInvocation(Runnable r) {
+ 303         _submitForLaterInvocation(r);
+ 304     }
+ 305 
+ 306     @Override protected void _invokeLater(Runnable runnable) {
+ 307         if (invokeLaterDispatcher != null) {
+ 308             invokeLaterDispatcher.invokeLater(runnable);
+ 309         } else {
+ 310             submitForLaterInvocation(runnable);
+ 311         }
+ 312     }
+ 313 
+ 314     @Override
+ 315     protected boolean _supportsInputMethods() {
+ 316         return true;
+ 317     }
+ 318 
+ 319     @Override
+ 320     protected boolean _supportsTransparentWindows() {
+ 321         return true;
+ 322     }
+ 323 
+ 324     @Override protected boolean _supportsUnifiedWindows() {
+ 325         return true;
+ 326     }
+ 327 
+ 328     @Override native protected boolean _supportsSystemMenu();
+ 329 
+ 330     native protected String _getRemoteLayerServerName();
+ 331     public String getRemoteLayerServerName() {
+ 332         return _getRemoteLayerServerName();
+ 333     }
+ 334 
+ 335     private native String _getDataDirectory();
+ 336     public String getDataDirectory() {
+ 337         checkEventThread();
+ 338         String baseDirectory = _getDataDirectory();
+ 339         if (baseDirectory == null || baseDirectory.length() == 0) {
+ 340             return super.getDataDirectory();
+ 341         }
+ 342         return baseDirectory + File.separator + name + File.separator;
+ 343     }
+ 344 
+ 345     @Override
+ 346     protected native int _getKeyCodeForChar(char c);
+ 347 }
+<a name="4" id="anc4"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="4" type="hidden" /></form></body></html>

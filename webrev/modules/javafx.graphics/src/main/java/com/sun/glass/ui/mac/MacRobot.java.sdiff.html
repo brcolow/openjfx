@@ -1,0 +1,385 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>openjfx Sdiff modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac </title>
+</head><body id="SUNWwebrev">
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.sdiff.html' target='_top'>next &gt</a></center>
+<h2>modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java</h2>
+<a class="print" href="javascript:print()">Print this page</a>
+<pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+
+<table><tr valign="top">
+<td><pre>
+
+</pre><hr></hr><pre>
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.mac;
+  26 
+<span class="changed">  27 import com.sun.glass.ui.*;</span>
+
+
+
+
+
+
+
+
+  28 
+  29 /**
+  30  * MacOSX platform implementation class for Robot.
+  31  */
+  32 final class MacRobot extends Robot {
+  33 
+  34     // TODO: get rid of native Robot object
+  35     private long ptr;
+  36 
+<span class="changed">  37     private native long _init();</span>
+<span class="changed">  38     @Override protected void _create() {</span>
+
+  39         ptr = _init();
+  40     }
+  41 
+<span class="changed">  42     private native void _destroy(long ptr);</span>
+<span class="changed">  43     @Override protected void _destroy() {</span>
+
+  44         if (ptr == 0) {
+  45             return;
+  46         }
+  47         _destroy(ptr);
+  48     }
+  49 
+<span class="changed">  50     @Override native protected void _keyPress(int code);</span>
+<span class="changed">  51     @Override native protected void _keyRelease(int code);</span>
+  52 
+<span class="changed">  53     private native void _mouseMove(long ptr, int x, int y);</span>
+<span class="changed">  54     @Override protected void _mouseMove(int x, int y) {</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  55         if (ptr == 0) {
+  56             return;
+  57         }
+  58         _mouseMove(ptr, x, y);
+  59     }
+  60 
+<span class="changed">  61     private native void _mousePress(long ptr, int buttons);</span>
+<span class="changed">  62     @Override protected void _mousePress(int buttons) {</span>
+
+
+
+
+
+
+
+
+
+  63         if (ptr == 0) {
+  64             return;
+  65         }
+<span class="changed">  66         _mousePress(ptr, buttons);</span>
+  67     }
+  68 
+<span class="changed">  69     private native void _mouseRelease(long ptr, int buttons);</span>
+<span class="changed">  70     @Override protected void _mouseRelease(int buttons) {</span>
+
+  71         if (ptr == 0) {
+  72             return;
+  73         }
+<span class="changed">  74         _mouseRelease(ptr, buttons);</span>
+  75     }
+  76 
+<span class="changed">  77     @Override native protected void _mouseWheel(int wheelAmt);</span>
+
+
+
+
+
+
+  78 
+<span class="changed">  79     private native int _getMouseX(long ptr);</span>
+<span class="changed">  80     @Override protected int _getMouseX() {</span>
+
+
+
+
+
+
+
+  81         if (ptr == 0) {
+  82             return 0;
+  83         }
+  84         return _getMouseX(ptr);
+  85     }
+  86 
+<span class="changed">  87     private native int _getMouseY(long ptr);</span>
+<span class="changed">  88     @Override protected int _getMouseY() {</span>
+
+  89         if (ptr == 0) {
+  90             return 0;
+  91         }
+  92         return _getMouseY(ptr);
+  93     }
+  94 
+<span class="changed">  95     @Override native protected int _getPixelColor(int x, int y);</span>
+<span class="changed">  96     @Override native protected Pixels _getScreenCapture(int x, int y, int width, int height, boolean isHiDPI);</span>
+
+
+
+
+
+  97 }
+  98 
+</pre></td><td><pre>
+
+</pre><hr></hr><pre>
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.mac;
+  26 
+<span class="changed">  27 import com.sun.glass.ui.Application;</span>
+<span class="changed">  28 import com.sun.glass.ui.GlassRobot;</span>
+<span class="changed">  29 import com.sun.glass.ui.Pixels;</span>
+<span class="changed">  30 </span>
+<span class="changed">  31 import javafx.scene.image.Image;</span>
+<span class="changed">  32 import javafx.scene.input.KeyCode;</span>
+<span class="changed">  33 import javafx.scene.input.MouseButton;</span>
+<span class="changed">  34 import javafx.scene.paint.Color;</span>
+<span class="changed">  35 import javafx.scene.robot.Robot;</span>
+  36 
+  37 /**
+  38  * MacOSX platform implementation class for Robot.
+  39  */
+  40 final class MacRobot extends Robot {
+  41 
+  42     // TODO: get rid of native Robot object
+  43     private long ptr;
+  44 
+<span class="changed">  45     native private long _init();</span>
+<span class="changed">  46     @Override protected void create() {</span>
+<span class="changed">  47         Application.checkEventThread();</span>
+  48         ptr = _init();
+  49     }
+  50 
+<span class="changed">  51     native protected void _destroy(long ptr);</span>
+<span class="changed">  52     @Override protected void destroy() {</span>
+<span class="changed">  53         Application.checkEventThread();</span>
+  54         if (ptr == 0) {
+  55             return;
+  56         }
+  57         _destroy(ptr);
+  58     }
+  59 
+<span class="changed">  60     native protected void _keyPress(int code);</span>
+
+  61 
+<span class="changed">  62     @Override public void keyPress(KeyCode code) {</span>
+<span class="changed">  63         Application.checkEventThread();</span>
+<span class="changed">  64         _keyPress(code.getCode());</span>
+<span class="changed">  65     }</span>
+<span class="changed">  66 </span>
+<span class="changed">  67     native protected void _keyRelease(int code);</span>
+<span class="changed">  68 </span>
+<span class="changed">  69     @Override public void keyRelease(KeyCode code) {</span>
+<span class="changed">  70         Application.checkEventThread();</span>
+<span class="changed">  71         _keyRelease(code.getCode());</span>
+<span class="changed">  72     }</span>
+<span class="changed">  73 </span>
+<span class="changed">  74     native protected void _mouseMove(long ptr, int x, int y);</span>
+<span class="changed">  75     @Override public void mouseMove(int x, int y) {</span>
+<span class="changed">  76         Application.checkEventThread();</span>
+  77         if (ptr == 0) {
+  78             return;
+  79         }
+  80         _mouseMove(ptr, x, y);
+  81     }
+  82 
+<span class="changed">  83     native protected void _mousePress(long ptr, int buttons);</span>
+<span class="changed">  84     @Override public void mousePress(MouseButton button) {</span>
+<span class="changed">  85         Application.checkEventThread();</span>
+<span class="changed">  86         if (ptr == 0) {</span>
+<span class="changed">  87             return;</span>
+<span class="changed">  88         }</span>
+<span class="changed">  89         _mousePress(ptr, GlassRobot.convertToRobotMouseButton(button));</span>
+<span class="changed">  90     }</span>
+<span class="changed">  91 </span>
+<span class="changed">  92     @Override public void mousePress(MouseButton... buttons) {</span>
+<span class="changed">  93         Application.checkEventThread();</span>
+  94         if (ptr == 0) {
+  95             return;
+  96         }
+<span class="changed">  97         _mousePress(ptr, GlassRobot.convertToRobotMouseButton(buttons));</span>
+  98     }
+  99 
+<span class="changed"> 100     native protected void _mouseRelease(long ptr, int buttons);</span>
+<span class="changed"> 101     @Override public void mouseRelease(MouseButton button) {</span>
+<span class="changed"> 102         Application.checkEventThread();</span>
+ 103         if (ptr == 0) {
+ 104             return;
+ 105         }
+<span class="changed"> 106         _mouseRelease(ptr, GlassRobot.convertToRobotMouseButton(button));</span>
+ 107     }
+ 108 
+<span class="changed"> 109     @Override public void mouseRelease(MouseButton... buttons) {</span>
+<span class="changed"> 110         Application.checkEventThread();</span>
+<span class="changed"> 111         if (ptr == 0) {</span>
+<span class="changed"> 112             return;</span>
+<span class="changed"> 113         }</span>
+<span class="changed"> 114         _mouseRelease(ptr, GlassRobot.convertToRobotMouseButton(buttons));</span>
+<span class="changed"> 115     }</span>
+ 116 
+<span class="changed"> 117     native protected void _mouseWheel(int wheelAmt);</span>
+<span class="changed"> 118     @Override protected void mouseWheel(int wheelAmt) {</span>
+<span class="changed"> 119         Application.checkEventThread();</span>
+<span class="changed"> 120         _mouseWheel(wheelAmt);</span>
+<span class="changed"> 121     }</span>
+<span class="changed"> 122 </span>
+<span class="changed"> 123     native protected int _getMouseX(long ptr);</span>
+<span class="changed"> 124     @Override public int getMouseX() {</span>
+<span class="changed"> 125         Application.checkEventThread();</span>
+ 126         if (ptr == 0) {
+ 127             return 0;
+ 128         }
+ 129         return _getMouseX(ptr);
+ 130     }
+ 131 
+<span class="changed"> 132     native protected int _getMouseY(long ptr);</span>
+<span class="changed"> 133     @Override public int getMouseY() {</span>
+<span class="changed"> 134         Application.checkEventThread();</span>
+ 135         if (ptr == 0) {
+ 136             return 0;
+ 137         }
+ 138         return _getMouseY(ptr);
+ 139     }
+ 140 
+<span class="changed"> 141     native protected int _getPixelColor(int x, int y);</span>
+<span class="changed"> 142     @Override public Color getPixelColor(int x, int y) {</span>
+<span class="changed"> 143         Application.checkEventThread();</span>
+<span class="changed"> 144         return GlassRobot.convertFromIntArgb(_getPixelColor(x, y));</span>
+<span class="changed"> 145     }</span>
+<span class="changed"> 146 </span>
+<span class="changed"> 147     @Override native protected void getScreenCapture(int x, int y, int width, int height, int[] data);</span>
+ 148 }
+ 149 
+</pre></td>
+</tr></table>
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.sdiff.html' target='_top'>next &gt</a></center>
+</body></html>

@@ -1,0 +1,354 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>Old modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui;
+  26 
+  27 import static com.sun.javafx.FXPermissions.CREATE_ROBOT_PERMISSION;
+  28 import java.lang.annotation.Native;
+  29 import java.nio.IntBuffer;
+  30 
+  31 public abstract class Robot {
+  32 
+  33     @Native public static final int MOUSE_LEFT_BTN   = 1;
+  34     @Native public static final int MOUSE_RIGHT_BTN  = 2;
+  35     @Native public static final int MOUSE_MIDDLE_BTN = 4;
+  36 
+  37     protected abstract void _create();
+  38     protected Robot() {
+  39         // Ensure proper permission
+  40         final SecurityManager sm = System.getSecurityManager();
+  41         if (sm != null) {
+  42             sm.checkPermission(CREATE_ROBOT_PERMISSION);
+  43         }
+  44         Application.checkEventThread();
+  45         _create();
+  46     }
+  47 
+  48     protected abstract void _destroy();
+  49     public void destroy() {
+  50         Application.checkEventThread();
+  51         _destroy();
+  52     }
+  53 
+  54     protected abstract void _keyPress(int code);
+  55     /**
+  56      * Generate a key pressed event.
+  57      * @param code key code for this event
+  58      */
+  59     public void keyPress(int code) {
+  60         Application.checkEventThread();
+  61         _keyPress(code);
+  62     }
+  63 
+  64     protected abstract void _keyRelease(int code);
+  65     /**
+  66      * Generate a key released event.
+  67      *
+  68      * @param code key code for this event
+  69      */
+  70     public void keyRelease(int code) {
+  71         Application.checkEventThread();
+  72         _keyRelease(code);
+  73     }
+  74 
+  75     protected abstract void _mouseMove(int x, int y);
+  76     /**
+  77      * Generate a mouse moved event.
+  78      *
+  79      * @param x screen coordinate x
+  80      * @param y screen coordinate y
+  81      */
+  82     public void mouseMove(int x, int y) {
+  83         Application.checkEventThread();
+  84         _mouseMove(x, y);
+  85     }
+  86 
+  87     protected abstract void _mousePress(int buttons);
+  88     /**
+  89      * Generate a mouse press event with specified buttons mask.
+  90      *
+  91      * Up to 32-buttons mice are supported. Other buttons are inaccessible
+  92      * by the robot. Bits 0, 1, and 2 mean LEFT, RIGHT, and MIDDLE mouse buttons
+  93      * respectively.
+  94      *
+  95      * @param buttons buttons to have generated the event
+  96      */
+  97     public void mousePress(int buttons) {
+  98         Application.checkEventThread();
+  99         _mousePress(buttons);
+ 100     }
+ 101 
+ 102     protected abstract void _mouseRelease(int buttons);
+ 103     /**
+ 104      * Generate a mouse release event with specified buttons mask.
+ 105      *
+ 106      * @param buttons buttons to have generated the event
+ 107      */
+ 108     public void mouseRelease(int buttons) {
+ 109         Application.checkEventThread();
+ 110         _mouseRelease(buttons);
+ 111     }
+ 112 
+ 113     protected abstract void _mouseWheel(int wheelAmt);
+ 114     /**
+ 115      * Generate a mouse wheel event.
+ 116      *
+ 117      * @param wheelAmt amount the wheel has turned of wheel turning
+ 118      */
+ 119     public void mouseWheel(int wheelAmt) {
+ 120         Application.checkEventThread();
+ 121         _mouseWheel(wheelAmt);
+ 122     }
+ 123 
+ 124     protected abstract int _getMouseX();
+ 125     public int getMouseX() {
+ 126         Application.checkEventThread();
+ 127         return _getMouseX();
+ 128     }
+ 129 
+ 130     protected abstract int _getMouseY();
+ 131     public int getMouseY() {
+ 132         Application.checkEventThread();
+ 133         return _getMouseY();
+ 134     }
+ 135 
+ 136     protected abstract int _getPixelColor(int x, int y);
+ 137     /**
+ 138      * Returns pixel color at specified screen coordinates in IntARGB format.
+ 139      */
+ 140     public int getPixelColor(int x, int y) {
+ 141         Application.checkEventThread();
+ 142         return _getPixelColor(x, y);
+ 143     }
+ 144 
+ 145     // Subclasses must override and implement at least one of the following two
+ 146     // _getScreenCapture methods
+ 147 
+ 148     protected void _getScreenCapture(int x, int y, int width, int height, int[] data) {
+ 149         throw new UnsupportedOperationException("Not implementated in the base class");
+ 150     }
+ 151 
+ 152     protected Pixels _getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {
+ 153         Screen mainScreen = Screen.getMainScreen();
+ 154         float uiScaleX = mainScreen.getPlatformScaleX();
+ 155         float uiScaleY = mainScreen.getPlatformScaleY();
+ 156         int data[];
+ 157         int dw, dh;
+ 158         if (uiScaleX == 1.0f &amp;&amp; uiScaleY == 1.0f) {
+ 159             data = new int[width * height];
+ 160             _getScreenCapture(x, y, width, height, data);
+ 161             dw = width;
+ 162             dh = height;
+ 163         } else {
+ 164             int pminx = (int) Math.floor(x * uiScaleX);
+ 165             int pminy = (int) Math.floor(y * uiScaleY);
+ 166             int pmaxx = (int) Math.ceil((x + width) * uiScaleX);
+ 167             int pmaxy = (int) Math.ceil((y + height) * uiScaleY);
+ 168             int pwidth = pmaxx - pminx;
+ 169             int pheight = pmaxy - pminy;
+ 170             int tmpdata[] = new int[pwidth * pheight];
+ 171             _getScreenCapture(pminx, pminy, pwidth, pheight, tmpdata);
+ 172             if (isHiDPI) {
+ 173                 data = tmpdata;
+ 174                 dw = pwidth;
+ 175                 dh = pheight;
+ 176             } else {
+ 177                 data = new int[width * height];
+ 178                 int index = 0;
+ 179                 for (int iy = 0; iy &lt; height; iy++) {
+ 180                     float rely = ((y + iy + 0.5f) * uiScaleY) - (pminy + 0.5f);
+ 181                     int irely = (int) Math.floor(rely);
+ 182                     int fracty = (int) ((rely - irely) * 256);
+ 183                     for (int ix = 0; ix &lt; width; ix++) {
+ 184                         float relx = ((x + ix + 0.5f) * uiScaleX) - (pminx + 0.5f);
+ 185                         int irelx = (int) Math.floor(relx);
+ 186                         int fractx = (int) ((relx - irelx) * 256);
+ 187                         data[index++] =
+ 188                             interp(tmpdata, irelx, irely, pwidth, pheight, fractx, fracty);
+ 189                     }
+ 190                 }
+ 191                 dw = width;
+ 192                 dh = height;
+ 193             }
+ 194         }
+ 195         return Application.GetApplication().createPixels(dw, dh, IntBuffer.wrap(data));
+ 196     }
+ 197 
+ 198     /**
+ 199      * Returns a capture of the specified rectangular area of the screen.
+ 200      *
+ 201      * If {@code isHiDPI} argument is {@code true}, the returned Pixels object
+ 202      * dimensions may differ from the requested {@code width} and {@code
+ 203      * height} depending on how many physical pixels the area occupies on the
+ 204      * screen.  E.g. in HiDPI mode on the Mac (aka Retina display) the pixels
+ 205      * are doubled, and thus a screen capture of an area of size (10x10) pixels
+ 206      * will result in a Pixels object with dimensions (20x20). Calling code
+ 207      * should use the returned objects's getWidth() and getHeight() methods
+ 208      * to determine the image size.
+ 209      *
+ 210      * If (@code isHiDPI) is {@code false}, the returned Pixels object is of
+ 211      * the requested size. Note that in this case the image may be scaled in
+ 212      * order to fit to the requested dimensions if running on a HiDPI display.
+ 213      */
+ 214     public Pixels getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {
+ 215         Application.checkEventThread();
+ 216         return _getScreenCapture(x, y, width, height, isHiDPI);
+ 217     }
+ 218 
+ 219     /**
+ 220      * Returns a capture of the specified area of the screen.
+ 221      * It is equivalent to calling getScreenCapture(x, y, width, height, false),
+ 222      * i.e. this method takes a "LowDPI" screen shot.
+ 223      */
+ 224     public Pixels getScreenCapture(int x, int y, int width, int height) {
+ 225         return getScreenCapture(x, y, width, height, false);
+ 226     }
+ 227 
+ 228     private static int interp(int pixels[], int x, int y, int w, int h, int fractx1, int fracty1) {
+ 229         int fractx0 = 256 - fractx1;
+ 230         int fracty0 = 256 - fracty1;
+ 231         int i = y * w + x;
+ 232         int rgb00 = (x &lt; 0 || y &lt; 0 || x &gt;= w || y &gt;= h) ? 0 : pixels[i];
+ 233         if (fracty1 == 0) {
+ 234             // No interplation with pixels[y+1]
+ 235             if (fractx1 == 0) {
+ 236                 // No interpolation with any neighbors
+ 237                 return rgb00;
+ 238             }
+ 239             int rgb10 = (y &lt; 0 || x+1 &gt;= w || y &gt;= h) ? 0 : pixels[i+1];
+ 240             return interp(rgb00, rgb10, fractx0, fractx1);
+ 241         } else if (fractx1 == 0) {
+ 242             // No interpolation with pixels[x+1]
+ 243             int rgb01 = (x &lt; 0 || x &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w];
+ 244             return interp(rgb00, rgb01, fracty0, fracty1);
+ 245         } else {
+ 246             // All 4 neighbors must be interpolated
+ 247             int rgb10 = (y &lt; 0 || x+1 &gt;= w || y &gt;= h) ? 0 : pixels[i+1];
+ 248             int rgb01 = (x &lt; 0 || x &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w];
+ 249             int rgb11 = (x+1 &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w+1];
+ 250             return interp(interp(rgb00, rgb10, fractx0, fractx1),
+ 251                           interp(rgb01, rgb11, fractx0, fractx1),
+ 252                           fracty0, fracty1);
+ 253         }
+ 254     }
+ 255 
+ 256     private static int interp(int rgb0, int rgb1, int fract0, int fract1) {
+ 257         int a0 = (rgb0 &gt;&gt; 24) &amp; 0xff;
+ 258         int r0 = (rgb0 &gt;&gt; 16) &amp; 0xff;
+ 259         int g0 = (rgb0 &gt;&gt;  8) &amp; 0xff;
+ 260         int b0 = (rgb0      ) &amp; 0xff;
+ 261         int a1 = (rgb1 &gt;&gt; 24) &amp; 0xff;
+ 262         int r1 = (rgb1 &gt;&gt; 16) &amp; 0xff;
+ 263         int g1 = (rgb1 &gt;&gt;  8) &amp; 0xff;
+ 264         int b1 = (rgb1      ) &amp; 0xff;
+ 265         int a = (a0 * fract0 + a1 * fract1) &gt;&gt; 8;
+ 266         int r = (r0 * fract0 + r1 * fract1) &gt;&gt; 8;
+ 267         int g = (g0 * fract0 + g1 * fract1) &gt;&gt; 8;
+ 268         int b = (b0 * fract0 + b1 * fract1) &gt;&gt; 8;
+ 269         return (a &lt;&lt; 24) | (r &lt;&lt; 16) | (g &lt;&lt; 8) | b;
+ 270     }
+ 271 }
+</pre></body></html>

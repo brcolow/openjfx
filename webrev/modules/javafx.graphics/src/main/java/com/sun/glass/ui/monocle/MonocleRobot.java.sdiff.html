@@ -1,0 +1,637 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>openjfx Sdiff modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle </title>
+</head><body id="SUNWwebrev">
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.sdiff.html' target='_top'>next &gt</a></center>
+<h2>modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java</h2>
+<a class="print" href="javascript:print()">Print this page</a>
+<pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+
+<table><tr valign="top">
+<td><pre>
+
+</pre><hr></hr><pre>
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 
+  26 package com.sun.glass.ui.monocle;
+  27 
+  28 import com.sun.glass.events.MouseEvent;
+<span class="changed">  29 import com.sun.glass.ui.Pixels;</span>
+<span class="changed">  30 import com.sun.glass.ui.Robot;</span>
+<span class="changed">  31 import javafx.application.Platform;</span>
+
+
+
+  32 
+  33 import java.nio.ByteBuffer;
+  34 import java.nio.IntBuffer;
+  35 import java.nio.ShortBuffer;
+  36 
+  37 class MonocleRobot extends Robot {
+  38     @Override
+<span class="changed">  39     protected void _create() {</span>
+
+  40     }
+  41 
+  42     @Override
+<span class="changed">  43     protected void _destroy() {</span>
+
+  44     }
+  45 
+  46     @Override
+<span class="changed">  47     protected void _keyPress(int code) {</span>
+<span class="changed">  48         Platform.runLater(() -&gt; {</span>
+  49             KeyState state = new KeyState();
+  50             KeyInput.getInstance().getState(state);
+<span class="changed">  51             state.pressKey(code);</span>
+  52             KeyInput.getInstance().setState(state);
+<span class="removed">  53         });</span>
+  54     }
+  55 
+  56     @Override
+<span class="changed">  57     protected void _keyRelease(int code) {</span>
+<span class="changed">  58         Platform.runLater(() -&gt; {</span>
+  59             KeyState state = new KeyState();
+  60             KeyInput.getInstance().getState(state);
+<span class="changed">  61             state.releaseKey(code);</span>
+  62             KeyInput.getInstance().setState(state);
+<span class="removed">  63         });</span>
+  64     }
+  65 
+  66     @Override
+<span class="changed">  67     protected void _mouseMove(int x, int y) {</span>
+<span class="changed">  68         Platform.runLater(() -&gt; {</span>
+  69             MouseState state = new MouseState();
+  70             MouseInput.getInstance().getState(state);
+  71             state.setX(x);
+  72             state.setY(y);
+  73             MouseInput.getInstance().setState(state, false);
+<span class="removed">  74         });</span>
+  75     }
+  76 
+<span class="changed">  77     @Override</span>
+<span class="changed">  78     protected void _mousePress(int buttons) {</span>
+<span class="changed">  79         Platform.runLater(() -&gt; {</span>
+<span class="changed">  80             MouseState state = new MouseState();</span>
+<span class="changed">  81             MouseInput.getInstance().getState(state);</span>
+<span class="changed">  82             if ((buttons &amp; MOUSE_LEFT_BTN) != 0) {</span>
+  83                 state.pressButton(MouseEvent.BUTTON_LEFT);
+
+
+
+
+
+
+
+
+
+  84             }
+<span class="changed">  85             if ((buttons &amp; MOUSE_MIDDLE_BTN) != 0) {</span>
+
+
+  86                 state.pressButton(MouseEvent.BUTTON_OTHER);
+
+
+
+
+
+
+  87             }
+<span class="changed">  88             if ((buttons &amp; MOUSE_RIGHT_BTN) != 0) {</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  89                 state.pressButton(MouseEvent.BUTTON_RIGHT);
+
+
+
+
+
+
+
+
+
+
+
+
+
+  90             }
+<span class="changed">  91             MouseInput.getInstance().setState(state, false);</span>
+<span class="changed">  92         });</span>
+  93     }
+  94 
+  95     @Override
+<span class="changed">  96     protected void _mouseRelease(int buttons) {</span>
+<span class="changed">  97         Platform.runLater(() -&gt; {</span>
+  98             MouseState state = new MouseState();
+  99             MouseInput.getInstance().getState(state);
+<span class="changed"> 100             if ((buttons &amp; MOUSE_LEFT_BTN) != 0) {</span>
+<span class="changed"> 101                 state.releaseButton(MouseEvent.BUTTON_LEFT);</span>
+ 102             }
+<span class="changed"> 103             if ((buttons &amp; MOUSE_MIDDLE_BTN) != 0) {</span>
+<span class="changed"> 104                 state.releaseButton(MouseEvent.BUTTON_OTHER);</span>
+
+
+
+
+
+ 105             }
+<span class="changed"> 106             if ((buttons &amp; MOUSE_RIGHT_BTN) != 0) {</span>
+<span class="changed"> 107                 state.releaseButton(MouseEvent.BUTTON_RIGHT);</span>
+
+
+
+
+
+ 108             }
+<span class="changed"> 109             MouseInput.getInstance().setState(state, false);</span>
+<span class="changed"> 110         });</span>
+
+
+
+
+
+ 111     }
+ 112 
+ 113     @Override
+<span class="changed"> 114     protected void _mouseWheel(int wheelAmt) {</span>
+<span class="changed"> 115         Platform.runLater(() -&gt; {</span>
+ 116             MouseState state = new MouseState();
+ 117             MouseInput mouse = MouseInput.getInstance();
+ 118             mouse.getState(state);
+ 119             int direction = wheelAmt &lt; 0
+ 120                             ? MouseState.WHEEL_DOWN
+ 121                             : MouseState.WHEEL_UP;
+ 122             for (int i = 0; i &lt; Math.abs(wheelAmt); i++) {
+ 123                 state.setWheel(direction);
+ 124                 mouse.setState(state, false);
+ 125                 state.setWheel(MouseState.WHEEL_NONE);
+ 126                 mouse.setState(state, false);
+ 127             }
+<span class="removed"> 128         });</span>
+ 129     }
+ 130 
+ 131     @Override
+<span class="changed"> 132     protected int _getMouseX() {</span>
+
+ 133         MouseState state = new MouseState();
+ 134         MouseInput.getInstance().getState(state);
+ 135         return state.getX();
+ 136     }
+ 137 
+ 138     @Override
+<span class="changed"> 139     protected int _getMouseY() {</span>
+
+ 140         MouseState state = new MouseState();
+ 141         MouseInput.getInstance().getState(state);
+ 142         return state.getY();
+ 143     }
+ 144 
+ 145     @Override
+<span class="changed"> 146     protected int _getPixelColor(int x, int y) {</span>
+
+ 147         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
+ 148         final int byteDepth = screen.getDepth() &gt;&gt;&gt; 3;
+ 149         final int bwidth = screen.getWidth();
+ 150         final int bheight = screen.getHeight();
+ 151 
+ 152         if (x &lt; 0 || x &gt; bwidth || y &lt; 0 || y &gt; bheight) {
+<span class="changed"> 153             return 0;</span>
+ 154         }
+ 155 
+ 156         synchronized (NativeScreen.framebufferSwapLock) {
+ 157 
+ 158             ByteBuffer buffer = screen.getScreenCapture();
+ 159 
+ 160             if (byteDepth == 2) {
+ 161                 ShortBuffer shortbuf = buffer.asShortBuffer();
+ 162 
+ 163                 int v = shortbuf.get((y * bwidth) + x);
+<span class="changed"> 164                 int red = (int) ((v &amp; 0xF800) &gt;&gt; 11) &lt;&lt; 3;</span>
+<span class="changed"> 165                 int green = (int) ((v &amp; 0x7E0) &gt;&gt; 5) &lt;&lt; 2;</span>
+<span class="changed"> 166                 int blue = (int) (v &amp; 0x1F) &lt;&lt; 3;</span>
+ 167 
+ 168                 int p = (0xff000000
+ 169                         | (red &lt;&lt; 16)
+ 170                         | (green &lt;&lt; 8)
+ 171                         | blue);
+<span class="changed"> 172                 return p;</span>
+ 173             } else if (byteDepth &gt;= 4) {
+ 174                 IntBuffer intbuf = buffer.asIntBuffer();
+<span class="changed"> 175                 return intbuf.get((y * bwidth) + x);</span>
+ 176             } else {
+<span class="changed"> 177                 throw new RuntimeException("Unknown bit depth");</span>
+ 178             }
+ 179         }
+ 180     }
+ 181 
+ 182     @Override
+<span class="changed"> 183     protected Pixels _getScreenCapture(int x, int y, int width, int height,</span>
+<span class="changed"> 184             boolean isHiDPI) {</span>
+ 185         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
+<span class="removed"> 186         final int byteDepth = screen.getDepth() &gt;&gt;&gt; 3;</span>
+ 187         final int scrWidth = screen.getWidth();
+ 188         final int scrHeight = screen.getHeight();
+ 189 
+ 190         synchronized (NativeScreen.framebufferSwapLock) {
+ 191             IntBuffer buffer = screen.getScreenCapture().asIntBuffer();
+ 192 
+ 193             if (x == 0 &amp;&amp; y == 0 &amp;&amp; width == scrWidth &amp;&amp; height == scrHeight) {
+<span class="changed"> 194                 return new MonoclePixels(width, height, buffer);</span>
+
+
+ 195             }
+ 196 
+<span class="removed"> 197             IntBuffer ret = IntBuffer.allocate(width * height);</span>
+ 198             int rowStop = Math.min(y + height, scrHeight);
+ 199             int colStop = Math.min(x + width, scrWidth);
+ 200             for (int row = y; row &lt; rowStop; row++) {
+ 201                 for (int col = x; col &lt; colStop; col++) {
+<span class="changed"> 202                     ret.put(buffer.get(row * scrWidth + col));</span>
+ 203                 }
+ 204             }
+<span class="removed"> 205 </span>
+<span class="removed"> 206             ret.rewind();</span>
+<span class="removed"> 207             return new MonoclePixels(width, height, ret);</span>
+ 208         }
+ 209     }
+ 210 }
+</pre></td><td><pre>
+
+</pre><hr></hr><pre>
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 
+  26 package com.sun.glass.ui.monocle;
+  27 
+  28 import com.sun.glass.events.MouseEvent;
+<span class="changed">  29 import com.sun.glass.ui.Application;</span>
+<span class="changed">  30 import com.sun.glass.ui.GlassRobot;</span>
+<span class="changed">  31 import javafx.scene.input.KeyCode;</span>
+<span class="changed">  32 import javafx.scene.input.MouseButton;</span>
+<span class="changed">  33 import javafx.scene.paint.Color;</span>
+<span class="changed">  34 import javafx.scene.robot.Robot;</span>
+  35 
+  36 import java.nio.ByteBuffer;
+  37 import java.nio.IntBuffer;
+  38 import java.nio.ShortBuffer;
+  39 
+  40 class MonocleRobot extends Robot {
+  41     @Override
+<span class="changed">  42     public void create() {</span>
+<span class="changed">  43         // no-op</span>
+  44     }
+  45 
+  46     @Override
+<span class="changed">  47     public void destroy() {</span>
+<span class="changed">  48         // no-op</span>
+  49     }
+  50 
+  51     @Override
+<span class="changed">  52     public void keyPress(KeyCode code) {</span>
+<span class="changed">  53         Application.checkEventThread();</span>
+  54         KeyState state = new KeyState();
+  55         KeyInput.getInstance().getState(state);
+<span class="changed">  56         state.pressKey(code.getCode());</span>
+  57         KeyInput.getInstance().setState(state);
+
+  58     }
+  59 
+  60     @Override
+<span class="changed">  61     public void keyRelease(KeyCode code) {</span>
+<span class="changed">  62         Application.checkEventThread();</span>
+  63         KeyState state = new KeyState();
+  64         KeyInput.getInstance().getState(state);
+<span class="changed">  65         state.releaseKey(code.getCode());</span>
+  66         KeyInput.getInstance().setState(state);
+
+  67     }
+  68 
+  69     @Override
+<span class="changed">  70     public void mouseMove(int x, int y) {</span>
+<span class="changed">  71         Application.checkEventThread();</span>
+  72         MouseState state = new MouseState();
+  73         MouseInput.getInstance().getState(state);
+  74         state.setX(x);
+  75         state.setY(y);
+  76         MouseInput.getInstance().setState(state, false);
+
+  77     }
+  78 
+<span class="changed">  79     private static MouseState convertToMouseState(boolean press, MouseState state, MouseButton button) {</span>
+<span class="changed">  80         switch (button) {</span>
+<span class="changed">  81             case PRIMARY:</span>
+<span class="changed">  82                 if (press) {</span>
+
+
+  83                     state.pressButton(MouseEvent.BUTTON_LEFT);
+<span class="new">  84                 } else {</span>
+<span class="new">  85                     state.releaseButton(MouseEvent.BUTTON_LEFT);</span>
+<span class="new">  86                 }</span>
+<span class="new">  87                 return state;</span>
+<span class="new">  88             case SECONDARY:</span>
+<span class="new">  89                 if (press) {</span>
+<span class="new">  90                     state.pressButton(MouseEvent.BUTTON_RIGHT);</span>
+<span class="new">  91                 } else {</span>
+<span class="new">  92                     state.releaseButton(MouseEvent.BUTTON_RIGHT);</span>
+  93                 }
+<span class="changed">  94                 return state;</span>
+<span class="changed">  95             case MIDDLE:</span>
+<span class="changed">  96                 if (press) {</span>
+  97                     state.pressButton(MouseEvent.BUTTON_OTHER);
+<span class="new">  98                 } else {</span>
+<span class="new">  99                     state.releaseButton(MouseEvent.BUTTON_OTHER);</span>
+<span class="new"> 100                 }</span>
+<span class="new"> 101                 return state;</span>
+<span class="new"> 102             default: throw new IllegalArgumentException("MouseButton: " + button +</span>
+<span class="new"> 103                     " not supported by Monocle Robot");</span>
+ 104         }
+<span class="changed"> 105     }</span>
+<span class="changed"> 106 </span>
+<span class="changed"> 107     private static MouseState convertToMouseState(boolean press, MouseState state, MouseButton... buttons) {</span>
+<span class="changed"> 108         for (MouseButton button : buttons) {</span>
+<span class="changed"> 109             switch (button) {</span>
+<span class="changed"> 110                 case PRIMARY:</span>
+<span class="changed"> 111                     if (press) {</span>
+<span class="changed"> 112                         state.pressButton(MouseEvent.BUTTON_LEFT);</span>
+<span class="changed"> 113                     } else {</span>
+<span class="changed"> 114                         state.releaseButton(MouseEvent.BUTTON_LEFT);</span>
+<span class="changed"> 115                     }</span>
+<span class="changed"> 116                     break;</span>
+<span class="changed"> 117                 case SECONDARY:</span>
+<span class="changed"> 118                     if (press) {</span>
+ 119                         state.pressButton(MouseEvent.BUTTON_RIGHT);
+<span class="new"> 120                     } else {</span>
+<span class="new"> 121                         state.releaseButton(MouseEvent.BUTTON_RIGHT);</span>
+<span class="new"> 122                     }</span>
+<span class="new"> 123                     break;</span>
+<span class="new"> 124                 case MIDDLE:</span>
+<span class="new"> 125                     if (press) {</span>
+<span class="new"> 126                         state.pressButton(MouseEvent.BUTTON_OTHER);</span>
+<span class="new"> 127                     } else {</span>
+<span class="new"> 128                         state.releaseButton(MouseEvent.BUTTON_OTHER);</span>
+<span class="new"> 129                     }</span>
+<span class="new"> 130                     break;</span>
+<span class="new"> 131                 default: throw new IllegalArgumentException("MouseButton: " + button +</span>
+<span class="new"> 132                         " not supported by Monocle Robot");</span>
+ 133             }
+<span class="changed"> 134         }</span>
+<span class="changed"> 135         return state;</span>
+ 136     }
+ 137 
+ 138     @Override
+<span class="changed"> 139     public void mousePress(MouseButton button) {</span>
+<span class="changed"> 140         Application.checkEventThread();</span>
+ 141         MouseState state = new MouseState();
+ 142         MouseInput.getInstance().getState(state);
+<span class="changed"> 143         MouseInput.getInstance().setState(convertToMouseState(true, state, button), false);</span>
+
+ 144     }
+<span class="changed"> 145 </span>
+<span class="changed"> 146     @Override</span>
+<span class="changed"> 147     public void mousePress(MouseButton... buttons) {</span>
+<span class="changed"> 148         Application.checkEventThread();</span>
+<span class="changed"> 149         MouseState state = new MouseState();</span>
+<span class="changed"> 150         MouseInput.getInstance().getState(state);</span>
+<span class="changed"> 151         MouseInput.getInstance().setState(convertToMouseState(true, state, buttons), false);</span>
+ 152     }
+<span class="changed"> 153 </span>
+<span class="changed"> 154     @Override</span>
+<span class="changed"> 155     public void mouseRelease(MouseButton button) {</span>
+<span class="changed"> 156         Application.checkEventThread();</span>
+<span class="changed"> 157         MouseState state = new MouseState();</span>
+<span class="changed"> 158         MouseInput.getInstance().getState(state);</span>
+<span class="changed"> 159         MouseInput.getInstance().setState(convertToMouseState(false, state, button), false);</span>
+ 160     }
+<span class="changed"> 161 </span>
+<span class="changed"> 162     @Override</span>
+<span class="changed"> 163     public void mouseRelease(MouseButton... buttons) {</span>
+<span class="changed"> 164         Application.checkEventThread();</span>
+<span class="changed"> 165         MouseState state = new MouseState();</span>
+<span class="changed"> 166         MouseInput.getInstance().getState(state);</span>
+<span class="changed"> 167         MouseInput.getInstance().setState(convertToMouseState(false, state, buttons), false);</span>
+ 168     }
+ 169 
+ 170     @Override
+<span class="changed"> 171     protected void mouseWheel(int wheelAmt) {</span>
+<span class="changed"> 172         Application.checkEventThread();</span>
+ 173         MouseState state = new MouseState();
+ 174         MouseInput mouse = MouseInput.getInstance();
+ 175         mouse.getState(state);
+ 176         int direction = wheelAmt &lt; 0
+ 177                         ? MouseState.WHEEL_DOWN
+ 178                         : MouseState.WHEEL_UP;
+ 179         for (int i = 0; i &lt; Math.abs(wheelAmt); i++) {
+ 180             state.setWheel(direction);
+ 181             mouse.setState(state, false);
+ 182             state.setWheel(MouseState.WHEEL_NONE);
+ 183             mouse.setState(state, false);
+ 184         }
+
+ 185     }
+ 186 
+ 187     @Override
+<span class="changed"> 188     public int getMouseX() {</span>
+<span class="changed"> 189         Application.checkEventThread();</span>
+ 190         MouseState state = new MouseState();
+ 191         MouseInput.getInstance().getState(state);
+ 192         return state.getX();
+ 193     }
+ 194 
+ 195     @Override
+<span class="changed"> 196     public int getMouseY() {</span>
+<span class="changed"> 197         Application.checkEventThread();</span>
+ 198         MouseState state = new MouseState();
+ 199         MouseInput.getInstance().getState(state);
+ 200         return state.getY();
+ 201     }
+ 202 
+ 203     @Override
+<span class="changed"> 204     public Color getPixelColor(int x, int y) {</span>
+<span class="changed"> 205         Application.checkEventThread();</span>
+ 206         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
+ 207         final int byteDepth = screen.getDepth() &gt;&gt;&gt; 3;
+ 208         final int bwidth = screen.getWidth();
+ 209         final int bheight = screen.getHeight();
+ 210 
+ 211         if (x &lt; 0 || x &gt; bwidth || y &lt; 0 || y &gt; bheight) {
+<span class="changed"> 212             return GlassRobot.convertFromIntArgb(0);</span>
+ 213         }
+ 214 
+ 215         synchronized (NativeScreen.framebufferSwapLock) {
+ 216 
+ 217             ByteBuffer buffer = screen.getScreenCapture();
+ 218 
+ 219             if (byteDepth == 2) {
+ 220                 ShortBuffer shortbuf = buffer.asShortBuffer();
+ 221 
+ 222                 int v = shortbuf.get((y * bwidth) + x);
+<span class="changed"> 223                 int red = (v &amp; 0xF800) &gt;&gt; 11 &lt;&lt; 3;</span>
+<span class="changed"> 224                 int green = (v &amp; 0x7E0) &gt;&gt; 5 &lt;&lt; 2;</span>
+<span class="changed"> 225                 int blue = (v &amp; 0x1F) &lt;&lt; 3;</span>
+ 226 
+ 227                 int p = (0xff000000
+ 228                         | (red &lt;&lt; 16)
+ 229                         | (green &lt;&lt; 8)
+ 230                         | blue);
+<span class="changed"> 231                 return GlassRobot.convertFromIntArgb(p);</span>
+ 232             } else if (byteDepth &gt;= 4) {
+ 233                 IntBuffer intbuf = buffer.asIntBuffer();
+<span class="changed"> 234                 return GlassRobot.convertFromIntArgb(intbuf.get((y * bwidth) + x));</span>
+ 235             } else {
+<span class="changed"> 236                 throw new RuntimeException("Unknown bit depth: " + byteDepth);</span>
+ 237             }
+ 238         }
+ 239     }
+ 240 
+ 241     @Override
+<span class="changed"> 242     protected void getScreenCapture(int x, int y, int width, int height, int[] data) {</span>
+<span class="changed"> 243         Application.checkEventThread();</span>
+ 244         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
+
+ 245         final int scrWidth = screen.getWidth();
+ 246         final int scrHeight = screen.getHeight();
+ 247 
+ 248         synchronized (NativeScreen.framebufferSwapLock) {
+ 249             IntBuffer buffer = screen.getScreenCapture().asIntBuffer();
+ 250 
+ 251             if (x == 0 &amp;&amp; y == 0 &amp;&amp; width == scrWidth &amp;&amp; height == scrHeight) {
+<span class="changed"> 252                 // Easy case, the entire screen is being captured.</span>
+<span class="changed"> 253                 System.arraycopy(buffer.array(), 0, data, 0, buffer.array().length);</span>
+<span class="changed"> 254                 return;</span>
+ 255             }
+ 256 
+
+ 257             int rowStop = Math.min(y + height, scrHeight);
+ 258             int colStop = Math.min(x + width, scrWidth);
+ 259             for (int row = y; row &lt; rowStop; row++) {
+ 260                 for (int col = x; col &lt; colStop; col++) {
+<span class="changed"> 261                     data[row * scrWidth + col] = buffer.get(row * scrWidth + col);</span>
+ 262                 }
+ 263             }
+
+
+
+ 264         }
+ 265     }
+ 266 }
+</pre></td>
+</tr></table>
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.sdiff.html' target='_top'>next &gt</a></center>
+</body></html>

@@ -1,0 +1,259 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>openjfx Cdiff modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java</title>
+</head>
+<body id="SUNWwebrev">
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.cdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.cdiff.html' target='_top'>next &gt</a></center>
+<h2>modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java</h2>
+        <a class="print" href="javascript:print()">Print this page</a>
+<pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+        <pre>
+<hr /><span class="oldmarker">*** 22,77 ****</span>
+   * or visit www.oracle.com if you need additional information or have any
+   * questions.
+   */
+  package com.sun.glass.ui.gtk;
+  
+<span class="changed">! import com.sun.glass.ui.*;</span>
+<span class="changed">! import java.nio.IntBuffer;</span>
+  
+  final class GtkRobot extends Robot {
+  
+      @Override
+<span class="changed">!     protected void _create() {</span>
+          // no-op
+      }
+  
+      @Override
+<span class="changed">!     protected void _destroy() {</span>
+          // no-op
+      }
+  
+      @Override
+      protected native void _keyPress(int code);
+  
+      @Override
+      protected native void _keyRelease(int code);
+  
+      @Override
+<span class="changed">!     protected native void _mouseMove(int x, int y);</span>
+  
+      @Override
+<span class="changed">!     protected native void _mousePress(int buttons);</span>
+  
+      @Override
+      protected native void _mouseRelease(int buttons);
+  
+      @Override
+      protected native void _mouseWheel(int wheelAmt);
+  
+      @Override
+      protected native int _getMouseX();
+  
+      @Override
+      protected native int _getMouseY();
+  
+      @Override
+<span class="changed">!     protected int _getPixelColor(int x, int y) {</span>
+          Screen mainScreen = Screen.getMainScreen();
+          x = (int) Math.floor((x + 0.5) * mainScreen.getPlatformScaleX());
+          y = (int) Math.floor((y + 0.5) * mainScreen.getPlatformScaleY());
+          int[] result = new int[1];
+<span class="changed">!         _getScreenCapture(x, y, 1, 1, result);</span>
+<span class="changed">!         return result[0];</span>
+      }
+  
+<span class="changed">!     @Override native protected void _getScreenCapture(int x, int y, int width, int height, int[] data);</span>
+  }
+<span class="newmarker">--- 22,131 ----</span>
+   * or visit www.oracle.com if you need additional information or have any
+   * questions.
+   */
+  package com.sun.glass.ui.gtk;
+  
+<span class="changed">! import javafx.scene.input.KeyCode;</span>
+<span class="changed">! import javafx.scene.input.MouseButton;</span>
+<span class="changed">! import javafx.scene.paint.Color;</span>
+<span class="changed">! import javafx.scene.robot.Robot;</span>
+<span class="changed">! </span>
+<span class="changed">! import com.sun.glass.ui.Application;</span>
+<span class="changed">! import com.sun.glass.ui.GlassRobot;</span>
+<span class="changed">! import com.sun.glass.ui.Screen;</span>
+  
+  final class GtkRobot extends Robot {
+  
+      @Override
+<span class="changed">!     protected void create() {</span>
+          // no-op
+      }
+  
+      @Override
+<span class="changed">!     protected void destroy() {</span>
+          // no-op
+      }
+  
+      @Override
+<span class="new">+     public void keyPress(KeyCode code) {</span>
+<span class="new">+         Application.checkEventThread();</span>
+<span class="new">+         _keyPress(code.getCode());</span>
+<span class="new">+     }</span>
+<span class="new">+ </span>
+      protected native void _keyPress(int code);
+  
+      @Override
+<span class="new">+     public void keyRelease(KeyCode code) {</span>
+<span class="new">+         Application.checkEventThread();</span>
+<span class="new">+         _keyRelease(code.getCode());</span>
+<span class="new">+     }</span>
+<span class="new">+ </span>
+      protected native void _keyRelease(int code);
+  
+      @Override
+<span class="changed">!     public native void mouseMove(int x, int y);</span>
+<span class="changed">! </span>
+<span class="changed">!     @Override</span>
+<span class="changed">!     public void mousePress(MouseButton button) {</span>
+<span class="changed">!         Application.checkEventThread();</span>
+<span class="changed">!         _mousePress(GlassRobot.convertToRobotMouseButton(button));</span>
+<span class="changed">!     }</span>
+<span class="changed">! </span>
+<span class="changed">!     @Override</span>
+<span class="changed">!     public void mousePress(MouseButton... buttons) {</span>
+<span class="changed">!         Application.checkEventThread();</span>
+<span class="changed">!         _mousePress(GlassRobot.convertToRobotMouseButton(buttons));</span>
+<span class="changed">!     }</span>
+<span class="changed">! </span>
+<span class="changed">!     protected native void _mousePress(int button);</span>
+  
+      @Override
+<span class="changed">!     public void mouseRelease(MouseButton button) {</span>
+<span class="changed">!         Application.checkEventThread();</span>
+<span class="changed">!         _mouseRelease(GlassRobot.convertToRobotMouseButton(button));</span>
+<span class="changed">!     }</span>
+  
+      @Override
+<span class="new">+     public void mouseRelease(MouseButton... buttons) {</span>
+<span class="new">+         Application.checkEventThread();</span>
+<span class="new">+         _mouseRelease(GlassRobot.convertToRobotMouseButton(buttons));</span>
+<span class="new">+     }</span>
+<span class="new">+ </span>
+      protected native void _mouseRelease(int buttons);
+  
+      @Override
+<span class="new">+     protected void mouseWheel(int wheelAmt) {</span>
+<span class="new">+         Application.checkEventThread();</span>
+<span class="new">+         _mouseWheel(wheelAmt);</span>
+<span class="new">+     }</span>
+<span class="new">+ </span>
+      protected native void _mouseWheel(int wheelAmt);
+  
+      @Override
+<span class="new">+     public int getMouseX() {</span>
+<span class="new">+         Application.checkEventThread();</span>
+<span class="new">+         return _getMouseX();</span>
+<span class="new">+     }</span>
+<span class="new">+ </span>
+      protected native int _getMouseX();
+  
+      @Override
+<span class="new">+     public int getMouseY() {</span>
+<span class="new">+         Application.checkEventThread();</span>
+<span class="new">+         return _getMouseY();</span>
+<span class="new">+     }</span>
+<span class="new">+ </span>
+      protected native int _getMouseY();
+  
+      @Override
+<span class="changed">!     public Color getPixelColor(int x, int y) {</span>
+<span class="changed">!         Application.checkEventThread();</span>
+          Screen mainScreen = Screen.getMainScreen();
+          x = (int) Math.floor((x + 0.5) * mainScreen.getPlatformScaleX());
+          y = (int) Math.floor((y + 0.5) * mainScreen.getPlatformScaleY());
+          int[] result = new int[1];
+<span class="changed">!         getScreenCapture(x, y, 1, 1, result);</span>
+<span class="changed">!         return GlassRobot.convertFromIntArgb(result[0]);</span>
+      }
+  
+<span class="changed">!     @Override native protected void getScreenCapture(int x, int y, int width, int height, int[] data);</span>
+  }
+</pre>
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.cdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.cdiff.html' target='_top'>next &gt</a></center>
+</body></html>
+

@@ -1,0 +1,450 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="scm" content="mercurial" />
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>openjfx</title>
+</head>
+<body id="SUNWwebrev">
+<div class="summary">
+<h2>Code Review for openjfx</h2>
+<table>
+<tr><th>Prepared by:</th>
+<td>"" (brcolow) on Mon Jan  1 14:51:44 DST 2018</td></tr>
+<tr><th>Workspace:</th><td>/home/brcolow/dev/openjfx</td></tr>
+</td></tr>
+<tr><th>Compare against version:</th><td>10766</td></tr>
+<tr><th>Branch:</th><td>robot</td></tr>
+<tr><th>Summary of changes:</th><td>
+1400 lines changed: 897 ins; 325 del; 178 mod; 5383 unchg</td></tr>
+<tr><th>Patch of changes:</th><td>
+<a href="openjfx.patch">openjfx.patch</a></td></tr>
+<tr><th>Legend:</th><td>
+<b>Modified file</b><br><font color=red><b>Deleted file</b></font><br><font color=green><b>New file</b></font></td></tr>
+</table>
+</div>
+<p><code>
+<a href="apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.cdiff.html">Cdiffs</a>
+<a href="apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.udiff.html">Udiffs</a>
+<a href="apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.sdiff.html">Sdiffs</a>
+<a href="apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.frames.html">Frames</a>
+<a href="apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java-.html">Old</a>
+<a href="apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.html">New</a>
+<a href="apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.patch">Patch</a>
+<a href="raw_files/new/apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java">Raw</a>
+</code>
+<b>apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java here -->
+<span class="lineschanged">12 lines changed: 2 ins; 2 del; 8 mod; 74 unchg</span>
+</blockquote>
+<p><code>
+<a href="apps/tests/Robot/src/robottest/RobotBuilder.java.cdiff.html">Cdiffs</a>
+<a href="apps/tests/Robot/src/robottest/RobotBuilder.java.udiff.html">Udiffs</a>
+<a href="apps/tests/Robot/src/robottest/RobotBuilder.java.sdiff.html">Sdiffs</a>
+<a href="apps/tests/Robot/src/robottest/RobotBuilder.java.frames.html">Frames</a>
+<a href="apps/tests/Robot/src/robottest/RobotBuilder.java-.html">Old</a>
+<a href="apps/tests/Robot/src/robottest/RobotBuilder.java.html">New</a>
+<a href="apps/tests/Robot/src/robottest/RobotBuilder.java.patch">Patch</a>
+<a href="raw_files/new/apps/tests/Robot/src/robottest/RobotBuilder.java">Raw</a>
+</code>
+<b>apps/tests/Robot/src/robottest/RobotBuilder.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in apps/tests/Robot/src/robottest/RobotBuilder.java here -->
+<span class="lineschanged">14 lines changed: 1 ins; 1 del; 12 mod; 445 unchg</span>
+</blockquote>
+<p><code>
+<a href="buildSrc/addExports.cdiff.html">Cdiffs</a>
+<a href="buildSrc/addExports.udiff.html">Udiffs</a>
+<a href="buildSrc/addExports.sdiff.html">Sdiffs</a>
+<a href="buildSrc/addExports.frames.html">Frames</a>
+<a href="buildSrc/addExports-.html">Old</a>
+<a href="buildSrc/addExports.html">New</a>
+<a href="buildSrc/addExports.patch">Patch</a>
+<a href="raw_files/new/buildSrc/addExports">Raw</a>
+</code>
+<b>buildSrc/addExports</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in buildSrc/addExports here -->
+<span class="lineschanged">1 line changed: 1 ins; 0 del; 0 mod; 15 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java here -->
+<span class="lineschanged">4 lines changed: 2 ins; 2 del; 0 mod; 744 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java here -->
+<span class="lineschanged">271 lines changed: 0 ins; 271 del; 0 mod; 0 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java here -->
+<span class="lineschanged">3 lines changed: 2 ins; 1 del; 0 mod; 480 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java here -->
+<span class="lineschanged">64 lines changed: 54 ins; 0 del; 10 mod; 67 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosApplication.java here -->
+<span class="lineschanged">11 lines changed: 9 ins; 0 del; 2 mod; 287 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/ios/IosRobot.java here -->
+<span class="lineschanged">62 lines changed: 37 ins; 2 del; 23 mod; 116 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacApplication.java here -->
+<span class="lineschanged">15 lines changed: 14 ins; 0 del; 1 mod; 332 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java here -->
+<span class="lineschanged">74 lines changed: 52 ins; 1 del; 21 mod; 76 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleApplication.java here -->
+<span class="lineschanged">3 lines changed: 1 ins; 2 del; 0 mod; 351 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/monocle/MonocleRobot.java here -->
+<span class="lineschanged">165 lines changed: 74 ins; 18 del; 73 mod; 119 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java here -->
+<span class="lineschanged">12 lines changed: 10 ins; 0 del; 2 mod; 360 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinRobot.java here -->
+<span class="lineschanged">75 lines changed: 61 ins; 1 del; 13 mod; 41 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/javafx/application/Application.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/javafx/application/Application.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/javafx/application/Application.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/javafx/application/Application.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/javafx/application/Application.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/javafx/application/Application.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/javafx/application/Application.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/javafx/application/Application.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/javafx/application/Application.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/javafx/application/Application.java here -->
+<span class="lineschanged">15 lines changed: 12 ins; 3 del; 0 mod; 525 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/java/module-info.java.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/module-info.java.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/java/module-info.java.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/java/module-info.java.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/java/module-info.java-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/java/module-info.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/module-info.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/module-info.java">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/java/module-info.java</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/module-info.java here -->
+<span class="lineschanged">1 line changed: 1 ins; 0 del; 0 mod; 151 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.html">New</a>
+<a href="modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp here -->
+<span class="lineschanged">6 lines changed: 1 ins; 0 del; 5 mod; 260 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m.html">New</a>
+<a href="modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/native-glass/mac/GlassRobot.m here -->
+<span class="lineschanged">33 lines changed: 7 ins; 20 del; 6 mod; 482 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/main/native-glass/win/Robot.cpp.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/win/Robot.cpp.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/win/Robot.cpp.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/main/native-glass/win/Robot.cpp.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/main/native-glass/win/Robot.cpp-.html">Old</a>
+<a href="modules/javafx.graphics/src/main/native-glass/win/Robot.cpp.html">New</a>
+<a href="modules/javafx.graphics/src/main/native-glass/win/Robot.cpp.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/native-glass/win/Robot.cpp">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/main/native-glass/win/Robot.cpp</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/native-glass/win/Robot.cpp here -->
+<span class="lineschanged">3 lines changed: 0 ins; 1 del; 2 mod; 398 unchg</span>
+</blockquote>
+<p><code>
+<a href="modules/javafx.graphics/src/test/addExports.cdiff.html">Cdiffs</a>
+<a href="modules/javafx.graphics/src/test/addExports.udiff.html">Udiffs</a>
+<a href="modules/javafx.graphics/src/test/addExports.sdiff.html">Sdiffs</a>
+<a href="modules/javafx.graphics/src/test/addExports.frames.html">Frames</a>
+<a href="modules/javafx.graphics/src/test/addExports-.html">Old</a>
+<a href="modules/javafx.graphics/src/test/addExports.html">New</a>
+<a href="modules/javafx.graphics/src/test/addExports.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/test/addExports">Raw</a>
+</code>
+<b>modules/javafx.graphics/src/test/addExports</b> 
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/test/addExports here -->
+<span class="lineschanged">1 line changed: 1 ins; 0 del; 0 mod; 60 unchg</span>
+</blockquote>
+<p><code>
+ ------ ------ ------
+ ------
+ ---
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/GlassRobot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/com/sun/glass/ui/GlassRobot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/GlassRobot.java">Raw</a>
+</code>
+<font color=green><b>modules/javafx.graphics/src/main/java/com/sun/glass/ui/GlassRobot.java</b></font>
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/com/sun/glass/ui/GlassRobot.java here -->
+<span class="lineschanged">172 lines changed: 172 ins; 0 del; 0 mod; 0 unchg</span>
+</blockquote>
+<p><code>
+ ------ ------ ------
+ ------
+ ---
+<a href="modules/javafx.graphics/src/main/java/javafx/scene/robot/Robot.java.html">New</a>
+<a href="modules/javafx.graphics/src/main/java/javafx/scene/robot/Robot.java.patch">Patch</a>
+<a href="raw_files/new/modules/javafx.graphics/src/main/java/javafx/scene/robot/Robot.java">Raw</a>
+</code>
+<font color=green><b>modules/javafx.graphics/src/main/java/javafx/scene/robot/Robot.java</b></font>
+</p><blockquote><pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+<!-- Add comments to explain changes in modules/javafx.graphics/src/main/java/javafx/scene/robot/Robot.java here -->
+<span class="lineschanged">383 lines changed: 383 ins; 0 del; 0 mod; 0 unchg</span>
+</blockquote>
+
+
+<hr />
+<p style="font-size: small">
+This code review page was prepared using <b>./webrev.ksh</b>
+(vers 25.16-hg+openjdk.java.net).
+</body>
+</html>

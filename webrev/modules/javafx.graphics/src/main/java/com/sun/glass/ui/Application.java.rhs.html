@@ -1,0 +1,914 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui;
+  26 
+  27 import com.sun.glass.events.KeyEvent;
+  28 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  29 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  30 
+  31 import java.io.File;
+  32 import java.nio.ByteBuffer;
+  33 import java.nio.IntBuffer;
+  34 import java.security.AccessController;
+  35 import java.security.PrivilegedAction;
+<a name="1" id="anc1"></a>
+
+  36 import java.util.List;
+  37 import java.util.Map;
+  38 import java.util.LinkedList;
+<a name="2" id="anc2"></a><span class="new">  39 </span>
+<span class="new">  40 import javafx.scene.robot.Robot;</span>
+  41 
+  42 public abstract class Application {
+  43 
+  44     private final static String DEFAULT_NAME = "java";
+  45     protected String name = DEFAULT_NAME;
+  46 
+  47     public static class EventHandler {
+  48         // currently used only on Mac OS X
+  49         public void handleWillFinishLaunchingAction(Application app, long time) {
+  50         }
+  51         // currently used only on Mac OS X
+  52         public void handleDidFinishLaunchingAction(Application app, long time) {
+  53         }
+  54         // currently used only on Mac OS X
+  55         public void handleWillBecomeActiveAction(Application app, long time) {
+  56         }
+  57         // currently used only on Mac OS X
+  58         public void handleDidBecomeActiveAction(Application app, long time) {
+  59         }
+  60         // currently used only on Mac OS X
+  61         public void handleWillResignActiveAction(Application app, long time) {
+  62         }
+  63         // currently used only on Mac OS X
+  64         public void handleDidResignActiveAction(Application app, long time) {
+  65         }
+  66         // currently used only on iOS
+  67         public void handleDidReceiveMemoryWarning(Application app, long time) {
+  68         }
+  69         // currently used only on Mac OS X
+  70         public void handleWillHideAction(Application app, long time) {
+  71         }
+  72         // currently used only on Mac OS X
+  73         public void handleDidHideAction(Application app, long time) {
+  74         }
+  75         // currently used only on Mac OS X
+  76         public void handleWillUnhideAction(Application app, long time) {
+  77         }
+  78         // currently used only on Mac OS X
+  79         public void handleDidUnhideAction(Application app, long time) {
+  80         }
+  81         // currently used only on Mac OS X
+  82         // the open files which started up the app will arrive before app becomes active
+  83         public void handleOpenFilesAction(Application app, long time, String files[]) {
+  84         }
+  85         // currently used only on Mac OS X
+  86         public void handleQuitAction(Application app, long time) {
+  87         }
+  88         public boolean handleThemeChanged(String themeName) {
+  89             return false;
+  90         }
+  91     }
+  92 
+  93     private EventHandler eventHandler;
+  94     private boolean initialActiveEventReceived = false;
+  95     private String initialOpenedFiles[] = null;
+  96 
+  97     private static boolean loaded = false;
+  98     private static Application application;
+  99     private static Thread eventThread;
+ 100     private static final boolean disableThreadChecks =
+ 101         AccessController.doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; {
+ 102             final String str =
+ 103                     System.getProperty("glass.disableThreadChecks", "false");
+ 104             return "true".equalsIgnoreCase(str);
+ 105         });
+ 106 
+ 107     // May be called on any thread.
+ 108     protected static synchronized void loadNativeLibrary(final String libname) {
+ 109         // load the native library of the specified libname.
+ 110         // the platform default by convention is "glass", all others should have a suffix, ie glass-x11
+ 111         if (!loaded) {
+ 112             com.sun.glass.utils.NativeLibLoader.loadLibrary(libname);
+ 113             loaded = true;
+ 114         }
+ 115     }
+ 116 
+ 117     // May be called on any thread.
+ 118     protected static synchronized void loadNativeLibrary() {
+ 119         // use the "platform default" name of "glass"
+ 120         loadNativeLibrary("glass");
+ 121     }
+ 122 
+ 123     private static volatile Map deviceDetails = null;
+ 124 
+ 125     // provides a means for the user to pass platorm specific details
+ 126     // to the native glass impl. Can be null.
+ 127     // May need be called before Run.
+ 128     // May be called on any thread.
+ 129     public static void setDeviceDetails(Map details) {
+ 130         deviceDetails = details;
+ 131     }
+ 132 
+ 133     // May be called on any thread.
+ 134     public static Map getDeviceDetails() {
+ 135         return deviceDetails;
+ 136     }
+ 137 
+ 138     protected Application() {
+ 139     }
+ 140 
+ 141     // May be called on any thread.
+ 142     public static void run(final Runnable launchable) {
+ 143         if (application != null) {
+ 144             throw new IllegalStateException("Application is already running");
+ 145         }
+ 146         application = PlatformFactory.getPlatformFactory().createApplication();
+ 147         // each concrete Application should set the app name using its own platform mechanism:
+ 148         // on Mac OS X - use NSBundle info, which can be overriden by -Xdock:name
+ 149         // on Windows - TODO
+ 150         // on Linux - TODO
+ 151         //application.name = DEFAULT_NAME; // default
+ 152         try {
+ 153             application.runLoop(() -&gt; {
+ 154                 Screen.initScreens();
+ 155                 launchable.run();
+ 156             });
+ 157         } catch (Throwable t) {
+ 158             t.printStackTrace();
+ 159         }
+ 160     }
+ 161 
+ 162     // runLoop never exits until app terminates
+ 163     protected abstract void runLoop(Runnable launchable);
+ 164 
+ 165     // should return after loop termination completion
+ 166     protected void finishTerminating() {
+ 167         // To make sure application object is not used outside of the run loop
+ 168         application = null;
+ 169         // The eventThread is null at this point, no need to check it
+ 170     }
+ 171 
+ 172     /**
+ 173      * Gets the name for the application.  The application name may
+ 174      * be used to identify the application in the user interface or
+ 175      * as part of the platform specific path used to store application
+ 176      * data.
+ 177      *
+ 178      * This is a hint and may not be used on some platforms.
+ 179      *
+ 180      * @return the application name
+ 181      */
+ 182     public String getName() {
+ 183         checkEventThread();
+ 184         return name;
+ 185     }
+ 186 
+ 187     /**
+ 188      * Sets the name for the application.  The application name may
+ 189      * be used to identify the application in the user interface or
+ 190      * as part of the platform specific path used to store application
+ 191      * data.
+ 192      *
+ 193      * The name could be set only once. All subsequent calls are ignored.
+ 194      *
+ 195      * This is a hint and may not be used on some platforms.
+ 196      *
+ 197      * @param name the new application name
+ 198      */
+ 199     public void setName(String name) {
+ 200         checkEventThread();
+ 201         if (name != null &amp;&amp; DEFAULT_NAME.equals(this.name)) {
+ 202             this.name = name;
+ 203         }
+ 204     }
+ 205 
+ 206     /**
+ 207      * Gets a platform specific path that can be used to store
+ 208      * application data.  The application name typically appears
+ 209      * as part of the path.
+ 210      *
+ 211      * On some platforms, the path may not yet exist and the caller
+ 212      * will need to create it.
+ 213      *
+ 214      * @return the platform specific path for the application data
+ 215      */
+ 216     public String getDataDirectory() {
+ 217         checkEventThread();
+ 218         String userHome = AccessController.doPrivileged((PrivilegedAction&lt;String&gt;) () -&gt; System.getProperty("user.home"));
+ 219         return userHome + File.separator + "." + name + File.separator;
+ 220     }
+ 221 
+ 222     private void notifyWillFinishLaunching() {
+ 223         EventHandler handler = getEventHandler();
+ 224         if (handler != null) {
+ 225             handler.handleWillFinishLaunchingAction(this, System.nanoTime());
+ 226         }
+ 227     }
+ 228 
+ 229     private void notifyDidFinishLaunching() {
+ 230         EventHandler handler = getEventHandler();
+ 231         if (handler != null) {
+ 232             handler.handleDidFinishLaunchingAction(this, System.nanoTime());
+ 233         }
+ 234     }
+ 235 
+ 236     private void notifyWillBecomeActive() {
+ 237         EventHandler handler = getEventHandler();
+ 238         if (handler != null) {
+ 239             handler.handleWillBecomeActiveAction(this, System.nanoTime());
+ 240         }
+ 241     }
+ 242 
+ 243     private void notifyDidBecomeActive() {
+ 244         this.initialActiveEventReceived = true;
+ 245         EventHandler handler = getEventHandler();
+ 246         if (handler != null) {
+ 247             handler.handleDidBecomeActiveAction(this, System.nanoTime());
+ 248         }
+ 249     }
+ 250 
+ 251     private void notifyWillResignActive() {
+ 252         EventHandler handler = getEventHandler();
+ 253         if (handler != null) {
+ 254             handler.handleWillResignActiveAction(this, System.nanoTime());
+ 255         }
+ 256     }
+ 257 
+ 258     private boolean notifyThemeChanged(String themeName) {
+ 259         EventHandler handler = getEventHandler();
+ 260         if (handler != null) {
+ 261             return handler.handleThemeChanged(themeName);
+ 262         }
+ 263         return false;
+ 264     }
+ 265 
+ 266     private void notifyDidResignActive() {
+ 267         EventHandler handler = getEventHandler();
+ 268         if (handler != null) {
+ 269             handler.handleDidResignActiveAction(this, System.nanoTime());
+ 270         }
+ 271     }
+ 272 
+ 273     private void notifyDidReceiveMemoryWarning() {
+ 274         EventHandler handler = getEventHandler();
+ 275         if (handler != null) {
+ 276             handler.handleDidReceiveMemoryWarning(this, System.nanoTime());
+ 277         }
+ 278     }
+ 279 
+ 280     private void notifyWillHide() {
+ 281         EventHandler handler = getEventHandler();
+ 282         if (handler != null) {
+ 283             handler.handleWillHideAction(this, System.nanoTime());
+ 284         }
+ 285     }
+ 286 
+ 287     private void notifyDidHide() {
+ 288         EventHandler handler = getEventHandler();
+ 289         if (handler != null) {
+ 290             handler.handleDidHideAction(this, System.nanoTime());
+ 291         }
+ 292     }
+ 293 
+ 294     private void notifyWillUnhide() {
+ 295         EventHandler handler = getEventHandler();
+ 296         if (handler != null) {
+ 297             handler.handleWillUnhideAction(this, System.nanoTime());
+ 298         }
+ 299     }
+ 300 
+ 301     private void notifyDidUnhide() {
+ 302         EventHandler handler = getEventHandler();
+ 303         if (handler != null) {
+ 304             handler.handleDidUnhideAction(this, System.nanoTime());
+ 305         }
+ 306     }
+ 307 
+ 308     // notificiation when user drag and drops files onto app icon
+ 309     private void notifyOpenFiles(String files[]) {
+ 310         if ((this.initialActiveEventReceived == false) &amp;&amp; (this.initialOpenedFiles == null)) {
+ 311             // rememeber the initial opened files
+ 312             this.initialOpenedFiles = files;
+ 313         }
+ 314         EventHandler handler = getEventHandler();
+ 315         if ((handler != null) &amp;&amp; (files != null)) {
+ 316             handler.handleOpenFilesAction(this, System.nanoTime(), files);
+ 317         }
+ 318     }
+ 319 
+ 320     private void notifyWillQuit() {
+ 321         EventHandler handler = getEventHandler();
+ 322         if (handler != null) {
+ 323             handler.handleQuitAction(this, System.nanoTime());
+ 324         }
+ 325     }
+ 326 
+ 327     /**
+ 328      * Install app's default native menus:
+ 329      * on Mac OS X - Apple menu (showing the app name) with a single Quit menu item
+ 330      * on Windows - NOP
+ 331      * on Linux - NOP
+ 332      */
+ 333     public void installDefaultMenus(MenuBar menubar) {
+ 334         checkEventThread();
+ 335         // To override in subclasses
+ 336     }
+ 337 
+ 338     public EventHandler getEventHandler() {
+ 339         //checkEventThread(); // Glass (Mac)
+ 340         // When an app is closing, Mac calls notify- Will/DidHide, Will/DidResignActive
+ 341         // on a thread other than the Main thread
+ 342         return eventHandler;
+ 343     }
+ 344 
+ 345     public void setEventHandler(EventHandler eventHandler) {
+ 346         checkEventThread();
+ 347         boolean resendOpenFiles = ((this.eventHandler != null) &amp;&amp; (this.initialOpenedFiles != null));
+ 348         this.eventHandler = eventHandler;
+ 349         if (resendOpenFiles == true) {
+ 350             // notify the new event handler with initial opened files
+ 351             notifyOpenFiles(this.initialOpenedFiles);
+ 352     }
+ 353     }
+ 354 
+ 355     private boolean terminateWhenLastWindowClosed = true;
+ 356     public final boolean shouldTerminateWhenLastWindowClosed() {
+ 357         checkEventThread();
+ 358         return terminateWhenLastWindowClosed;
+ 359     }
+ 360     public final void setTerminateWhenLastWindowClosed(boolean b) {
+ 361         checkEventThread();
+ 362         terminateWhenLastWindowClosed = b;
+ 363     }
+ 364 
+ 365     public boolean shouldUpdateWindow() {
+ 366         checkEventThread();
+ 367         return false; // overridden in platform application class
+ 368     }
+ 369 
+ 370     public boolean hasWindowManager() {
+ 371         //checkEventThread(); // Prism (Mac)
+ 372         return true; // overridden in platform application class
+ 373     }
+ 374 
+ 375     /**
+ 376      * Notifies the Application that rendering has completed for current pulse.
+ 377      *
+ 378      * This is called on the render thread.
+ 379      */
+ 380     public void notifyRenderingFinished() {
+ 381     }
+ 382 
+ 383     public void terminate() {
+ 384         checkEventThread();
+ 385         try {
+ 386                 final List&lt;Window&gt; windows = new LinkedList&lt;&gt;(Window.getWindows());
+ 387                 for (Window window : windows) {
+ 388                     // first make windows invisible
+ 389                     window.setVisible(false);
+ 390                 }
+ 391                 for (Window window : windows) {
+ 392                     // now we can close windows
+ 393                     window.close();
+ 394                 }
+ 395         } catch (Throwable t) {
+ 396             t.printStackTrace();
+ 397         } finally {
+ 398             finishTerminating();
+ 399         }
+ 400     }
+ 401 
+ 402     // May be called on any thread
+ 403     static public Application GetApplication() {
+ 404         return Application.application;
+ 405     }
+ 406 
+ 407     // May be called on any thread
+ 408     protected static void setEventThread(Thread thread) {
+ 409         Application.eventThread = thread;
+ 410     }
+ 411 
+ 412     // May be called on any thread
+ 413     protected static Thread getEventThread() {
+ 414         return Application.eventThread;
+ 415     }
+ 416 
+ 417     /**
+ 418      * Returns {@code true} if the current thread is the event thread.
+ 419      */
+ 420     public static boolean isEventThread() {
+ 421         return Thread.currentThread() == Application.eventThread;
+ 422     }
+ 423 
+ 424     /**
+ 425      * Verifies that the current thread is the event thread, and throws
+ 426      * an exception if this is not so.
+ 427      *
+ 428      * The check can be disabled by setting the "glass.disableThreadChecks"
+ 429      * system property. It is preferred, however, to fix the application code
+ 430      * instead.
+ 431      *
+ 432      * @throws IllegalStateException if the current thread is not the event thread
+ 433      */
+ 434     public static void checkEventThread() {
+ 435         //TODO: we do NOT advertise the "glass.disableThreadChecks".
+ 436         //      If we never get a complaint about this check, we can consider
+ 437         //      dropping the system property and perform the check unconditionally
+ 438         if (!disableThreadChecks &amp;&amp;
+ 439                 Thread.currentThread() != Application.eventThread)
+ 440         {
+ 441             throw new IllegalStateException(
+ 442                     "This operation is permitted on the event thread only; currentThread = "
+ 443                     + Thread.currentThread().getName());
+ 444 
+ 445         }
+ 446     }
+ 447 
+ 448     // Called from native, when a JNI exception has occurred
+ 449     public static void reportException(Throwable t) {
+ 450         Thread currentThread = Thread.currentThread();
+ 451         Thread.UncaughtExceptionHandler handler =
+ 452                 currentThread.getUncaughtExceptionHandler();
+ 453         handler.uncaughtException(currentThread, t);
+ 454     }
+ 455 
+ 456     abstract protected void _invokeAndWait(java.lang.Runnable runnable);
+ 457     /**
+ 458      * Block the current thread and wait until the given  runnable finishes
+ 459      * running on the native event loop thread.
+ 460      */
+ 461     public static void invokeAndWait(java.lang.Runnable runnable) {
+ 462         if (runnable == null) {
+ 463             return;
+ 464         }
+ 465         if (isEventThread()) {
+ 466             runnable.run();
+ 467         } else {
+ 468             GetApplication()._invokeAndWait(runnable);
+ 469         }
+ 470     }
+ 471 
+ 472     abstract protected void _invokeLater(java.lang.Runnable runnable);
+ 473     /**
+ 474      * Schedule the given runnable to run on the native event loop thread
+ 475      * some time in the future, and return immediately.
+ 476      */
+ 477     public static void invokeLater(java.lang.Runnable runnable) {
+ 478         if (runnable == null) {
+ 479             return;
+ 480         }
+ 481         GetApplication()._invokeLater(runnable);
+ 482     }
+ 483 
+ 484     protected abstract Object _enterNestedEventLoop();
+ 485     protected abstract void _leaveNestedEventLoop(Object retValue);
+ 486 
+ 487     private static int nestedEventLoopCounter = 0;
+ 488 
+ 489     /**
+ 490      * Starts a nested event loop.
+ 491      *
+ 492      * Calling this method temporarily blocks processing of the current event,
+ 493      * and starts a nested event loop to handle other native events.  To
+ 494      * proceed with the blocked execution path, the application should call the
+ 495      * {@link #leaveNestedEventLoop(Object)} method.
+ 496      *
+ 497      * Note that this method may only be invoked on the main (event handling)
+ 498      * thread.
+ 499      *
+ 500      * An application may enter several nested loops recursively. There's no
+ 501      * limit of recursion other than that imposed by the native stack size.
+ 502      *
+ 503      * @return an object passed to the leaveNestedEventLoop() method
+ 504      * @throws RuntimeException if the current thread is not the main thread
+ 505      */
+ 506     static Object enterNestedEventLoop() {
+ 507         checkEventThread();
+ 508 
+ 509         nestedEventLoopCounter++;
+ 510         try {
+ 511             return GetApplication()._enterNestedEventLoop();
+ 512         } finally {
+ 513             nestedEventLoopCounter--;
+ 514         }
+ 515     }
+ 516 
+ 517     /**
+ 518      * Terminates the current nested event loop.
+ 519      *
+ 520      * After calling this method and returning from the current event handler,
+ 521      * the execusion returns to the point where the {@link #enterNestedEventLoop}
+ 522      * was called previously. You may specify a return value for the
+ 523      * enterNestedEventLoop() method by passing the argument {@code retValue} to
+ 524      * the leaveNestedEventLoop().
+ 525      *
+ 526      * Note that this method may only be invoked on the main (event handling)
+ 527      * thread.
+ 528      *
+ 529      * @throws RuntimeException if the current thread is not the main thread
+ 530      * @throws IllegalStateException if the application hasn't started a nested
+ 531      *                               event loop
+ 532      */
+ 533     static void leaveNestedEventLoop(Object retValue) {
+ 534         checkEventThread();
+ 535 
+ 536         if (nestedEventLoopCounter == 0) {
+ 537             throw new IllegalStateException("Not in a nested event loop");
+ 538         }
+ 539 
+ 540         GetApplication()._leaveNestedEventLoop(retValue);
+ 541     }
+ 542 
+ 543     public static boolean isNestedLoopRunning() {
+ 544         checkEventThread();
+ 545         return nestedEventLoopCounter &gt; 0;
+ 546     }
+ 547 
+ 548     //TODO: move to the EventHandler
+ 549     public void menuAboutAction() {
+ 550         System.err.println("about");
+ 551     }
+ 552 
+ 553 
+ 554     // FACTORY METHODS
+ 555 
+ 556     /**
+ 557      * Create a window.
+ 558      *
+ 559      * The styleMask argument is a bitmask of window styles as defined in the
+ 560      * Window class.  Note, however, that visual kinds (UNTITLED, TITLED,
+ 561      * or TRANSPARENT) can't be combined together.  Also, functional types
+ 562      * (NORMAL, POPUP, or UTILITY) can't be combined together.  A window is
+ 563      * allowed to be of exactly one visual kind, and exactly one functional
+ 564      * type.
+ 565      */
+ 566     public abstract Window createWindow(Window owner, Screen screen, int styleMask);
+ 567 
+ 568     /**
+ 569      * Create a window.
+ 570      *
+ 571      * The styleMask argument is a bitmask of window styles as defined in the
+ 572      * Window class.  Note, however, that visual kinds (UNTITLED, TITLED,
+ 573      * or TRANSPARENT) can't be combined together.  Also, functional types
+ 574      * (NORMAL, POPUP, or UTILITY) can't be combined together.  A window is
+ 575      * allowed to be of exactly one visual kind, and exactly one functional
+ 576      * type.
+ 577      */
+ 578     public final Window createWindow(Screen screen, int styleMask) {
+ 579         return createWindow(null, screen, styleMask);
+ 580     }
+ 581 
+ 582     public abstract Window createWindow(long parent);
+ 583 
+ 584     public abstract View createView();
+ 585 
+ 586     public abstract Cursor createCursor(int type);
+ 587     public abstract Cursor createCursor(int x, int y, Pixels pixels);
+ 588 
+ 589     protected abstract void staticCursor_setVisible(boolean visible);
+ 590     protected abstract Size staticCursor_getBestSize(int width, int height);
+ 591 
+ 592     public final Menu createMenu(String title) {
+ 593         return new Menu(title);
+ 594     }
+ 595 
+ 596     public final Menu createMenu(String title, boolean enabled) {
+ 597         return new Menu(title, enabled);
+ 598     }
+ 599 
+ 600     public final MenuBar createMenuBar() {
+ 601         return new MenuBar();
+ 602     }
+ 603 
+ 604     public final MenuItem createMenuItem(String title) {
+ 605         return createMenuItem(title, null);
+ 606     }
+ 607 
+ 608     public final MenuItem createMenuItem(String title, MenuItem.Callback callback) {
+ 609         return createMenuItem(title, callback, KeyEvent.VK_UNDEFINED, KeyEvent.MODIFIER_NONE);
+ 610     }
+ 611 
+ 612     public final MenuItem createMenuItem(String title, MenuItem.Callback callback,
+ 613             int shortcutKey, int shortcutModifiers) {
+ 614         return createMenuItem(title, callback, shortcutKey, shortcutModifiers, null);
+ 615     }
+ 616 
+ 617     public final MenuItem createMenuItem(String title, MenuItem.Callback callback,
+ 618             int shortcutKey, int shortcutModifiers, Pixels pixels) {
+ 619         return new MenuItem(title, callback, shortcutKey, shortcutModifiers, pixels);
+ 620     }
+ 621 
+ 622     public abstract Pixels createPixels(int width, int height, ByteBuffer data);
+ 623     public abstract Pixels createPixels(int width, int height, IntBuffer data);
+ 624     public abstract Pixels createPixels(int width, int height, IntBuffer data, float scalex, float scaley);
+ 625     protected abstract int staticPixels_getNativeFormat();
+ 626 
+ 627     /* utility method called from native code */
+ 628     static Pixels createPixels(int width, int height, int[] data, float scalex, float scaley) {
+ 629         return Application.GetApplication().createPixels(width, height, IntBuffer.wrap(data), scalex, scaley);
+ 630     }
+ 631 
+ 632     /* utility method called from native code */
+ 633     static float getScaleFactor(final int x, final int y, final int w, final int h) {
+ 634         float scale = 0.0f;
+ 635         // Find the maximum scale for screens this area overlaps
+ 636         for (Screen s : Screen.getScreens()) {
+ 637             final int sx = s.getX(), sy = s.getY(), sw = s.getWidth(), sh = s.getHeight();
+ 638             if (x &lt; (sx + sw) &amp;&amp; (x + w) &gt; sx &amp;&amp; y &lt; (sy + sh) &amp;&amp; (y + h) &gt; sy) {
+ 639                 if (scale &lt; s.getRecommendedOutputScaleX()) {
+ 640                     scale = s.getRecommendedOutputScaleX();
+ 641                 }
+ 642                 if (scale &lt; s.getRecommendedOutputScaleY()) {
+ 643                     scale = s.getRecommendedOutputScaleY();
+ 644                 }
+ 645             }
+ 646         }
+ 647         return scale == 0.0f ? 1.0f : scale;
+ 648     }
+ 649 
+ 650 
+ 651     public abstract Robot createRobot();
+ 652 
+ 653     protected abstract double staticScreen_getVideoRefreshPeriod();
+ 654     protected abstract Screen[] staticScreen_getScreens();
+ 655 
+ 656     public abstract Timer createTimer(Runnable runnable);
+ 657     protected abstract int staticTimer_getMinPeriod();
+ 658     protected abstract int staticTimer_getMaxPeriod();
+ 659 
+ 660     public final EventLoop createEventLoop() {
+ 661         return new EventLoop();
+ 662     }
+ 663 
+ 664     public Accessible createAccessible() { return null; }
+ 665 
+ 666     protected abstract FileChooserResult staticCommonDialogs_showFileChooser(Window owner, String folder, String filename, String title, int type,
+ 667                                                      boolean multipleMode, ExtensionFilter[] extensionFilters, int defaultFilterIndex);
+ 668 
+ 669     protected abstract File staticCommonDialogs_showFolderChooser(Window owner, String folder, String title);
+ 670 
+ 671     protected abstract long staticView_getMultiClickTime();
+ 672     protected abstract int staticView_getMultiClickMaxX();
+ 673     protected abstract int staticView_getMultiClickMaxY();
+ 674 
+ 675     /**
+ 676      * Gets the Name of the currently active high contrast theme.
+ 677      * If null, then high contrast is not enabled.
+ 678      */
+ 679     public String getHighContrastTheme() {
+ 680         checkEventThread();
+ 681         return null;
+ 682     }
+ 683 
+ 684     protected boolean _supportsInputMethods() {
+ 685         // Overridden in subclasses
+ 686         return false;
+ 687     }
+ 688     public final boolean supportsInputMethods() {
+ 689         checkEventThread();
+ 690         return _supportsInputMethods();
+ 691     }
+ 692 
+ 693     protected abstract boolean _supportsTransparentWindows();
+ 694     public final boolean supportsTransparentWindows() {
+ 695         checkEventThread();
+ 696         return _supportsTransparentWindows();
+ 697     }
+ 698 
+ 699     public boolean hasTwoLevelFocus() {
+ 700         return false;
+ 701     }
+ 702 
+ 703     public boolean hasVirtualKeyboard() {
+ 704         return false;
+ 705     }
+ 706 
+ 707     public boolean hasTouch() {
+ 708         return false;
+ 709     }
+ 710 
+ 711     public boolean hasMultiTouch() {
+ 712         return false;
+ 713     }
+ 714 
+ 715     public boolean hasPointer() {
+ 716         return true;
+ 717     }
+ 718 
+ 719     protected abstract boolean _supportsUnifiedWindows();
+ 720     public final boolean supportsUnifiedWindows() {
+ 721         checkEventThread();
+ 722         return _supportsUnifiedWindows();
+ 723     }
+ 724 
+ 725     protected boolean _supportsSystemMenu() {
+ 726         // Overridden in subclasses
+ 727         return false;
+ 728     }
+ 729     public final boolean supportsSystemMenu() {
+ 730         checkEventThread();
+ 731         return _supportsSystemMenu();
+ 732     }
+ 733 
+ 734     protected abstract int _getKeyCodeForChar(char c);
+ 735     /**
+ 736      * Returns a VK_ code of a key capable of producing the given unicode
+ 737      * character with respect to the currently active keyboard layout or
+ 738      * VK_UNDEFINED if the character isn't present in the current layout.
+ 739      *
+ 740      * @param c the character
+ 741      * @return integer code for the given char
+ 742      */
+ 743     public static int getKeyCodeForChar(char c) {
+ 744         return application._getKeyCodeForChar(c);
+ 745     }
+ 746 }
+<a name="3" id="anc3"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="3" type="hidden" /></form></body></html>

@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>openjfx Sdiff modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk </title>
+</head><body id="SUNWwebrev">
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.sdiff.html' target='_top'>next &gt</a></center>
+<h2>modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java</h2>
+<a class="print" href="javascript:print()">Print this page</a>
+<pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+
+<table><tr valign="top">
+<td><pre>
+
+</pre><hr></hr><pre>
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.gtk;
+  26 
+  27 import com.sun.glass.ui.Application;
+  28 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  29 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  30 import com.sun.glass.ui.Cursor;
+  31 import com.sun.glass.ui.InvokeLaterDispatcher;
+  32 import com.sun.glass.ui.Pixels;
+<span class="removed">  33 import com.sun.glass.ui.Robot;</span>
+  34 import com.sun.glass.ui.Screen;
+  35 import com.sun.glass.ui.Size;
+  36 import com.sun.glass.ui.Timer;
+  37 import com.sun.glass.ui.View;
+  38 import com.sun.glass.ui.Window;
+  39 import com.sun.javafx.util.Logging;
+  40 import com.sun.glass.utils.NativeLibLoader;
+  41 import com.sun.prism.impl.PrismSettings;
+  42 import sun.util.logging.PlatformLogger;
+  43 
+  44 import java.io.File;
+  45 import java.lang.reflect.Method;
+  46 import java.nio.ByteBuffer;
+  47 import java.nio.IntBuffer;
+  48 import java.security.AccessController;
+  49 import java.security.PrivilegedAction;
+  50 import java.util.Map;
+  51 import java.util.concurrent.CountDownLatch;
+  52 import java.lang.annotation.Native;
+
+
+  53 
+  54 final class GtkApplication extends Application implements
+  55                                     InvokeLaterDispatcher.InvokeLaterSubmitter {
+  56     private static final String SWT_INTERNAL_CLASS =
+  57             "org.eclipse.swt.internal.gtk.OS";
+  58     private static final int forcedGtkVersion;
+  59 
+  60 
+  61     static  {
+  62         //check for SWT-GTK lib presence
+  63         Class&lt;?&gt; OS = AccessController.
+  64                 doPrivileged((PrivilegedAction&lt;Class&lt;?&gt;&gt;) () -&gt; {
+  65                     try {
+  66                         return Class.forName(SWT_INTERNAL_CLASS, true,
+  67                                 ClassLoader.getSystemClassLoader());
+  68                     } catch (Exception e) {}
+  69                     try {
+  70                         return Class.forName(SWT_INTERNAL_CLASS, true,
+  71                                 Thread.currentThread().getContextClassLoader());
+  72                     } catch (Exception e) {}
+
+</pre><hr></hr>
+</pre></td><td><pre>
+
+</pre><hr></hr><pre>
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.gtk;
+  26 
+  27 import com.sun.glass.ui.Application;
+  28 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  29 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  30 import com.sun.glass.ui.Cursor;
+  31 import com.sun.glass.ui.InvokeLaterDispatcher;
+  32 import com.sun.glass.ui.Pixels;
+
+  33 import com.sun.glass.ui.Screen;
+  34 import com.sun.glass.ui.Size;
+  35 import com.sun.glass.ui.Timer;
+  36 import com.sun.glass.ui.View;
+  37 import com.sun.glass.ui.Window;
+  38 import com.sun.javafx.util.Logging;
+  39 import com.sun.glass.utils.NativeLibLoader;
+  40 import com.sun.prism.impl.PrismSettings;
+  41 import sun.util.logging.PlatformLogger;
+  42 
+  43 import java.io.File;
+  44 import java.lang.reflect.Method;
+  45 import java.nio.ByteBuffer;
+  46 import java.nio.IntBuffer;
+  47 import java.security.AccessController;
+  48 import java.security.PrivilegedAction;
+  49 import java.util.Map;
+  50 import java.util.concurrent.CountDownLatch;
+  51 import java.lang.annotation.Native;
+<span class="new">  52 </span>
+<span class="new">  53 import javafx.scene.robot.Robot;</span>
+  54 
+  55 final class GtkApplication extends Application implements
+  56                                     InvokeLaterDispatcher.InvokeLaterSubmitter {
+  57     private static final String SWT_INTERNAL_CLASS =
+  58             "org.eclipse.swt.internal.gtk.OS";
+  59     private static final int forcedGtkVersion;
+  60 
+  61 
+  62     static  {
+  63         //check for SWT-GTK lib presence
+  64         Class&lt;?&gt; OS = AccessController.
+  65                 doPrivileged((PrivilegedAction&lt;Class&lt;?&gt;&gt;) () -&gt; {
+  66                     try {
+  67                         return Class.forName(SWT_INTERNAL_CLASS, true,
+  68                                 ClassLoader.getSystemClassLoader());
+  69                     } catch (Exception e) {}
+  70                     try {
+  71                         return Class.forName(SWT_INTERNAL_CLASS, true,
+  72                                 Thread.currentThread().getContextClassLoader());
+  73                     } catch (Exception e) {}
+
+</pre><hr></hr>
+</pre></td>
+</tr></table>
+<center><a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/Robot.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../../../../../../index.html' target='_top'>index</a> <a href='../../../../../../../../../../modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkRobot.java.sdiff.html' target='_top'>next &gt</a></center>
+</body></html>

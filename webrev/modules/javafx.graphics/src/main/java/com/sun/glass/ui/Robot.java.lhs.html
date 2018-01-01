@@ -1,0 +1,437 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+<span class="removed">   1 /*</span>
+<span class="removed">   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.</span>
+<span class="removed">   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</span>
+<span class="removed">   4  *</span>
+<span class="removed">   5  * This code is free software; you can redistribute it and/or modify it</span>
+<span class="removed">   6  * under the terms of the GNU General Public License version 2 only, as</span>
+<span class="removed">   7  * published by the Free Software Foundation.  Oracle designates this</span>
+<span class="removed">   8  * particular file as subject to the "Classpath" exception as provided</span>
+<span class="removed">   9  * by Oracle in the LICENSE file that accompanied this code.</span>
+<span class="removed">  10  *</span>
+<span class="removed">  11  * This code is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="removed">  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</span>
+<span class="removed">  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</span>
+<span class="removed">  14  * version 2 for more details (a copy is included in the LICENSE file that</span>
+<span class="removed">  15  * accompanied this code).</span>
+<span class="removed">  16  *</span>
+<span class="removed">  17  * You should have received a copy of the GNU General Public License version</span>
+<span class="removed">  18  * 2 along with this work; if not, write to the Free Software Foundation,</span>
+<span class="removed">  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</span>
+<span class="removed">  20  *</span>
+<span class="removed">  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</span>
+<span class="removed">  22  * or visit www.oracle.com if you need additional information or have any</span>
+<span class="removed">  23  * questions.</span>
+<span class="removed">  24  */</span>
+<span class="removed">  25 package com.sun.glass.ui;</span>
+<span class="removed">  26 </span>
+<span class="removed">  27 import static com.sun.javafx.FXPermissions.CREATE_ROBOT_PERMISSION;</span>
+<span class="removed">  28 import java.lang.annotation.Native;</span>
+<span class="removed">  29 import java.nio.IntBuffer;</span>
+<span class="removed">  30 </span>
+<span class="removed">  31 public abstract class Robot {</span>
+<span class="removed">  32 </span>
+<span class="removed">  33     @Native public static final int MOUSE_LEFT_BTN   = 1;</span>
+<span class="removed">  34     @Native public static final int MOUSE_RIGHT_BTN  = 2;</span>
+<span class="removed">  35     @Native public static final int MOUSE_MIDDLE_BTN = 4;</span>
+<span class="removed">  36 </span>
+<span class="removed">  37     protected abstract void _create();</span>
+<span class="removed">  38     protected Robot() {</span>
+<span class="removed">  39         // Ensure proper permission</span>
+<span class="removed">  40         final SecurityManager sm = System.getSecurityManager();</span>
+<span class="removed">  41         if (sm != null) {</span>
+<span class="removed">  42             sm.checkPermission(CREATE_ROBOT_PERMISSION);</span>
+<span class="removed">  43         }</span>
+<span class="removed">  44         Application.checkEventThread();</span>
+<span class="removed">  45         _create();</span>
+<span class="removed">  46     }</span>
+<span class="removed">  47 </span>
+<span class="removed">  48     protected abstract void _destroy();</span>
+<span class="removed">  49     public void destroy() {</span>
+<span class="removed">  50         Application.checkEventThread();</span>
+<span class="removed">  51         _destroy();</span>
+<span class="removed">  52     }</span>
+<span class="removed">  53 </span>
+<span class="removed">  54     protected abstract void _keyPress(int code);</span>
+<span class="removed">  55     /**</span>
+<span class="removed">  56      * Generate a key pressed event.</span>
+<span class="removed">  57      * @param code key code for this event</span>
+<span class="removed">  58      */</span>
+<span class="removed">  59     public void keyPress(int code) {</span>
+<span class="removed">  60         Application.checkEventThread();</span>
+<span class="removed">  61         _keyPress(code);</span>
+<span class="removed">  62     }</span>
+<span class="removed">  63 </span>
+<span class="removed">  64     protected abstract void _keyRelease(int code);</span>
+<span class="removed">  65     /**</span>
+<span class="removed">  66      * Generate a key released event.</span>
+<span class="removed">  67      *</span>
+<span class="removed">  68      * @param code key code for this event</span>
+<span class="removed">  69      */</span>
+<span class="removed">  70     public void keyRelease(int code) {</span>
+<span class="removed">  71         Application.checkEventThread();</span>
+<span class="removed">  72         _keyRelease(code);</span>
+<span class="removed">  73     }</span>
+<span class="removed">  74 </span>
+<span class="removed">  75     protected abstract void _mouseMove(int x, int y);</span>
+<span class="removed">  76     /**</span>
+<span class="removed">  77      * Generate a mouse moved event.</span>
+<span class="removed">  78      *</span>
+<span class="removed">  79      * @param x screen coordinate x</span>
+<span class="removed">  80      * @param y screen coordinate y</span>
+<span class="removed">  81      */</span>
+<span class="removed">  82     public void mouseMove(int x, int y) {</span>
+<span class="removed">  83         Application.checkEventThread();</span>
+<span class="removed">  84         _mouseMove(x, y);</span>
+<span class="removed">  85     }</span>
+<span class="removed">  86 </span>
+<span class="removed">  87     protected abstract void _mousePress(int buttons);</span>
+<span class="removed">  88     /**</span>
+<span class="removed">  89      * Generate a mouse press event with specified buttons mask.</span>
+<span class="removed">  90      *</span>
+<span class="removed">  91      * Up to 32-buttons mice are supported. Other buttons are inaccessible</span>
+<span class="removed">  92      * by the robot. Bits 0, 1, and 2 mean LEFT, RIGHT, and MIDDLE mouse buttons</span>
+<span class="removed">  93      * respectively.</span>
+<span class="removed">  94      *</span>
+<span class="removed">  95      * @param buttons buttons to have generated the event</span>
+<span class="removed">  96      */</span>
+<span class="removed">  97     public void mousePress(int buttons) {</span>
+<span class="removed">  98         Application.checkEventThread();</span>
+<span class="removed">  99         _mousePress(buttons);</span>
+<span class="removed"> 100     }</span>
+<span class="removed"> 101 </span>
+<span class="removed"> 102     protected abstract void _mouseRelease(int buttons);</span>
+<span class="removed"> 103     /**</span>
+<span class="removed"> 104      * Generate a mouse release event with specified buttons mask.</span>
+<span class="removed"> 105      *</span>
+<span class="removed"> 106      * @param buttons buttons to have generated the event</span>
+<span class="removed"> 107      */</span>
+<span class="removed"> 108     public void mouseRelease(int buttons) {</span>
+<span class="removed"> 109         Application.checkEventThread();</span>
+<span class="removed"> 110         _mouseRelease(buttons);</span>
+<span class="removed"> 111     }</span>
+<span class="removed"> 112 </span>
+<span class="removed"> 113     protected abstract void _mouseWheel(int wheelAmt);</span>
+<span class="removed"> 114     /**</span>
+<span class="removed"> 115      * Generate a mouse wheel event.</span>
+<span class="removed"> 116      *</span>
+<span class="removed"> 117      * @param wheelAmt amount the wheel has turned of wheel turning</span>
+<span class="removed"> 118      */</span>
+<span class="removed"> 119     public void mouseWheel(int wheelAmt) {</span>
+<span class="removed"> 120         Application.checkEventThread();</span>
+<span class="removed"> 121         _mouseWheel(wheelAmt);</span>
+<span class="removed"> 122     }</span>
+<span class="removed"> 123 </span>
+<span class="removed"> 124     protected abstract int _getMouseX();</span>
+<span class="removed"> 125     public int getMouseX() {</span>
+<span class="removed"> 126         Application.checkEventThread();</span>
+<span class="removed"> 127         return _getMouseX();</span>
+<span class="removed"> 128     }</span>
+<span class="removed"> 129 </span>
+<span class="removed"> 130     protected abstract int _getMouseY();</span>
+<span class="removed"> 131     public int getMouseY() {</span>
+<span class="removed"> 132         Application.checkEventThread();</span>
+<span class="removed"> 133         return _getMouseY();</span>
+<span class="removed"> 134     }</span>
+<span class="removed"> 135 </span>
+<span class="removed"> 136     protected abstract int _getPixelColor(int x, int y);</span>
+<span class="removed"> 137     /**</span>
+<span class="removed"> 138      * Returns pixel color at specified screen coordinates in IntARGB format.</span>
+<span class="removed"> 139      */</span>
+<span class="removed"> 140     public int getPixelColor(int x, int y) {</span>
+<span class="removed"> 141         Application.checkEventThread();</span>
+<span class="removed"> 142         return _getPixelColor(x, y);</span>
+<span class="removed"> 143     }</span>
+<span class="removed"> 144 </span>
+<span class="removed"> 145     // Subclasses must override and implement at least one of the following two</span>
+<span class="removed"> 146     // _getScreenCapture methods</span>
+<span class="removed"> 147 </span>
+<span class="removed"> 148     protected void _getScreenCapture(int x, int y, int width, int height, int[] data) {</span>
+<span class="removed"> 149         throw new UnsupportedOperationException("Not implementated in the base class");</span>
+<span class="removed"> 150     }</span>
+<span class="removed"> 151 </span>
+<span class="removed"> 152     protected Pixels _getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {</span>
+<span class="removed"> 153         Screen mainScreen = Screen.getMainScreen();</span>
+<span class="removed"> 154         float uiScaleX = mainScreen.getPlatformScaleX();</span>
+<span class="removed"> 155         float uiScaleY = mainScreen.getPlatformScaleY();</span>
+<span class="removed"> 156         int data[];</span>
+<span class="removed"> 157         int dw, dh;</span>
+<span class="removed"> 158         if (uiScaleX == 1.0f &amp;&amp; uiScaleY == 1.0f) {</span>
+<span class="removed"> 159             data = new int[width * height];</span>
+<span class="removed"> 160             _getScreenCapture(x, y, width, height, data);</span>
+<span class="removed"> 161             dw = width;</span>
+<span class="removed"> 162             dh = height;</span>
+<span class="removed"> 163         } else {</span>
+<span class="removed"> 164             int pminx = (int) Math.floor(x * uiScaleX);</span>
+<span class="removed"> 165             int pminy = (int) Math.floor(y * uiScaleY);</span>
+<span class="removed"> 166             int pmaxx = (int) Math.ceil((x + width) * uiScaleX);</span>
+<span class="removed"> 167             int pmaxy = (int) Math.ceil((y + height) * uiScaleY);</span>
+<span class="removed"> 168             int pwidth = pmaxx - pminx;</span>
+<span class="removed"> 169             int pheight = pmaxy - pminy;</span>
+<span class="removed"> 170             int tmpdata[] = new int[pwidth * pheight];</span>
+<span class="removed"> 171             _getScreenCapture(pminx, pminy, pwidth, pheight, tmpdata);</span>
+<span class="removed"> 172             if (isHiDPI) {</span>
+<span class="removed"> 173                 data = tmpdata;</span>
+<span class="removed"> 174                 dw = pwidth;</span>
+<span class="removed"> 175                 dh = pheight;</span>
+<span class="removed"> 176             } else {</span>
+<span class="removed"> 177                 data = new int[width * height];</span>
+<span class="removed"> 178                 int index = 0;</span>
+<span class="removed"> 179                 for (int iy = 0; iy &lt; height; iy++) {</span>
+<span class="removed"> 180                     float rely = ((y + iy + 0.5f) * uiScaleY) - (pminy + 0.5f);</span>
+<span class="removed"> 181                     int irely = (int) Math.floor(rely);</span>
+<span class="removed"> 182                     int fracty = (int) ((rely - irely) * 256);</span>
+<span class="removed"> 183                     for (int ix = 0; ix &lt; width; ix++) {</span>
+<span class="removed"> 184                         float relx = ((x + ix + 0.5f) * uiScaleX) - (pminx + 0.5f);</span>
+<span class="removed"> 185                         int irelx = (int) Math.floor(relx);</span>
+<span class="removed"> 186                         int fractx = (int) ((relx - irelx) * 256);</span>
+<span class="removed"> 187                         data[index++] =</span>
+<span class="removed"> 188                             interp(tmpdata, irelx, irely, pwidth, pheight, fractx, fracty);</span>
+<span class="removed"> 189                     }</span>
+<span class="removed"> 190                 }</span>
+<span class="removed"> 191                 dw = width;</span>
+<span class="removed"> 192                 dh = height;</span>
+<span class="removed"> 193             }</span>
+<span class="removed"> 194         }</span>
+<span class="removed"> 195         return Application.GetApplication().createPixels(dw, dh, IntBuffer.wrap(data));</span>
+<span class="removed"> 196     }</span>
+<span class="removed"> 197 </span>
+<span class="removed"> 198     /**</span>
+<span class="removed"> 199      * Returns a capture of the specified rectangular area of the screen.</span>
+<span class="removed"> 200      *</span>
+<span class="removed"> 201      * If {@code isHiDPI} argument is {@code true}, the returned Pixels object</span>
+<span class="removed"> 202      * dimensions may differ from the requested {@code width} and {@code</span>
+<span class="removed"> 203      * height} depending on how many physical pixels the area occupies on the</span>
+<span class="removed"> 204      * screen.  E.g. in HiDPI mode on the Mac (aka Retina display) the pixels</span>
+<span class="removed"> 205      * are doubled, and thus a screen capture of an area of size (10x10) pixels</span>
+<span class="removed"> 206      * will result in a Pixels object with dimensions (20x20). Calling code</span>
+<span class="removed"> 207      * should use the returned objects's getWidth() and getHeight() methods</span>
+<span class="removed"> 208      * to determine the image size.</span>
+<span class="removed"> 209      *</span>
+<span class="removed"> 210      * If (@code isHiDPI) is {@code false}, the returned Pixels object is of</span>
+<span class="removed"> 211      * the requested size. Note that in this case the image may be scaled in</span>
+<span class="removed"> 212      * order to fit to the requested dimensions if running on a HiDPI display.</span>
+<span class="removed"> 213      */</span>
+<span class="removed"> 214     public Pixels getScreenCapture(int x, int y, int width, int height, boolean isHiDPI) {</span>
+<span class="removed"> 215         Application.checkEventThread();</span>
+<span class="removed"> 216         return _getScreenCapture(x, y, width, height, isHiDPI);</span>
+<span class="removed"> 217     }</span>
+<span class="removed"> 218 </span>
+<span class="removed"> 219     /**</span>
+<span class="removed"> 220      * Returns a capture of the specified area of the screen.</span>
+<span class="removed"> 221      * It is equivalent to calling getScreenCapture(x, y, width, height, false),</span>
+<span class="removed"> 222      * i.e. this method takes a "LowDPI" screen shot.</span>
+<span class="removed"> 223      */</span>
+<span class="removed"> 224     public Pixels getScreenCapture(int x, int y, int width, int height) {</span>
+<span class="removed"> 225         return getScreenCapture(x, y, width, height, false);</span>
+<span class="removed"> 226     }</span>
+<span class="removed"> 227 </span>
+<span class="removed"> 228     private static int interp(int pixels[], int x, int y, int w, int h, int fractx1, int fracty1) {</span>
+<span class="removed"> 229         int fractx0 = 256 - fractx1;</span>
+<span class="removed"> 230         int fracty0 = 256 - fracty1;</span>
+<span class="removed"> 231         int i = y * w + x;</span>
+<span class="removed"> 232         int rgb00 = (x &lt; 0 || y &lt; 0 || x &gt;= w || y &gt;= h) ? 0 : pixels[i];</span>
+<span class="removed"> 233         if (fracty1 == 0) {</span>
+<span class="removed"> 234             // No interplation with pixels[y+1]</span>
+<span class="removed"> 235             if (fractx1 == 0) {</span>
+<span class="removed"> 236                 // No interpolation with any neighbors</span>
+<span class="removed"> 237                 return rgb00;</span>
+<span class="removed"> 238             }</span>
+<span class="removed"> 239             int rgb10 = (y &lt; 0 || x+1 &gt;= w || y &gt;= h) ? 0 : pixels[i+1];</span>
+<span class="removed"> 240             return interp(rgb00, rgb10, fractx0, fractx1);</span>
+<span class="removed"> 241         } else if (fractx1 == 0) {</span>
+<span class="removed"> 242             // No interpolation with pixels[x+1]</span>
+<span class="removed"> 243             int rgb01 = (x &lt; 0 || x &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w];</span>
+<span class="removed"> 244             return interp(rgb00, rgb01, fracty0, fracty1);</span>
+<span class="removed"> 245         } else {</span>
+<span class="removed"> 246             // All 4 neighbors must be interpolated</span>
+<span class="removed"> 247             int rgb10 = (y &lt; 0 || x+1 &gt;= w || y &gt;= h) ? 0 : pixels[i+1];</span>
+<span class="removed"> 248             int rgb01 = (x &lt; 0 || x &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w];</span>
+<span class="removed"> 249             int rgb11 = (x+1 &gt;= w || y+1 &gt;= h) ? 0 : pixels[i+w+1];</span>
+<span class="removed"> 250             return interp(interp(rgb00, rgb10, fractx0, fractx1),</span>
+<span class="removed"> 251                           interp(rgb01, rgb11, fractx0, fractx1),</span>
+<span class="removed"> 252                           fracty0, fracty1);</span>
+<span class="removed"> 253         }</span>
+<span class="removed"> 254     }</span>
+<span class="removed"> 255 </span>
+<span class="removed"> 256     private static int interp(int rgb0, int rgb1, int fract0, int fract1) {</span>
+<span class="removed"> 257         int a0 = (rgb0 &gt;&gt; 24) &amp; 0xff;</span>
+<span class="removed"> 258         int r0 = (rgb0 &gt;&gt; 16) &amp; 0xff;</span>
+<span class="removed"> 259         int g0 = (rgb0 &gt;&gt;  8) &amp; 0xff;</span>
+<span class="removed"> 260         int b0 = (rgb0      ) &amp; 0xff;</span>
+<span class="removed"> 261         int a1 = (rgb1 &gt;&gt; 24) &amp; 0xff;</span>
+<span class="removed"> 262         int r1 = (rgb1 &gt;&gt; 16) &amp; 0xff;</span>
+<span class="removed"> 263         int g1 = (rgb1 &gt;&gt;  8) &amp; 0xff;</span>
+<span class="removed"> 264         int b1 = (rgb1      ) &amp; 0xff;</span>
+<span class="removed"> 265         int a = (a0 * fract0 + a1 * fract1) &gt;&gt; 8;</span>
+<span class="removed"> 266         int r = (r0 * fract0 + r1 * fract1) &gt;&gt; 8;</span>
+<span class="removed"> 267         int g = (g0 * fract0 + g1 * fract1) &gt;&gt; 8;</span>
+<span class="removed"> 268         int b = (b0 * fract0 + b1 * fract1) &gt;&gt; 8;</span>
+<span class="removed"> 269         return (a &lt;&lt; 24) | (r &lt;&lt; 16) | (g &lt;&lt; 8) | b;</span>
+<span class="removed"> 270     }</span>
+<span class="removed"> 271 }</span>
+<a name="1" id="anc1"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="1" type="hidden" /></form></body></html>

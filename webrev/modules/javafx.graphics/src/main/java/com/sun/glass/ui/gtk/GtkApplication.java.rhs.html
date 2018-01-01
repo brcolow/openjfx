@@ -1,0 +1,649 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+    <script type="text/javascript" src="../../../../../../../../../../ancnav.js"></script>
+    </head>
+    <body id="SUNWwebrev" onkeypress="keypress(event);">
+    <a name="0"></a>
+    <pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre><hr></hr>
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.gtk;
+  26 
+  27 import com.sun.glass.ui.Application;
+  28 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  29 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  30 import com.sun.glass.ui.Cursor;
+  31 import com.sun.glass.ui.InvokeLaterDispatcher;
+  32 import com.sun.glass.ui.Pixels;
+<a name="1" id="anc1"></a>
+  33 import com.sun.glass.ui.Screen;
+  34 import com.sun.glass.ui.Size;
+  35 import com.sun.glass.ui.Timer;
+  36 import com.sun.glass.ui.View;
+  37 import com.sun.glass.ui.Window;
+  38 import com.sun.javafx.util.Logging;
+  39 import com.sun.glass.utils.NativeLibLoader;
+  40 import com.sun.prism.impl.PrismSettings;
+  41 import sun.util.logging.PlatformLogger;
+  42 
+  43 import java.io.File;
+  44 import java.lang.reflect.Method;
+  45 import java.nio.ByteBuffer;
+  46 import java.nio.IntBuffer;
+  47 import java.security.AccessController;
+  48 import java.security.PrivilegedAction;
+  49 import java.util.Map;
+  50 import java.util.concurrent.CountDownLatch;
+  51 import java.lang.annotation.Native;
+<a name="2" id="anc2"></a><span class="new">  52 </span>
+<span class="new">  53 import javafx.scene.robot.Robot;</span>
+  54 
+  55 final class GtkApplication extends Application implements
+  56                                     InvokeLaterDispatcher.InvokeLaterSubmitter {
+  57     private static final String SWT_INTERNAL_CLASS =
+  58             "org.eclipse.swt.internal.gtk.OS";
+  59     private static final int forcedGtkVersion;
+  60 
+  61 
+  62     static  {
+  63         //check for SWT-GTK lib presence
+  64         Class&lt;?&gt; OS = AccessController.
+  65                 doPrivileged((PrivilegedAction&lt;Class&lt;?&gt;&gt;) () -&gt; {
+  66                     try {
+  67                         return Class.forName(SWT_INTERNAL_CLASS, true,
+  68                                 ClassLoader.getSystemClassLoader());
+  69                     } catch (Exception e) {}
+  70                     try {
+  71                         return Class.forName(SWT_INTERNAL_CLASS, true,
+  72                                 Thread.currentThread().getContextClassLoader());
+  73                     } catch (Exception e) {}
+  74                     return null;
+  75                 });
+  76         if (OS != null) {
+  77             PlatformLogger logger = Logging.getJavaFXLogger();
+  78             logger.fine("SWT-GTK library found. Try to obtain GTK version.");
+  79             Method method = AccessController.
+  80                     doPrivileged((PrivilegedAction&lt;Method&gt;) () -&gt; {
+  81                         try {
+  82                             return OS.getMethod("gtk_major_version");
+  83                         } catch (Exception e) {
+  84                             return null;
+  85                         }
+  86                     });
+  87             int ver = 0;
+  88             if (method != null) {
+  89                 try {
+  90                     ver = ((Number)method.invoke(OS)).intValue();
+  91                 } catch (Exception e) {
+  92                     logger.warning("Method gtk_major_version() of " +
+  93                          "the org.eclipse.swt.internal.gtk.OS class " +
+  94                          "returns error. SWT GTK version cannot be detected. " +
+  95                          "GTK3 will be used as default.");
+  96                     ver = 3;
+  97                 }
+  98             }
+  99             if (ver &lt; 2 || ver &gt; 3) {
+ 100                 logger.warning("SWT-GTK uses unsupported major GTK version "
+ 101                         + ver + ". GTK3 will be used as default.");
+ 102                 ver = 3;
+ 103             }
+ 104             forcedGtkVersion = ver;
+ 105         } else {
+ 106             forcedGtkVersion = 0;
+ 107         }
+ 108 
+ 109         AccessController.doPrivileged((PrivilegedAction&lt;Void&gt;) () -&gt; {
+ 110             Application.loadNativeLibrary();
+ 111             return null;
+ 112         });
+ 113     }
+ 114 
+ 115     public static  int screen = -1;
+ 116     public static  long display = 0;
+ 117     public static  long visualID = 0;
+ 118 
+ 119     static float overrideUIScale;
+ 120 
+ 121     private final InvokeLaterDispatcher invokeLaterDispatcher;
+ 122 
+ 123     private static float getFloat(String propname, float defval, String description) {
+ 124         String str = System.getProperty(propname);
+ 125         if (str == null) {
+ 126             str = System.getenv(propname);
+ 127         }
+ 128         if (str == null) {
+ 129             return defval;
+ 130         }
+ 131         str = str.trim();
+ 132         float val;
+ 133         if (str.endsWith("%")) {
+ 134             val = Integer.parseInt(str.substring(0, str.length()-1)) / 100.0f;
+ 135         } else if (str.endsWith("DPI") || str.endsWith("dpi")) {
+ 136             val = Integer.parseInt(str.substring(0, str.length()-3)) / 96.0f;
+ 137         } else {
+ 138             val = Float.parseFloat(str);
+ 139         }
+ 140         if (PrismSettings.verbose) {
+ 141             System.out.println(description+val);
+ 142         }
+ 143         return val;
+ 144     }
+ 145 
+ 146     GtkApplication() {
+ 147 
+ 148         final int gtkVersion = forcedGtkVersion == 0 ?
+ 149             AccessController.doPrivileged((PrivilegedAction&lt;Integer&gt;) () -&gt; {
+ 150                 String v = System.getProperty("jdk.gtk.version","2");
+ 151                 int ret = 0;
+ 152                 if ("3".equals(v) || v.startsWith("3.")) {
+ 153                     ret = 3;
+ 154                 } else if ("2".equals(v) || v.startsWith("2.")) {
+ 155                     ret = 2;
+ 156                 }
+ 157                 return ret;
+ 158             }) : forcedGtkVersion;
+ 159         boolean gtkVersionVerbose =
+ 160                 AccessController.doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; {
+ 161             return Boolean.getBoolean("jdk.gtk.verbose");
+ 162         });
+ 163         if (PrismSettings.allowHiDPIScaling) {
+ 164             overrideUIScale = AccessController.doPrivileged((PrivilegedAction&lt;Float&gt;) () -&gt;
+ 165                     getFloat("glass.gtk.uiScale", -1.0f, "Forcing UI scaling factor: "));
+ 166         } else {
+ 167             overrideUIScale = -1.0f;
+ 168         }
+ 169 
+ 170         int libraryToLoad = _queryLibrary(gtkVersion, gtkVersionVerbose);
+ 171 
+ 172         AccessController.doPrivileged((PrivilegedAction&lt;Void&gt;) () -&gt; {
+ 173             if (libraryToLoad == QUERY_NO_DISPLAY) {
+ 174                 throw new UnsupportedOperationException("Unable to open DISPLAY");
+ 175             } else if (libraryToLoad == QUERY_USE_CURRENT) {
+ 176                 if (gtkVersionVerbose) {
+ 177                     System.out.println("Glass GTK library to load is already loaded");
+ 178                 }
+ 179             } else if (libraryToLoad == QUERY_LOAD_GTK2) {
+ 180                 if (gtkVersionVerbose) {
+ 181                     System.out.println("Glass GTK library to load is glassgtk2");
+ 182                 }
+ 183                 NativeLibLoader.loadLibrary("glassgtk2");
+ 184             } else if (libraryToLoad == QUERY_LOAD_GTK3) {
+ 185                 if (gtkVersionVerbose) {
+ 186                     System.out.println("Glass GTK library to load is glassgtk3");
+ 187                 }
+ 188                 NativeLibLoader.loadLibrary("glassgtk3");
+ 189             } else {
+ 190                 throw new UnsupportedOperationException("Internal Error");
+ 191             }
+ 192             return null;
+ 193         });
+ 194 
+ 195         int version = _initGTK(gtkVersion, gtkVersionVerbose, overrideUIScale);
+ 196 
+ 197         if (version == -1) {
+ 198             throw new RuntimeException("Error loading GTK libraries");
+ 199         }
+ 200 
+ 201         // Embedded in SWT, with shared event thread
+ 202         boolean isEventThread = AccessController
+ 203                 .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("javafx.embed.isEventThread"));
+ 204         if (!isEventThread) {
+ 205             invokeLaterDispatcher = new InvokeLaterDispatcher(this);
+ 206             invokeLaterDispatcher.start();
+ 207         } else {
+ 208             invokeLaterDispatcher = null;
+ 209         }
+ 210     }
+ 211 
+ 212     @Native private static final int QUERY_ERROR = -2;
+ 213     @Native private static final int QUERY_NO_DISPLAY = -1;
+ 214     @Native private static final int QUERY_USE_CURRENT = 1;
+ 215     @Native private static final int QUERY_LOAD_GTK2 = 2;
+ 216     @Native private static final int QUERY_LOAD_GTK3 = 3;
+ 217     /*
+ 218      * check the system and return an indication of which library to load
+ 219      *  return values are the QUERY_ constants
+ 220      */
+ 221     private static native int _queryLibrary(int version, boolean verbose);
+ 222 
+ 223     private static native int _initGTK(int version, boolean verbose, float overrideUIScale);
+ 224 
+ 225     private void initDisplay() {
+ 226         Map ds = getDeviceDetails();
+ 227         if (ds != null) {
+ 228             Object value;
+ 229             value = ds.get("XDisplay");
+ 230             if (value != null) {
+ 231                 display = (Long)value;
+ 232             }
+ 233             value = ds.get("XVisualID");
+ 234             if (value != null) {
+ 235                 visualID = (Long)value;
+ 236             }
+ 237             value = ds.get("XScreenID");
+ 238             if (value != null) {
+ 239                 screen = (Integer)value;
+ 240             }
+ 241         }
+ 242     }
+ 243 
+ 244     private void init() {
+ 245         initDisplay();
+ 246         long eventProc = 0;
+ 247         Map map = getDeviceDetails();
+ 248         if (map != null) {
+ 249             Long result = (Long) map.get("javafx.embed.eventProc");
+ 250             eventProc = result == null ? 0 : result;
+ 251         }
+ 252 
+ 253         final boolean disableGrab = AccessController.doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("sun.awt.disablegrab") ||
+ 254                Boolean.getBoolean("glass.disableGrab"));
+ 255 
+ 256         _init(eventProc, disableGrab);
+ 257     }
+ 258 
+ 259     @Override
+ 260     protected void runLoop(final Runnable launchable) {
+ 261         // Embedded in SWT, with shared event thread
+ 262         final boolean isEventThread = AccessController
+ 263             .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("javafx.embed.isEventThread"));
+ 264 
+ 265         if (isEventThread) {
+ 266             init();
+ 267             setEventThread(Thread.currentThread());
+ 268             launchable.run();
+ 269             return;
+ 270         }
+ 271 
+ 272         final boolean noErrorTrap = AccessController
+ 273             .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("glass.noErrorTrap"));
+ 274 
+ 275         final Thread toolkitThread =
+ 276             AccessController.doPrivileged((PrivilegedAction&lt;Thread&gt;) () -&gt; new Thread(() -&gt; {
+ 277                 init();
+ 278                 _runLoop(launchable, noErrorTrap);
+ 279             }, "GtkNativeMainLoopThread"));
+ 280         setEventThread(toolkitThread);
+ 281         toolkitThread.start();
+ 282     }
+ 283 
+ 284     @Override
+ 285     protected void finishTerminating() {
+ 286         final Thread toolkitThread = getEventThread();
+ 287         if (toolkitThread != null) {
+ 288             _terminateLoop();
+ 289             setEventThread(null);
+ 290         }
+ 291         super.finishTerminating();
+ 292     }
+ 293 
+ 294     @Override public boolean shouldUpdateWindow() {
+ 295         return true;
+ 296     }
+ 297 
+ 298     private native void _terminateLoop();
+ 299 
+ 300     private native void _init(long eventProc, boolean disableGrab);
+ 301 
+ 302     private native void _runLoop(Runnable launchable, boolean noErrorTrap);
+ 303 
+ 304     @Override
+ 305     protected void _invokeAndWait(final Runnable runnable) {
+ 306         if (invokeLaterDispatcher != null) {
+ 307             invokeLaterDispatcher.invokeAndWait(runnable);
+ 308         } else {
+ 309             final CountDownLatch latch = new CountDownLatch(1);
+ 310             submitForLaterInvocation(() -&gt; {
+ 311                 if (runnable != null) runnable.run();
+ 312                 latch.countDown();
+ 313             });
+ 314             try {
+ 315                 latch.await();
+ 316             } catch (InterruptedException e) {
+ 317                 //FAIL SILENTLY
+ 318             }
+ 319         }
+ 320     }
+ 321 
+ 322     private native void _submitForLaterInvocation(Runnable r);
+ 323     // InvokeLaterDispatcher.InvokeLaterSubmitter
+ 324     @Override public void submitForLaterInvocation(Runnable r) {
+ 325         _submitForLaterInvocation(r);
+ 326     }
+ 327 
+ 328     @Override protected void _invokeLater(Runnable runnable) {
+ 329         if (invokeLaterDispatcher != null) {
+ 330             invokeLaterDispatcher.invokeLater(runnable);
+ 331         } else {
+ 332             submitForLaterInvocation(runnable);
+ 333         }
+ 334     }
+ 335 
+ 336     private Object eventLoopExitEnterPassValue;
+ 337 
+ 338     private native void enterNestedEventLoopImpl();
+ 339 
+ 340     private native void leaveNestedEventLoopImpl();
+ 341 
+ 342     @Override
+ 343     protected Object _enterNestedEventLoop() {
+ 344         if (invokeLaterDispatcher != null) {
+ 345             invokeLaterDispatcher.notifyEnteringNestedEventLoop();
+ 346         }
+ 347         try {
+ 348             enterNestedEventLoopImpl();
+ 349             final Object retValue = eventLoopExitEnterPassValue;
+ 350             eventLoopExitEnterPassValue = null;
+ 351             return retValue;
+ 352         } finally {
+ 353             if (invokeLaterDispatcher != null) {
+ 354                 invokeLaterDispatcher.notifyLeftNestedEventLoop();
+ 355             }
+ 356         }
+ 357     }
+ 358 
+ 359     @Override
+ 360     protected void _leaveNestedEventLoop(Object retValue) {
+ 361         if (invokeLaterDispatcher != null) {
+ 362             invokeLaterDispatcher.notifyLeavingNestedEventLoop();
+ 363         }
+ 364         eventLoopExitEnterPassValue = retValue;
+ 365         leaveNestedEventLoopImpl();
+ 366     }
+ 367 
+ 368     @Override
+ 369     public Window createWindow(Window owner, Screen screen, int styleMask) {
+ 370         return new GtkWindow(owner, screen, styleMask);
+ 371     }
+ 372 
+ 373     @Override
+ 374     public Window createWindow(long parent) {
+ 375         return new GtkChildWindow(parent);
+ 376     }
+ 377 
+ 378     @Override
+ 379     public View createView() {
+ 380         return new GtkView();
+ 381     }
+ 382 
+ 383     @Override
+ 384     public Cursor createCursor(int type) {
+ 385         return new GtkCursor(type);
+ 386     }
+ 387 
+ 388     @Override
+ 389     public Cursor createCursor(int x, int y, Pixels pixels) {
+ 390         return new GtkCursor(x, y, pixels);
+ 391     }
+ 392 
+ 393     @Override
+ 394     protected void staticCursor_setVisible(boolean visible) {
+ 395     }
+ 396 
+ 397     @Override
+ 398     protected Size staticCursor_getBestSize(int width, int height) {
+ 399         return GtkCursor._getBestSize(width, height);
+ 400     }
+ 401 
+ 402     @Override
+ 403     public Pixels createPixels(int width, int height, ByteBuffer data) {
+ 404         return new GtkPixels(width, height, data);
+ 405     }
+ 406 
+ 407     @Override
+ 408     public Pixels createPixels(int width, int height, IntBuffer data) {
+ 409         return new GtkPixels(width, height, data);
+ 410     }
+ 411 
+ 412     @Override
+ 413     public Pixels createPixels(int width, int height, IntBuffer data, float scalex, float scaley) {
+ 414         return new GtkPixels(width, height, data, scalex, scaley);
+ 415     }
+ 416 
+ 417     @Override
+ 418     protected int staticPixels_getNativeFormat() {
+ 419         return Pixels.Format.BYTE_BGRA_PRE; // TODO
+ 420     }
+ 421 
+ 422     @Override
+ 423     public Robot createRobot() {
+ 424         return new GtkRobot();
+ 425     }
+ 426 
+ 427     @Override
+ 428     public Timer createTimer(Runnable runnable) {
+ 429         return new GtkTimer(runnable);
+ 430     }
+ 431 
+ 432     @Override
+ 433     protected native int staticTimer_getMinPeriod();
+ 434 
+ 435     @Override
+ 436     protected native int staticTimer_getMaxPeriod();
+ 437 
+ 438     @Override protected double staticScreen_getVideoRefreshPeriod() {
+ 439         return 0.0;     // indicate millisecond resolution
+ 440     }
+ 441 
+ 442     @Override native protected Screen[] staticScreen_getScreens();
+ 443 
+ 444     @Override
+ 445     protected FileChooserResult staticCommonDialogs_showFileChooser(
+ 446             Window owner, String folder, String filename, String title,
+ 447             int type, boolean multipleMode, ExtensionFilter[] extensionFilters, int defaultFilterIndex) {
+ 448 
+ 449         return GtkCommonDialogs.showFileChooser(owner, folder, filename, title,
+ 450                 type, multipleMode, extensionFilters, defaultFilterIndex);
+ 451     }
+ 452 
+ 453     @Override
+ 454     protected File staticCommonDialogs_showFolderChooser(Window owner, String folder, String title) {
+ 455         return GtkCommonDialogs.showFolderChooser(owner, folder, title);
+ 456     }
+ 457 
+ 458     @Override
+ 459     protected native long staticView_getMultiClickTime();
+ 460 
+ 461     @Override
+ 462     protected native int staticView_getMultiClickMaxX();
+ 463 
+ 464     @Override
+ 465     protected native int staticView_getMultiClickMaxY();
+ 466 
+ 467     @Override
+ 468     protected boolean _supportsInputMethods() {
+ 469         return true;
+ 470     }
+ 471 
+ 472     @Override
+ 473     protected native boolean _supportsTransparentWindows();
+ 474 
+ 475     @Override protected boolean _supportsUnifiedWindows() {
+ 476         return false;
+ 477     }
+ 478 
+ 479     @Override
+ 480     protected native int _getKeyCodeForChar(char c);
+ 481 
+ 482 }
+<a name="3" id="anc3"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre><form name="eof"><input name="value" value="3" type="hidden" /></form></body></html>

@@ -1,0 +1,541 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>Old apps/tests/Robot/src/robottest/RobotBuilder.java</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package robottest;
+  26 
+  27 import com.sun.glass.events.KeyEvent;
+  28 import com.sun.glass.ui.Robot;
+  29 import java.io.File;
+  30 import java.io.FileInputStream;
+  31 import java.io.FileOutputStream;
+  32 import java.nio.Buffer;
+  33 import java.nio.IntBuffer;
+  34 import javafx.animation.AnimationTimer;
+  35 import javafx.collections.FXCollections;
+  36 import javafx.collections.ObservableList;
+  37 import javafx.event.ActionEvent;
+  38 import javafx.event.EventHandler;
+  39 import javafx.geometry.BoundingBox;
+  40 import javafx.geometry.Bounds;
+  41 import javafx.scene.Group;
+  42 import javafx.scene.Scene;
+  43 import javafx.scene.control.Button;
+  44 import javafx.scene.control.Label;
+  45 import javafx.scene.control.ListView;
+  46 import javafx.scene.control.TextField;
+  47 import javafx.scene.image.Image;
+  48 import javafx.scene.image.ImageView;
+  49 import javafx.scene.layout.GridPane;
+  50 import javafx.scene.layout.Pane;
+  51 import javafx.scene.layout.VBox;
+  52 import javafx.scene.paint.Color;
+  53 import javafx.scene.shape.Rectangle;
+  54 import javafx.stage.Popup;
+  55 import javafx.stage.Stage;
+  56 
+  57 
+  58 public class RobotBuilder {
+  59 
+  60     //Variable used by "RobotTest" section
+  61     private final Rectangle rec1 = new Rectangle(50, 50, 40, 160);
+  62     private Popup screenShot;
+  63 
+  64     private static RobotBuilder instance;
+  65 
+  66 //    protected TestRobot {}
+  67 
+  68     public static RobotBuilder getInstance() {
+  69         if (instance==null)
+  70                  instance = new RobotBuilder();
+  71         return instance;
+  72     }
+  73 
+  74     /**
+  75      * The method updates globalScene with robot tests
+  76      * @param globalScene the global Scene
+  77      * @param mainBox the Box to insert into
+  78      * @param robotStage the Robot Stage
+  79      */
+  80     void robotTest(final Scene globalScene, final VBox mainBox,
+  81                           final Stage robotStage){
+  82 
+  83         Label l = new Label("Robot features Demo");
+  84         Group lGroup = new Group(l);
+  85         lGroup.setLayoutX(400);
+  86         lGroup.setLayoutY(10);
+  87 
+  88         //Rectangle's coordinates
+  89         final int recX = 50;
+  90         final int recY = 50;
+  91 
+  92         Group allGroup = new Group();
+  93         rec1.setFill(Color.RED);
+  94         Rectangle rec2 = new Rectangle(recX + 40, recY, 40, 160);
+  95         rec2.setFill(Color.BLUE);
+  96         Rectangle rec3 = new Rectangle(recX + 80, recY, 40, 160);
+  97         rec3.setFill(Color.YELLOW);
+  98         Rectangle rec4 = new Rectangle(recX + 120, recY, 40, 160);
+  99         rec4.setFill(Color.GREEN);
+ 100 
+ 101         GridPane grid = new GridPane();
+ 102         grid.setVgap(50);
+ 103         grid.setHgap(20);
+ 104         grid.setLayoutX(recX + 300);
+ 105         grid.setLayoutY(recY + 50);
+ 106 
+ 107         final TextField result1 = new TextField("Result");
+ 108         result1.setEditable(false);
+ 109         Button screenTestBtn = new Button("Robot Get Screen Capture Test");
+ 110         screenTestBtn.setOnAction(new EventHandler&lt;ActionEvent&gt;() {
+ 111             @Override public void handle(ActionEvent e) {
+ 112                screenShot = robotScreenTest(result1, robotStage);
+ 113             }
+ 114         });
+ 115 
+ 116         grid.setConstraints(screenTestBtn, 0, 0);
+ 117         grid.getChildren().add(screenTestBtn);
+ 118         grid.setConstraints(result1, 1, 0);
+ 119         grid.getChildren().add(result1);
+ 120 
+ 121         final TextField result2 = new TextField("Result");
+ 122         result2.setEditable(false);
+ 123         Button pixelTestBtn = new Button("Robot Get Pixel Color Test");
+ 124         pixelTestBtn.setOnAction(new EventHandler&lt;ActionEvent&gt;() {
+ 125             @Override public void handle(ActionEvent e) {
+ 126                robotPixelTest(result2, robotStage);
+ 127             }
+ 128         });
+ 129 
+ 130         grid.setConstraints(pixelTestBtn, 0, 1);
+ 131         grid.getChildren().add(pixelTestBtn);
+ 132         grid.setConstraints(result2, 1, 1);
+ 133         grid.getChildren().add(result2);
+ 134 
+ 135         //KeyPressRelesase
+ 136         final TextField writeField = new TextField("");
+ 137         Group writeFieldGroup = new Group(writeField);
+ 138         writeFieldGroup.setLayoutX(recX);
+ 139         writeFieldGroup.setLayoutY(recY + 200);
+ 140 
+ 141         final TextField result3 = new TextField("Result");
+ 142         result3.setEditable(false);
+ 143 
+ 144         Button keyTestBtn = new Button("Robot Key Press/Release Test");
+ 145         keyTestBtn.setOnAction(new EventHandler&lt;ActionEvent&gt;() {
+ 146             @Override public void handle(ActionEvent e) {
+ 147                 robotKeyTest(writeField, result3);
+ 148             }
+ 149         });
+ 150 
+ 151         grid.setConstraints(keyTestBtn, 0, 2);
+ 152         grid.getChildren().add(keyTestBtn);
+ 153         grid.setConstraints(result3, 1, 2);
+ 154         grid.getChildren().add(result3);
+ 155 
+ 156         //Mouse wheel
+ 157         final ListView&lt;String&gt; sv = new ListView&lt;String&gt;();
+ 158         ObservableList&lt;String&gt; items =FXCollections.observableArrayList (
+ 159                     "a", "b", "c", "d", "e", "f", "g", "h", "i");
+ 160         sv.setItems(items);
+ 161         sv.setPrefWidth(100);
+ 162         sv.setPrefHeight(100);
+ 163 
+ 164         Group svGroup = new Group(sv);
+ 165         svGroup.setLayoutX(recX);
+ 166         svGroup.setLayoutY(recY + 250);
+ 167 
+ 168         final TextField result4 = new TextField("Result");
+ 169         result4.setEditable(false);
+ 170 
+ 171         Button wheelTestBtn = new Button("Robot Mouse Press/Release/Wheel Test");
+ 172         wheelTestBtn.setOnAction(new EventHandler&lt;ActionEvent&gt;() {
+ 173             @Override public void handle(ActionEvent e) {
+ 174                 robotWheelTest(sv, result4, robotStage);
+ 175             }
+ 176         });
+ 177 
+ 178         grid.setConstraints(wheelTestBtn, 0, 3);
+ 179         grid.getChildren().add(wheelTestBtn);
+ 180         grid.setConstraints(result4, 1, 3);
+ 181         grid.getChildren().add(result4);
+ 182 
+ 183         Button btn = new Button("Back");
+ 184         btn.setOnAction(new EventHandler&lt;ActionEvent&gt;() {
+ 185             @Override public void handle(ActionEvent e) {
+ 186                 if ((screenShot != null) &amp;&amp; (screenShot.isShowing())) {
+ 187                     screenShot.hide();
+ 188                 }
+ 189                 globalScene.setRoot(mainBox);
+ 190             }
+ 191         });
+ 192         Group btnGroup = new Group(btn);
+ 193         btnGroup.setLayoutX(450);
+ 194         btnGroup.setLayoutY(450);
+ 195 
+ 196         allGroup.getChildren().addAll(rec1, rec2, rec3, rec4, grid, lGroup, btnGroup,
+ 197                                       writeFieldGroup, svGroup);
+ 198         globalScene.setRoot(allGroup);
+ 199     }
+ 200 
+ 201 
+ 202     public void robotKeyTest(final TextField field, final TextField result) {
+ 203         field.requestFocus();
+ 204         new AnimationTimer() {
+ 205             long startTime = System.nanoTime();
+ 206             @Override
+ 207             public void handle(long now) {
+ 208                 if (now &gt; startTime + 3000000000l){
+ 209                     stop();
+ 210                     field.setText("Failed");
+ 211                 } else if (field.isFocused()) {
+ 212                     stop();
+ 213                     Robot robot = com.sun.glass.ui.Application.GetApplication().createRobot();
+ 214                     robot.keyPress(KeyEvent.VK_T);
+ 215                     robot.keyRelease(KeyEvent.VK_T);
+ 216                     robot.keyPress(KeyEvent.VK_E);
+ 217                     robot.keyRelease(KeyEvent.VK_E);
+ 218                     robot.keyPress(KeyEvent.VK_S);
+ 219                     robot.keyRelease(KeyEvent.VK_S);
+ 220                     robot.keyPress(KeyEvent.VK_T);
+ 221                     robot.keyRelease(KeyEvent.VK_T);
+ 222                     robot.destroy();
+ 223                     new AnimationTimer() {
+ 224                         long startTime = System.nanoTime();
+ 225                         @Override
+ 226                         public void handle(long now) {
+ 227                             if (now &gt; startTime + 3000000000l){
+ 228                                 stop();
+ 229                                 result.setText("Failed");
+ 230                             } else if ((field.getText()).equals("test")) {
+ 231                                 stop();
+ 232                                 result.setText("Passed");
+ 233                             }
+ 234                         }
+ 235                     }.start();
+ 236                 }
+ 237             }
+ 238         }.start();
+ 239     }
+ 240 
+ 241     public void robotWheelTest(final ListView&lt;String&gt; lv, final TextField result,
+ 242                                                             Stage currentStage){
+ 243 
+ 244         //Caclulation of ListView minimal coordinates
+ 245         Bounds bounds = lv.localToScreen(new BoundingBox(0, 0,
+ 246             lv.getBoundsInParent().getWidth(),
+ 247             lv.getBoundsInParent().getHeight()));
+ 248         int x = 10 + (int) bounds.getMinX();
+ 249         int y = 10 + (int) bounds.getMinY();
+ 250 
+ 251         final Robot robot =
+ 252                     com.sun.glass.ui.Application.GetApplication().createRobot();
+ 253         robot.mouseMove(x, y);
+ 254         robot.mousePress(Robot.MOUSE_LEFT_BTN);
+ 255         robot.mouseRelease(Robot.MOUSE_LEFT_BTN);
+ 256 
+ 257         new AnimationTimer() {
+ 258             long startTime = System.nanoTime();
+ 259             @Override
+ 260             public void handle(long now) {
+ 261                 if (now &gt; startTime + 3000000000l){
+ 262                     stop();
+ 263                     result.setText("Failed");
+ 264                 } else if (lv.isFocused()) {
+ 265                     stop();
+ 266                     robot.mouseWheel(-5);
+ 267                     robot.mousePress(Robot.MOUSE_LEFT_BTN);
+ 268                     robot.mouseRelease(Robot.MOUSE_LEFT_BTN);
+ 269                     robot.destroy();
+ 270                     new AnimationTimer() {
+ 271                         long startTime = System.nanoTime();
+ 272                         @Override
+ 273                         public void handle(long now) {
+ 274                             if (now &gt; startTime + 3000000000l){
+ 275                                 stop();
+ 276                                 result.setText("Scroll Down Failed");
+ 277                             } else if (!lv.getSelectionModel().
+ 278                                     selectedItemProperty().getValue().
+ 279                                     equals("a")) {
+ 280                                         stop();
+ 281                                     result.setText("Scroll Down Passed");
+ 282                             }
+ 283                         }
+ 284                     }.start();
+ 285                 }
+ 286             }
+ 287         }.start();
+ 288     }
+ 289 
+ 290     public void robotPixelTest(final TextField result, Stage currentStage){
+ 291 
+ 292         Bounds bounds = rec1.localToScreen(new BoundingBox(0, 0,
+ 293                         rec1.getBoundsInParent().getWidth(),
+ 294                         rec1.getBoundsInParent().getHeight()));
+ 295         int x = 53 + (int) bounds.getMinX();
+ 296         int y = 53 + (int) bounds.getMinY();
+ 297         int answer = assertPixelEquals(x, y, Color.RED) +
+ 298                      assertPixelEquals(x + 40, y, Color.BLUE) +
+ 299                      assertPixelEquals(x + 80, y, Color.YELLOW) +
+ 300                      assertPixelEquals(x + 120, y, Color.GREEN);
+ 301         if (answer == 4) {
+ 302             result.setText("Passed");
+ 303         } else {
+ 304             result.setText("Failed");
+ 305         }
+ 306 
+ 307     }
+ 308 
+ 309     static int colorToRGB(Color c) {
+ 310         int r = (int) Math.round(c.getRed() * 255.0);
+ 311         int g = (int) Math.round(c.getGreen() * 255.0);
+ 312         int b = (int) Math.round(c.getBlue() * 255.0);
+ 313         return 0xff000000 | (r &lt;&lt; 16) | (g &lt;&lt; 8) | b;
+ 314     }
+ 315 
+ 316     public int assertPixelEquals(int x, int y, Color expected){
+ 317 
+ 318         Robot robot = com.sun.glass.ui.Application.GetApplication().createRobot();
+ 319         int pixel = robot.getPixelColor(x, y);
+ 320         robot.destroy();
+ 321         int expectedPixel = colorToRGB(expected);
+ 322         if (checkColor(pixel, expected)) {
+ 323             return 1;
+ 324         } else {
+ 325             System.out.println("Expected color 0x" + Integer.toHexString(expectedPixel) +
+ 326                     " at " + x + "," + y + " but found 0x" + Integer.toHexString(pixel));
+ 327         }
+ 328         return 0;
+ 329     }
+ 330 
+ 331     private boolean checkColor(int value, Color expected) {
+ 332 
+ 333         double tolerance = 0.07;
+ 334         double ered = expected.getRed();
+ 335         double egrn = expected.getGreen();
+ 336         double eblu = expected.getBlue();
+ 337 
+ 338         double vred = ((value &amp; 0xff0000) &gt;&gt; 16) / 255.0;
+ 339         double vgrn = ((value &amp; 0x00ff00) &gt;&gt; 8) / 255.0;
+ 340         double vblu = ((value &amp; 0x0000ff)) / 255.0;
+ 341 
+ 342         double dred = Math.abs(ered - vred);
+ 343         double dgrn = Math.abs(egrn - vgrn);
+ 344         double dblu = Math.abs(eblu - vblu);
+ 345 
+ 346         if (dred &lt;= tolerance &amp;&amp; dgrn &lt;= tolerance &amp;&amp; dblu &lt;= tolerance) {
+ 347             return true;
+ 348         }
+ 349 
+ 350         return false;
+ 351     }
+ 352 
+ 353     public Popup robotScreenTest(final TextField result, Stage stage){
+ 354 
+ 355         Bounds bounds = rec1.localToScreen(new BoundingBox(0, 0,
+ 356                 rec1.getBoundsInParent().getWidth(),
+ 357                 rec1.getBoundsInParent().getHeight()));
+ 358 
+ 359         int x = 50 + (int) bounds.getMinX();
+ 360         int y = 50 + (int) bounds.getMinY();
+ 361         int[] intArr = null;
+ 362         boolean correct = true;
+ 363         Robot robot = com.sun.glass.ui.Application.GetApplication().createRobot();
+ 364         int width = 160;
+ 365         int height = 160;
+ 366         final Buffer buff = robot.getScreenCapture(x, y, width, height).getPixels();
+ 367         if ((buff instanceof IntBuffer)&amp;&amp;(buff.hasArray())) {
+ 368             intArr =((IntBuffer) buff).array();
+ 369         }
+ 370 
+ 371         String filename= "scrCapture.bmp";
+ 372         File file = new File(filename);
+ 373         try {
+ 374             if (!file.exists()) {
+ 375                 file.createNewFile();
+ 376             }
+ 377             BMPOutputStream bmp = new BMPOutputStream(new FileOutputStream(filename), intArr, width, height);
+ 378         } catch (Exception e) {}
+ 379 
+ 380 
+ 381         for (int i = width; i &lt;= height*(height-1); i += width) {
+ 382             for (int j = 1; j &lt;= 38; j ++){
+ 383                 if (!checkColor(intArr[j+i],Color.RED)) {
+ 384                     System.out.println(" pixel("+j+","+(i/width)+") "+
+ 385                             Integer.toHexString(intArr[j+i])+" != "+
+ 386                             Integer.toHexString(colorToRGB(Color.RED)));
+ 387                     correct = false;
+ 388                 }
+ 389              }
+ 390             for (int j = 41; j &lt;= 78; j ++){
+ 391                 if (!checkColor(intArr[j+i],Color.BLUE)) {
+ 392                     System.out.println(" pixel("+j+","+(i/width)+") "+
+ 393                             Integer.toHexString(intArr[j+i])+" != "+
+ 394                             Integer.toHexString(colorToRGB(Color.BLUE)));
+ 395                     correct = false;
+ 396                 }
+ 397              }
+ 398             for (int j = 81; j &lt;= 118; j ++){
+ 399                 if (!checkColor(intArr[j+i],Color.YELLOW)) {
+ 400                     System.out.println(" pixel("+j+","+(i/width)+") "+
+ 401                             Integer.toHexString(intArr[j+i])+" != "+
+ 402                             Integer.toHexString(colorToRGB(Color.YELLOW)));
+ 403                     correct = false;
+ 404                 }
+ 405              }
+ 406             for (int j = 121; j &lt;= 158; j ++){
+ 407                 if (!checkColor(intArr[j+i],Color.GREEN)) {
+ 408                     System.out.println(" pixel("+j+","+(i/width)+") "+
+ 409                             Integer.toHexString(intArr[j+i])+" != "+
+ 410                             Integer.toHexString(colorToRGB(Color.GREEN)));
+ 411                     correct = false;
+ 412                 }
+ 413             }
+ 414         }
+ 415         robot.destroy();
+ 416         if (correct) {
+ 417             result.setText("Passed");
+ 418         } else {
+ 419             result.setText("Failed");
+ 420         }
+ 421         return showImage(stage, width, height, result);
+ 422     }
+ 423 
+ 424     private Popup showImage(Stage stage, int width, int height, TextField tf) {
+ 425 
+ 426         int frame = 70;
+ 427         Rectangle rec = new Rectangle(width + frame, height + frame);
+ 428         FileInputStream os = null;
+ 429         final File file = new File("scrCapture.bmp");
+ 430         try {
+ 431             os = new FileInputStream(file);
+ 432         } catch (Exception e) {}
+ 433 
+ 434         final Popup popup = new Popup();
+ 435         ImageView iv = new ImageView(new Image(os));
+ 436         iv.setLayoutX(frame/2);
+ 437         iv.setLayoutY(frame/2);
+ 438 
+ 439         rec.setFill(Color.WHITE);
+ 440         rec.setStroke(Color.BLACK);
+ 441         Button exit = new Button("x");
+ 442         exit.setOnAction(new EventHandler&lt;ActionEvent&gt;() {
+ 443             @Override public void handle(ActionEvent e) {
+ 444                 if (file.exists()&amp;&amp;tf.getText().equals("Passed")) {
+ 445                     file.deleteOnExit();
+ 446                 }
+ 447                 popup.hide();
+ 448             }
+ 449         });
+ 450         exit.setLayoutX(width + frame/2);
+ 451         Pane popupPane = new Pane(rec, iv, exit);
+ 452         popup.setX(stage.getX() + 550);
+ 453         popup.setY(stage.getY() + 430);
+ 454         popup.getContent().addAll(popupPane);
+ 455         popup.show(stage);
+ 456         return popup;
+ 457     }
+ 458 }
+</pre></body></html>

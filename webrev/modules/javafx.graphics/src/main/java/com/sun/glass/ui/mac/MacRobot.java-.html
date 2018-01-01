@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>Old modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.mac;
+  26 
+  27 import com.sun.glass.ui.*;
+  28 
+  29 /**
+  30  * MacOSX platform implementation class for Robot.
+  31  */
+  32 final class MacRobot extends Robot {
+  33 
+  34     // TODO: get rid of native Robot object
+  35     private long ptr;
+  36 
+  37     private native long _init();
+  38     @Override protected void _create() {
+  39         ptr = _init();
+  40     }
+  41 
+  42     private native void _destroy(long ptr);
+  43     @Override protected void _destroy() {
+  44         if (ptr == 0) {
+  45             return;
+  46         }
+  47         _destroy(ptr);
+  48     }
+  49 
+  50     @Override native protected void _keyPress(int code);
+  51     @Override native protected void _keyRelease(int code);
+  52 
+  53     private native void _mouseMove(long ptr, int x, int y);
+  54     @Override protected void _mouseMove(int x, int y) {
+  55         if (ptr == 0) {
+  56             return;
+  57         }
+  58         _mouseMove(ptr, x, y);
+  59     }
+  60 
+  61     private native void _mousePress(long ptr, int buttons);
+  62     @Override protected void _mousePress(int buttons) {
+  63         if (ptr == 0) {
+  64             return;
+  65         }
+  66         _mousePress(ptr, buttons);
+  67     }
+  68 
+  69     private native void _mouseRelease(long ptr, int buttons);
+  70     @Override protected void _mouseRelease(int buttons) {
+  71         if (ptr == 0) {
+  72             return;
+  73         }
+  74         _mouseRelease(ptr, buttons);
+  75     }
+  76 
+  77     @Override native protected void _mouseWheel(int wheelAmt);
+  78 
+  79     private native int _getMouseX(long ptr);
+  80     @Override protected int _getMouseX() {
+  81         if (ptr == 0) {
+  82             return 0;
+  83         }
+  84         return _getMouseX(ptr);
+  85     }
+  86 
+  87     private native int _getMouseY(long ptr);
+  88     @Override protected int _getMouseY() {
+  89         if (ptr == 0) {
+  90             return 0;
+  91         }
+  92         return _getMouseY(ptr);
+  93     }
+  94 
+  95     @Override native protected int _getPixelColor(int x, int y);
+  96     @Override native protected Pixels _getScreenCapture(int x, int y, int width, int height, boolean isHiDPI);
+  97 }
+  98 
+</pre></body></html>

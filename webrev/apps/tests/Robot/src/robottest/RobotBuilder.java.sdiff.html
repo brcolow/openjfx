@@ -1,0 +1,427 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>openjfx Sdiff apps/tests/Robot/src/robottest </title>
+</head><body id="SUNWwebrev">
+<center><a href='../../../../../apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../index.html' target='_top'>index</a> <a href='../../../../../buildSrc/addExports.sdiff.html' target='_top'>next &gt</a></center>
+<h2>apps/tests/Robot/src/robottest/RobotBuilder.java</h2>
+<a class="print" href="javascript:print()">Print this page</a>
+<pre>rev <a href="https://bugs.openjdk.java.net/browse/JDK-10767">10767</a> : Move Robot to public API.</pre>
+
+<table><tr valign="top">
+<td><pre>
+
+</pre><hr></hr><pre>
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package robottest;
+  26 
+  27 import com.sun.glass.events.KeyEvent;
+<span class="removed">  28 import com.sun.glass.ui.Robot;</span>
+  29 import java.io.File;
+  30 import java.io.FileInputStream;
+  31 import java.io.FileOutputStream;
+  32 import java.nio.Buffer;
+  33 import java.nio.IntBuffer;
+  34 import javafx.animation.AnimationTimer;
+  35 import javafx.collections.FXCollections;
+  36 import javafx.collections.ObservableList;
+  37 import javafx.event.ActionEvent;
+  38 import javafx.event.EventHandler;
+  39 import javafx.geometry.BoundingBox;
+  40 import javafx.geometry.Bounds;
+  41 import javafx.scene.Group;
+  42 import javafx.scene.Scene;
+  43 import javafx.scene.control.Button;
+  44 import javafx.scene.control.Label;
+  45 import javafx.scene.control.ListView;
+  46 import javafx.scene.control.TextField;
+  47 import javafx.scene.image.Image;
+  48 import javafx.scene.image.ImageView;
+  49 import javafx.scene.layout.GridPane;
+  50 import javafx.scene.layout.Pane;
+  51 import javafx.scene.layout.VBox;
+  52 import javafx.scene.paint.Color;
+
+  53 import javafx.scene.shape.Rectangle;
+  54 import javafx.stage.Popup;
+  55 import javafx.stage.Stage;
+  56 
+  57 
+  58 public class RobotBuilder {
+  59 
+  60     //Variable used by "RobotTest" section
+  61     private final Rectangle rec1 = new Rectangle(50, 50, 40, 160);
+  62     private Popup screenShot;
+  63 
+  64     private static RobotBuilder instance;
+  65 
+  66 //    protected TestRobot {}
+  67 
+  68     public static RobotBuilder getInstance() {
+  69         if (instance==null)
+  70                  instance = new RobotBuilder();
+  71         return instance;
+  72     }
+
+</pre><hr></hr><pre>
+ 194         btnGroup.setLayoutY(450);
+ 195 
+ 196         allGroup.getChildren().addAll(rec1, rec2, rec3, rec4, grid, lGroup, btnGroup,
+ 197                                       writeFieldGroup, svGroup);
+ 198         globalScene.setRoot(allGroup);
+ 199     }
+ 200 
+ 201 
+ 202     public void robotKeyTest(final TextField field, final TextField result) {
+ 203         field.requestFocus();
+ 204         new AnimationTimer() {
+ 205             long startTime = System.nanoTime();
+ 206             @Override
+ 207             public void handle(long now) {
+ 208                 if (now &gt; startTime + 3000000000l){
+ 209                     stop();
+ 210                     field.setText("Failed");
+ 211                 } else if (field.isFocused()) {
+ 212                     stop();
+ 213                     Robot robot = com.sun.glass.ui.Application.GetApplication().createRobot();
+<span class="changed"> 214                     robot.keyPress(KeyEvent.VK_T);</span>
+<span class="changed"> 215                     robot.keyRelease(KeyEvent.VK_T);</span>
+<span class="changed"> 216                     robot.keyPress(KeyEvent.VK_E);</span>
+<span class="changed"> 217                     robot.keyRelease(KeyEvent.VK_E);</span>
+<span class="changed"> 218                     robot.keyPress(KeyEvent.VK_S);</span>
+<span class="changed"> 219                     robot.keyRelease(KeyEvent.VK_S);</span>
+<span class="changed"> 220                     robot.keyPress(KeyEvent.VK_T);</span>
+<span class="changed"> 221                     robot.keyRelease(KeyEvent.VK_T);</span>
+ 222                     robot.destroy();
+ 223                     new AnimationTimer() {
+ 224                         long startTime = System.nanoTime();
+ 225                         @Override
+ 226                         public void handle(long now) {
+ 227                             if (now &gt; startTime + 3000000000l){
+ 228                                 stop();
+ 229                                 result.setText("Failed");
+ 230                             } else if ((field.getText()).equals("test")) {
+ 231                                 stop();
+ 232                                 result.setText("Passed");
+ 233                             }
+ 234                         }
+ 235                     }.start();
+ 236                 }
+ 237             }
+ 238         }.start();
+ 239     }
+ 240 
+ 241     public void robotWheelTest(final ListView&lt;String&gt; lv, final TextField result,
+ 242                                                             Stage currentStage){
+ 243 
+ 244         //Caclulation of ListView minimal coordinates
+ 245         Bounds bounds = lv.localToScreen(new BoundingBox(0, 0,
+ 246             lv.getBoundsInParent().getWidth(),
+ 247             lv.getBoundsInParent().getHeight()));
+ 248         int x = 10 + (int) bounds.getMinX();
+ 249         int y = 10 + (int) bounds.getMinY();
+ 250 
+ 251         final Robot robot =
+ 252                     com.sun.glass.ui.Application.GetApplication().createRobot();
+ 253         robot.mouseMove(x, y);
+<span class="changed"> 254         robot.mousePress(Robot.MOUSE_LEFT_BTN);</span>
+<span class="changed"> 255         robot.mouseRelease(Robot.MOUSE_LEFT_BTN);</span>
+ 256 
+ 257         new AnimationTimer() {
+ 258             long startTime = System.nanoTime();
+ 259             @Override
+ 260             public void handle(long now) {
+ 261                 if (now &gt; startTime + 3000000000l){
+ 262                     stop();
+ 263                     result.setText("Failed");
+ 264                 } else if (lv.isFocused()) {
+ 265                     stop();
+ 266                     robot.mouseWheel(-5);
+<span class="changed"> 267                     robot.mousePress(Robot.MOUSE_LEFT_BTN);</span>
+<span class="changed"> 268                     robot.mouseRelease(Robot.MOUSE_LEFT_BTN);</span>
+ 269                     robot.destroy();
+ 270                     new AnimationTimer() {
+ 271                         long startTime = System.nanoTime();
+ 272                         @Override
+ 273                         public void handle(long now) {
+ 274                             if (now &gt; startTime + 3000000000l){
+ 275                                 stop();
+ 276                                 result.setText("Scroll Down Failed");
+ 277                             } else if (!lv.getSelectionModel().
+ 278                                     selectedItemProperty().getValue().
+ 279                                     equals("a")) {
+ 280                                         stop();
+ 281                                     result.setText("Scroll Down Passed");
+ 282                             }
+ 283                         }
+ 284                     }.start();
+ 285                 }
+ 286             }
+ 287         }.start();
+ 288     }
+
+</pre><hr></hr>
+</pre></td><td><pre>
+
+</pre><hr></hr><pre>
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package robottest;
+  26 
+  27 import com.sun.glass.events.KeyEvent;
+
+  28 import java.io.File;
+  29 import java.io.FileInputStream;
+  30 import java.io.FileOutputStream;
+  31 import java.nio.Buffer;
+  32 import java.nio.IntBuffer;
+  33 import javafx.animation.AnimationTimer;
+  34 import javafx.collections.FXCollections;
+  35 import javafx.collections.ObservableList;
+  36 import javafx.event.ActionEvent;
+  37 import javafx.event.EventHandler;
+  38 import javafx.geometry.BoundingBox;
+  39 import javafx.geometry.Bounds;
+  40 import javafx.scene.Group;
+  41 import javafx.scene.Scene;
+  42 import javafx.scene.control.Button;
+  43 import javafx.scene.control.Label;
+  44 import javafx.scene.control.ListView;
+  45 import javafx.scene.control.TextField;
+  46 import javafx.scene.image.Image;
+  47 import javafx.scene.image.ImageView;
+  48 import javafx.scene.layout.GridPane;
+  49 import javafx.scene.layout.Pane;
+  50 import javafx.scene.layout.VBox;
+  51 import javafx.scene.paint.Color;
+<span class="new">  52 import javafx.scene.robot.Robot;</span>
+  53 import javafx.scene.shape.Rectangle;
+  54 import javafx.stage.Popup;
+  55 import javafx.stage.Stage;
+  56 
+  57 
+  58 public class RobotBuilder {
+  59 
+  60     //Variable used by "RobotTest" section
+  61     private final Rectangle rec1 = new Rectangle(50, 50, 40, 160);
+  62     private Popup screenShot;
+  63 
+  64     private static RobotBuilder instance;
+  65 
+  66 //    protected TestRobot {}
+  67 
+  68     public static RobotBuilder getInstance() {
+  69         if (instance==null)
+  70                  instance = new RobotBuilder();
+  71         return instance;
+  72     }
+
+</pre><hr></hr><pre>
+ 194         btnGroup.setLayoutY(450);
+ 195 
+ 196         allGroup.getChildren().addAll(rec1, rec2, rec3, rec4, grid, lGroup, btnGroup,
+ 197                                       writeFieldGroup, svGroup);
+ 198         globalScene.setRoot(allGroup);
+ 199     }
+ 200 
+ 201 
+ 202     public void robotKeyTest(final TextField field, final TextField result) {
+ 203         field.requestFocus();
+ 204         new AnimationTimer() {
+ 205             long startTime = System.nanoTime();
+ 206             @Override
+ 207             public void handle(long now) {
+ 208                 if (now &gt; startTime + 3000000000l){
+ 209                     stop();
+ 210                     field.setText("Failed");
+ 211                 } else if (field.isFocused()) {
+ 212                     stop();
+ 213                     Robot robot = com.sun.glass.ui.Application.GetApplication().createRobot();
+<span class="changed"> 214                     robot.keyPress(KeyCode.T);</span>
+<span class="changed"> 215                     robot.keyRelease(KeyCode.T);</span>
+<span class="changed"> 216                     robot.keyPress(KeyCode.E);</span>
+<span class="changed"> 217                     robot.keyRelease(KeyCode.E);</span>
+<span class="changed"> 218                     robot.keyPress(KeyCode.S);</span>
+<span class="changed"> 219                     robot.keyRelease(KKeyCode.S);</span>
+<span class="changed"> 220                     robot.keyPress(KeyCode.T);</span>
+<span class="changed"> 221                     robot.keyRelease(KeyCode.T);</span>
+ 222                     robot.destroy();
+ 223                     new AnimationTimer() {
+ 224                         long startTime = System.nanoTime();
+ 225                         @Override
+ 226                         public void handle(long now) {
+ 227                             if (now &gt; startTime + 3000000000l){
+ 228                                 stop();
+ 229                                 result.setText("Failed");
+ 230                             } else if ((field.getText()).equals("test")) {
+ 231                                 stop();
+ 232                                 result.setText("Passed");
+ 233                             }
+ 234                         }
+ 235                     }.start();
+ 236                 }
+ 237             }
+ 238         }.start();
+ 239     }
+ 240 
+ 241     public void robotWheelTest(final ListView&lt;String&gt; lv, final TextField result,
+ 242                                                             Stage currentStage){
+ 243 
+ 244         //Caclulation of ListView minimal coordinates
+ 245         Bounds bounds = lv.localToScreen(new BoundingBox(0, 0,
+ 246             lv.getBoundsInParent().getWidth(),
+ 247             lv.getBoundsInParent().getHeight()));
+ 248         int x = 10 + (int) bounds.getMinX();
+ 249         int y = 10 + (int) bounds.getMinY();
+ 250 
+ 251         final Robot robot =
+ 252                     com.sun.glass.ui.Application.GetApplication().createRobot();
+ 253         robot.mouseMove(x, y);
+<span class="changed"> 254         robot.mousePress(MouseButton.PRIMARY);</span>
+<span class="changed"> 255         robot.mouseRelease(MouseButton.PRIMARY);</span>
+ 256 
+ 257         new AnimationTimer() {
+ 258             long startTime = System.nanoTime();
+ 259             @Override
+ 260             public void handle(long now) {
+ 261                 if (now &gt; startTime + 3000000000l){
+ 262                     stop();
+ 263                     result.setText("Failed");
+ 264                 } else if (lv.isFocused()) {
+ 265                     stop();
+ 266                     robot.mouseWheel(-5);
+<span class="changed"> 267                     robot.mousePress(MouseButton.PRIMARY);</span>
+<span class="changed"> 268                     robot.mouseRelease(MouseButton.PRIMARY);</span>
+ 269                     robot.destroy();
+ 270                     new AnimationTimer() {
+ 271                         long startTime = System.nanoTime();
+ 272                         @Override
+ 273                         public void handle(long now) {
+ 274                             if (now &gt; startTime + 3000000000l){
+ 275                                 stop();
+ 276                                 result.setText("Scroll Down Failed");
+ 277                             } else if (!lv.getSelectionModel().
+ 278                                     selectedItemProperty().getValue().
+ 279                                     equals("a")) {
+ 280                                         stop();
+ 281                                     result.setText("Scroll Down Passed");
+ 282                             }
+ 283                         }
+ 284                     }.start();
+ 285                 }
+ 286             }
+ 287         }.start();
+ 288     }
+
+</pre><hr></hr>
+</pre></td>
+</tr></table>
+<center><a href='../../../../../apps/tests/HelloTest/src/hellotest/RemoveFocusedControl.java.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../../index.html' target='_top'>index</a> <a href='../../../../../buildSrc/addExports.sdiff.html' target='_top'>next &gt</a></center>
+</body></html>

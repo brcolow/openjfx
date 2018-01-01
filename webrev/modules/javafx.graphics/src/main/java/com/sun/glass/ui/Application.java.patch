@@ -1,0 +1,17 @@
+--- old/modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java	2018-01-01 14:51:09.412944700 -0700
++++ new/modules/javafx.graphics/src/main/java/com/sun/glass/ui/Application.java	2018-01-01 14:51:09.047924300 -0700
+@@ -33,12 +33,12 @@
+ import java.nio.IntBuffer;
+ import java.security.AccessController;
+ import java.security.PrivilegedAction;
+-import java.util.ArrayList;
+-import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.LinkedList;
+ 
++import javafx.scene.robot.Robot;
++
+ public abstract class Application {
+ 
+     private final static String DEFAULT_NAME = "java";

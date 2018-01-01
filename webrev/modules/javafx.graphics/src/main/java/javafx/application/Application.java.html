@@ -1,0 +1,620 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>New modules/javafx.graphics/src/main/java/javafx/application/Application.java</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 
+  26 package javafx.application;
+  27 
+  28 import java.util.List;
+  29 import java.util.Map;
+  30 
+  31 import javafx.application.Preloader.PreloaderNotification;
+  32 import javafx.scene.Scene;
+  33 import javafx.scene.robot.Robot;
+  34 import javafx.stage.Stage;
+  35 
+  36 import com.sun.javafx.application.LauncherImpl;
+  37 import com.sun.javafx.application.ParametersImpl;
+  38 import com.sun.javafx.application.PlatformImpl;
+  39 
+  40 /**
+  41  * Application class from which JavaFX applications extend.
+  42  *
+  43  * &lt;p&gt;&lt;b&gt;Life-cycle&lt;/b&gt;&lt;/p&gt;
+  44  * &lt;p&gt;
+  45  * The entry point for JavaFX applications is the Application class. The
+  46  * JavaFX runtime does the following, in order, whenever an application is
+  47  * launched:
+  48  * &lt;/p&gt;
+  49  * &lt;ol&gt;
+  50  * &lt;li&gt;Starts the JavaFX runtime, if not already started
+  51  * (see {@link Platform#startup(Runnable)} for more information)&lt;/li&gt;
+  52  * &lt;li&gt;Constructs an instance of the specified Application class&lt;/li&gt;
+  53  * &lt;li&gt;Calls the {@link #init} method&lt;/li&gt;
+  54  * &lt;li&gt;Calls the {@link #start} method&lt;/li&gt;
+  55  * &lt;li&gt;Waits for the application to finish, which happens when either of
+  56  * the following occur:
+  57  * &lt;ul&gt;
+  58  * &lt;li&gt;the application calls {@link Platform#exit}&lt;/li&gt;
+  59  * &lt;li&gt;the last window has been closed and the {@code implicitExit}
+  60  * attribute on {@code Platform} is true&lt;/li&gt;
+  61  * &lt;/ul&gt;&lt;/li&gt;
+  62  * &lt;li&gt;Calls the {@link #stop} method&lt;/li&gt;
+  63  * &lt;/ol&gt;
+  64  * &lt;p&gt;Note that the {@code start} method is abstract and must be overridden.
+  65  * The {@code init} and {@code stop} methods have concrete implementations
+  66  * that do nothing.&lt;/p&gt;
+  67  * &lt;p&gt;The {@code Application} subclass must be declared public and must have a
+  68  * public no-argument constructor.&lt;/p&gt;
+  69  *
+  70  * &lt;p&gt;Calling {@link Platform#exit} is the preferred way to explicitly terminate
+  71  * a JavaFX Application. Directly calling {@link System#exit} is
+  72  * an acceptable alternative, but doesn't allow the Application {@link #stop}
+  73  * method to run.
+  74  * &lt;/p&gt;
+  75  *
+  76  * &lt;p&gt;A JavaFX Application should not attempt to use JavaFX after the
+  77  * FX toolkit has terminated or from a ShutdownHook, that is, after the
+  78  * {@link #stop} method returns or {@link System#exit} is called.
+  79  * &lt;/p&gt;
+  80  *
+  81  * &lt;p&gt;&lt;b&gt;Deploying an Application as a Module&lt;/b&gt;&lt;/p&gt;
+  82  * &lt;p&gt;
+  83  * If the {@code Application} subclass is in a named module then that class
+  84  * must be accessible to the {@code javafx.graphics} module.
+  85  * Otherwise, an exception will be thrown when the application is launched.
+  86  * This means that
+  87  * in addition to the class itself being declared public, the module must
+  88  * {@link Module#isExported(String,Module) export}
+  89  * (or {@link Module#isOpen(String,Module) open}) the containing package to
+  90  * at least the {@code javafx.graphics} module.
+  91  * &lt;/p&gt;
+  92  * &lt;p&gt;
+  93  * For example, if {@code com.foo.MyApplication} is in the {@code foo.app}
+  94  * module, the {@code module-info.java} might look like this:
+  95  * &lt;/p&gt;
+  96 &lt;pre&gt;{@code module foo.app {
+  97     exports com.foo to javafx.graphics;
+  98 }}&lt;/pre&gt;
+  99 *
+ 100  * &lt;p&gt;&lt;b&gt;Parameters&lt;/b&gt;&lt;/p&gt;
+ 101  * &lt;p&gt;
+ 102  * Application parameters are available by calling the {@link #getParameters}
+ 103  * method from the {@link #init} method, or any time after the {@code init}
+ 104  * method has been called.
+ 105  * &lt;/p&gt;
+ 106  *
+ 107  * &lt;p&gt;&lt;b&gt;Threading&lt;/b&gt;&lt;/p&gt;
+ 108  * &lt;p&gt;
+ 109  * JavaFX creates an application thread for running the application start
+ 110  * method, processing input events, and running animation timelines. Creation
+ 111  * of JavaFX {@link Scene} and {@link Stage} objects as well as modification of
+ 112  * scene graph operations to &lt;em&gt;live&lt;/em&gt; objects (those objects already
+ 113  * attached to a scene) must be done on the JavaFX application thread.
+ 114  * &lt;/p&gt;
+ 115  *
+ 116  * &lt;p&gt;
+ 117  * The Java launcher loads and initializes the specified Application class
+ 118  * on the JavaFX Application Thread. If there is no main method in the
+ 119  * Application class, or if the main method calls Application.launch(), then
+ 120  * an instance of the Application is then constructed on the JavaFX Application
+ 121  * Thread.
+ 122  * &lt;/p&gt;
+ 123  *
+ 124  * &lt;p&gt;
+ 125  * The {@code init} method is called on the launcher thread, not on the
+ 126  * JavaFX Application Thread.
+ 127  * This means that an application must not construct a {@link Scene}
+ 128  * or a {@link Stage} in the {@code init} method.
+ 129  * An application may construct other JavaFX objects in the {@code init}
+ 130  * method.
+ 131  * &lt;/p&gt;
+ 132  *
+ 133  * &lt;p&gt;
+ 134  * All the unhandled exceptions on the JavaFX application thread that occur during
+ 135  * event dispatching, running animation timelines, or any other code, are forwarded
+ 136  * to the thread's {@link java.lang.Thread.UncaughtExceptionHandler uncaught
+ 137  * exception handler}.
+ 138  * &lt;/p&gt;
+ 139  *
+ 140  * &lt;p&gt;&lt;b&gt;Example&lt;/b&gt;&lt;/p&gt;
+ 141  * &lt;p&gt;The following example will illustrate a simple JavaFX application.&lt;/p&gt;
+ 142  * &lt;pre&gt;{@code
+ 143 import javafx.application.Application;
+ 144 import javafx.scene.Group;
+ 145 import javafx.scene.Scene;
+ 146 import javafx.scene.shape.Circle;
+ 147 import javafx.stage.Stage;
+ 148 
+ 149 public class MyApp extends Application {
+ 150     public void start(Stage stage) {
+ 151         Circle circ = new Circle(40, 40, 30);
+ 152         Group root = new Group(circ);
+ 153         Scene scene = new Scene(root, 400, 300);
+ 154 
+ 155         stage.setTitle("My JavaFX Application");
+ 156         stage.setScene(scene);
+ 157         stage.show();
+ 158     }
+ 159 }
+ 160  * }&lt;/pre&gt;
+ 161  *
+ 162  * &lt;p&gt;The above example will produce the following:&lt;/p&gt;
+ 163  * &lt;p&gt;&lt;img src="doc-files/Application.png" alt="A black circle in the top left
+ 164  * corner of scene"&gt;&lt;/p&gt;
+ 165  *
+ 166  * @see Platform
+ 167  *
+ 168  * @since JavaFX 2.0
+ 169  */
+ 170 public abstract class Application {
+ 171     /**
+ 172      * Constant for user agent stylesheet for the "Caspian" theme. Caspian
+ 173      * is the theme that shipped as default in JavaFX 2.x.
+ 174      * @since JavaFX 8.0
+ 175      */
+ 176     public static final String STYLESHEET_CASPIAN = "CASPIAN";
+ 177     /**
+ 178      * Constant for user agent stylesheet for the "Modena" theme. Modena
+ 179      * is the default theme for JavaFX 8.x.
+ 180      * @since JavaFX 8.0
+ 181      */
+ 182     public static final String STYLESHEET_MODENA = "MODENA";
+ 183 
+ 184     /**
+ 185      * Launch a standalone application. This method is typically called
+ 186      * from the main method(). It must not be called more than once or an
+ 187      * exception will be thrown.
+ 188      *
+ 189      * &lt;p&gt;
+ 190      * The launch method does not return until the application has exited,
+ 191      * either via a call to Platform.exit or all of the application windows
+ 192      * have been closed.
+ 193      * The class specified by the {@code appClass} argument must be
+ 194      * a public subclass of {@code Application}
+ 195      * with a public no-argument constructor, in a package that is
+ 196      * {@link Module#isExported(String,Module) exported}
+ 197      * (or {@link Module#isOpen(String,Module) open}) to at least the
+ 198      * {@code javafx.graphics} module, or a RuntimeException will be thrown.
+ 199      *
+ 200      * &lt;p&gt;
+ 201      * Typical usage is:
+ 202      * &lt;pre&gt;
+ 203      *     public static void main(String[] args) {
+ 204      *         Application.launch(MyApp.class, args);
+ 205      *     }
+ 206      * &lt;/pre&gt;
+ 207      * where &lt;code&gt;MyApp&lt;/code&gt; is a subclass of Application.
+ 208      *
+ 209      * @param appClass the application class that is constructed and executed
+ 210      *        by the launcher.
+ 211      * @param args the command line arguments passed to the application.
+ 212      *             An application may get these parameters using the
+ 213      *             {@link #getParameters()} method.
+ 214      *
+ 215      * @throws IllegalStateException if this method is called more than once.
+ 216      * @throws IllegalArgumentException if &lt;code&gt;appClass&lt;/code&gt; is not a
+ 217      *         subclass of &lt;code&gt;Application&lt;/code&gt;.
+ 218      * @throws RuntimeException if there is an error launching the
+ 219      * JavaFX runtime, or if the application class cannot be constructed
+ 220      * (e.g., if the class is not public or is not in an exported package), or
+ 221      * if an Exception or Error is thrown by the Application constructor, init
+ 222      * method, start method, or stop method.
+ 223      */
+ 224     public static void launch(Class&lt;? extends Application&gt; appClass, String... args) {
+ 225         LauncherImpl.launchApplication(appClass, args);
+ 226     }
+ 227 
+ 228     /**
+ 229      * Launch a standalone application. This method is typically called
+ 230      * from the main method(). It must not be called more than once or an
+ 231      * exception will be thrown.
+ 232      * This is equivalent to {@code launch(TheClass.class, args)} where
+ 233      * {@code TheClass} is the
+ 234      * immediately enclosing class of the method that called launch.
+ 235      * It must be a public subclass of {@code Application}
+ 236      * with a public no-argument constructor, in a package that is
+ 237      * {@link Module#isExported(String,Module) exported}
+ 238      * (or {@link Module#isOpen(String,Module) open}) to at least the
+ 239      * {@code javafx.graphics} module, or a RuntimeException will be thrown.
+ 240      *
+ 241      * &lt;p&gt;
+ 242      * The launch method does not return until the application has exited,
+ 243      * either via a call to Platform.exit or all of the application windows
+ 244      * have been closed.
+ 245      *
+ 246      * &lt;p&gt;
+ 247      * Typical usage is:
+ 248      * &lt;pre&gt;
+ 249      *     public static void main(String[] args) {
+ 250      *         Application.launch(args);
+ 251      *     }
+ 252      * &lt;/pre&gt;
+ 253      *
+ 254      * @param args the command line arguments passed to the application.
+ 255      *             An application may get these parameters using the
+ 256      *             {@link #getParameters()} method.
+ 257      *
+ 258      * @throws IllegalStateException if this method is called more than once.
+ 259      * @throws RuntimeException if there is an error launching the
+ 260      * JavaFX runtime, or if the application class cannot be constructed
+ 261      * (e.g., if the class is not public or is not in an exported package), or
+ 262      * if an Exception or Error is thrown by the Application constructor, init
+ 263      * method, start method, or stop method.
+ 264      */
+ 265     public static void launch(String... args) {
+ 266         // Figure out the right class to call
+ 267         StackTraceElement[] cause = Thread.currentThread().getStackTrace();
+ 268 
+ 269         boolean foundThisMethod = false;
+ 270         String callingClassName = null;
+ 271         for (StackTraceElement se : cause) {
+ 272             // Skip entries until we get to the entry for this class
+ 273             String className = se.getClassName();
+ 274             String methodName = se.getMethodName();
+ 275             if (foundThisMethod) {
+ 276                 callingClassName = className;
+ 277                 break;
+ 278             } else if (Application.class.getName().equals(className)
+ 279                     &amp;&amp; "launch".equals(methodName)) {
+ 280 
+ 281                 foundThisMethod = true;
+ 282             }
+ 283         }
+ 284 
+ 285         if (callingClassName == null) {
+ 286             throw new RuntimeException("Error: unable to determine Application class");
+ 287         }
+ 288 
+ 289         try {
+ 290             Class theClass = Class.forName(callingClassName, false,
+ 291                                Thread.currentThread().getContextClassLoader());
+ 292             if (Application.class.isAssignableFrom(theClass)) {
+ 293                 Class&lt;? extends Application&gt; appClass = theClass;
+ 294                 LauncherImpl.launchApplication(appClass, args);
+ 295             } else {
+ 296                 throw new RuntimeException("Error: " + theClass
+ 297                         + " is not a subclass of javafx.application.Application");
+ 298             }
+ 299         } catch (RuntimeException ex) {
+ 300             throw ex;
+ 301         } catch (Exception ex) {
+ 302             throw new RuntimeException(ex);
+ 303         }
+ 304     }
+ 305 
+ 306     /**
+ 307      * Constructs a new {@code Application} instance.
+ 308      */
+ 309     public Application() {
+ 310     }
+ 311 
+ 312     /**
+ 313      * The application initialization method. This method is called immediately
+ 314      * after the Application class is loaded and constructed. An application may
+ 315      * override this method to perform initialization prior to the actual starting
+ 316      * of the application.
+ 317      *
+ 318      * &lt;p&gt;
+ 319      * The implementation of this method provided by the Application class does nothing.
+ 320      * &lt;/p&gt;
+ 321      *
+ 322      * &lt;p&gt;
+ 323      * NOTE: This method is not called on the JavaFX Application Thread. An
+ 324      * application must not construct a Scene or a Stage in this
+ 325      * method.
+ 326      * An application may construct other JavaFX objects in this method.
+ 327      * &lt;/p&gt;
+ 328      * @throws java.lang.Exception if something goes wrong
+ 329      */
+ 330     public void init() throws Exception {
+ 331     }
+ 332 
+ 333     /**
+ 334      * The main entry point for all JavaFX applications.
+ 335      * The start method is called after the init method has returned,
+ 336      * and after the system is ready for the application to begin running.
+ 337      *
+ 338      * &lt;p&gt;
+ 339      * NOTE: This method is called on the JavaFX Application Thread.
+ 340      * &lt;/p&gt;
+ 341      *
+ 342      * @param primaryStage the primary stage for this application, onto which
+ 343      * the application scene can be set. The primary stage will be embedded in
+ 344      * the browser if the application was launched as an applet.
+ 345      * Applications may create other stages, if needed, but they will not be
+ 346      * primary stages and will not be embedded in the browser.
+ 347      * @throws java.lang.Exception if something goes wrong
+ 348      */
+ 349     public abstract void start(Stage primaryStage) throws Exception;
+ 350 
+ 351     /**
+ 352      * This method is called when the application should stop, and provides a
+ 353      * convenient place to prepare for application exit and destroy resources.
+ 354      *
+ 355      * &lt;p&gt;
+ 356      * The implementation of this method provided by the Application class does nothing.
+ 357      * &lt;/p&gt;
+ 358      *
+ 359      * &lt;p&gt;
+ 360      * NOTE: This method is called on the JavaFX Application Thread.
+ 361      * &lt;/p&gt;
+ 362      * @throws java.lang.Exception if something goes wrong
+ 363      */
+ 364     public void stop() throws Exception {
+ 365     }
+ 366 
+ 367     private HostServices hostServices = null;
+ 368 
+ 369     /**
+ 370      * Gets the HostServices provider for this application. This provides
+ 371      * the ability to get the code base and document base for this application,
+ 372      * and to access the enclosing web page.
+ 373      *
+ 374      * @return the HostServices provider
+ 375      */
+ 376     public final HostServices getHostServices() {
+ 377         synchronized (this) {
+ 378             if (hostServices == null) {
+ 379                 hostServices = new HostServices(this);
+ 380             }
+ 381             return hostServices;
+ 382         }
+ 383     }
+ 384 
+ 385     /**
+ 386      * Retrieves the parameters for this Application, including any arguments
+ 387      * passed on the command line and any parameters specified in a JNLP file
+ 388      * for an applet or WebStart application.
+ 389      *
+ 390      * &lt;p&gt;
+ 391      * NOTE: this method should not be called from the Application constructor,
+ 392      * as it will return null. It may be called in the init() method or any
+ 393      * time after that.
+ 394      * &lt;/p&gt;
+ 395      *
+ 396      * @return the parameters for this Application, or null if called from the
+ 397      * constructor.
+ 398      */
+ 399     public final Parameters getParameters() {
+ 400         return ParametersImpl.getParameters(this);
+ 401     }
+ 402 
+ 403     /**
+ 404      * Notifies the preloader with an application-generated notification.
+ 405      * Application code calls this method with a PreloaderNotification that is
+ 406      * delivered to the
+ 407      * {@link Preloader#handleApplicationNotification
+ 408      * Preloader.handleApplicationNotification} method.
+ 409      * This is primarily useful for cases where an application wants the
+ 410      * preloader to show progress during a long application initialization
+ 411      * step.
+ 412      *
+ 413      * &lt;p&gt;
+ 414      * NOTE: the notification will be delivered only to the preloader's
+ 415      * handleApplicationNotification() method; this means, for example, that
+ 416      * if this method is called with a ProgressNotification, that notification
+ 417      * will not be delivered to the {@link Preloader#handleProgressNotification
+ 418      * Preloader.handleProgressNotification}
+ 419      * method.
+ 420      * &lt;/p&gt;
+ 421      *
+ 422      * @param info the application-generated preloader notification
+ 423      */
+ 424     public final void notifyPreloader(PreloaderNotification info) {
+ 425         LauncherImpl.notifyPreloader(this, info);
+ 426     }
+ 427 
+ 428     /**
+ 429      * Encapsulates the set of parameters for an application. This includes
+ 430      * arguments passed on the command line, unnamed parameters specified
+ 431      * in a JNLP file, and &amp;lt;name,value&amp;gt; pairs specified in a JNLP file.
+ 432      *
+ 433      * &lt;p&gt;
+ 434      * Note that the application and the preloader both get the same set
+ 435      * of parameters for a given run of an application.
+ 436      * &lt;/p&gt;
+ 437      * @since JavaFX 2.0
+ 438      */
+ 439     public static abstract class Parameters {
+ 440 
+ 441         /**
+ 442          * Constructs a new {@code Parameters} instance.
+ 443          */
+ 444         public Parameters() {
+ 445         }
+ 446 
+ 447         /**
+ 448          * Retrieves a read-only list of the raw arguments. This list
+ 449          * may be empty, but is never null. In the case of a standalone
+ 450          * application, it is the ordered list of arguments specified on the
+ 451          * command line. In the case of an applet or WebStart application,
+ 452          * it includes unnamed parameters as well as named parameters. For
+ 453          * named parameters, each &amp;lt;name,value&amp;gt; pair is represented as
+ 454          * a single argument of the form: "--name=value".
+ 455          *
+ 456          * @return a read-only list of raw application arguments
+ 457          */
+ 458         public abstract List&lt;String&gt; getRaw();
+ 459 
+ 460         /**
+ 461          * Retrieves a read-only list of the unnamed parameters. This list
+ 462          * may be empty, but is never null. The named parameters, that is
+ 463          * the parameters that are represented as &amp;lt;name,value&amp;gt; pairs, are
+ 464          * filtered out.
+ 465          *
+ 466          * @return a read-only list of unnamed parameters.
+ 467          */
+ 468         public abstract List&lt;String&gt; getUnnamed();
+ 469 
+ 470         /**
+ 471          * Retrieves a read-only map of the named parameters. It may be
+ 472          * empty, but is never null.
+ 473          * Named parameters include those &amp;lt;name,value&amp;gt; pairs explicitly
+ 474          * specified in a JNLP file. It also includes any command line
+ 475          * arguments of the form: "--name=value".
+ 476          *
+ 477          * @return a read-only map of named parameters.
+ 478          */
+ 479         public abstract Map&lt;String, String&gt; getNamed();
+ 480 
+ 481     }
+ 482 
+ 483     private static String userAgentStylesheet = null;
+ 484 
+ 485     /**
+ 486      * Get the user agent stylesheet used by the whole application. This is
+ 487      * used to provide default styling for all ui controls and other nodes.
+ 488      * A value of null means the platform default stylesheet is being used.
+ 489      * &lt;p&gt;
+ 490      * NOTE: This method must be called on the JavaFX Application Thread.
+ 491      * &lt;/p&gt;
+ 492      *
+ 493      * @return The URL to the stylesheet as a String.
+ 494      * @since JavaFX 8.0
+ 495      */
+ 496     public static String getUserAgentStylesheet() {
+ 497         return userAgentStylesheet;
+ 498     }
+ 499 
+ 500     /**
+ 501      * Set the user agent stylesheet used by the whole application. This is used
+ 502      * to provide default styling for all ui controls and other nodes. Each
+ 503      * release of JavaFX may have a new default value for this so if you need
+ 504      * to guarantee consistency you will need to call this method and choose
+ 505      * what default you would like for your application. A value of null will
+ 506      * restore the platform default stylesheet. This property can also be set
+ 507      * on the command line with {@code -Djavafx.userAgentStylesheetUrl=[URL]}
+ 508      * Setting it on the command line overrides anything set using this method
+ 509      * in code.
+ 510      * &lt;p&gt;
+ 511      * NOTE: This method must be called on the JavaFX Application Thread.
+ 512      * &lt;/p&gt;
+ 513      *
+ 514      *
+ 515      * @param url The URL to the stylesheet as a String.
+ 516      * @since JavaFX 8.0
+ 517      */
+ 518     public static void setUserAgentStylesheet(String url) {
+ 519         userAgentStylesheet = url;
+ 520         if (url == null) {
+ 521             PlatformImpl.setDefaultPlatformUserAgentStylesheet();
+ 522         } else {
+ 523             PlatformImpl.setPlatformUserAgentStylesheet(url);
+ 524         }
+ 525     }
+ 526 
+ 527     /**
+ 528      * Creates and returns a {@link javafx.scene.robot.Robot} which can be used for
+ 529      * simulating user interaction.
+ 530      *
+ 531      * @return a new {@link javafx.scene.robot.Robot} instance
+ 532      * @since 11
+ 533      */
+ 534     public static Robot createRobot() {
+ 535         return com.sun.glass.ui.Application.GetApplication().createRobot();
+ 536     }
+ 537 }
+</pre></body></html>

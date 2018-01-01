@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>New modules/javafx.graphics/src/main/java/com/sun/glass/ui/mac/MacRobot.java</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.mac;
+  26 
+  27 import com.sun.glass.ui.Application;
+  28 import com.sun.glass.ui.GlassRobot;
+  29 import com.sun.glass.ui.Pixels;
+  30 
+  31 import javafx.scene.image.Image;
+  32 import javafx.scene.input.KeyCode;
+  33 import javafx.scene.input.MouseButton;
+  34 import javafx.scene.paint.Color;
+  35 import javafx.scene.robot.Robot;
+  36 
+  37 /**
+  38  * MacOSX platform implementation class for Robot.
+  39  */
+  40 final class MacRobot extends Robot {
+  41 
+  42     // TODO: get rid of native Robot object
+  43     private long ptr;
+  44 
+  45     native private long _init();
+  46     @Override protected void create() {
+  47         Application.checkEventThread();
+  48         ptr = _init();
+  49     }
+  50 
+  51     native protected void _destroy(long ptr);
+  52     @Override protected void destroy() {
+  53         Application.checkEventThread();
+  54         if (ptr == 0) {
+  55             return;
+  56         }
+  57         _destroy(ptr);
+  58     }
+  59 
+  60     native protected void _keyPress(int code);
+  61 
+  62     @Override public void keyPress(KeyCode code) {
+  63         Application.checkEventThread();
+  64         _keyPress(code.getCode());
+  65     }
+  66 
+  67     native protected void _keyRelease(int code);
+  68 
+  69     @Override public void keyRelease(KeyCode code) {
+  70         Application.checkEventThread();
+  71         _keyRelease(code.getCode());
+  72     }
+  73 
+  74     native protected void _mouseMove(long ptr, int x, int y);
+  75     @Override public void mouseMove(int x, int y) {
+  76         Application.checkEventThread();
+  77         if (ptr == 0) {
+  78             return;
+  79         }
+  80         _mouseMove(ptr, x, y);
+  81     }
+  82 
+  83     native protected void _mousePress(long ptr, int buttons);
+  84     @Override public void mousePress(MouseButton button) {
+  85         Application.checkEventThread();
+  86         if (ptr == 0) {
+  87             return;
+  88         }
+  89         _mousePress(ptr, GlassRobot.convertToRobotMouseButton(button));
+  90     }
+  91 
+  92     @Override public void mousePress(MouseButton... buttons) {
+  93         Application.checkEventThread();
+  94         if (ptr == 0) {
+  95             return;
+  96         }
+  97         _mousePress(ptr, GlassRobot.convertToRobotMouseButton(buttons));
+  98     }
+  99 
+ 100     native protected void _mouseRelease(long ptr, int buttons);
+ 101     @Override public void mouseRelease(MouseButton button) {
+ 102         Application.checkEventThread();
+ 103         if (ptr == 0) {
+ 104             return;
+ 105         }
+ 106         _mouseRelease(ptr, GlassRobot.convertToRobotMouseButton(button));
+ 107     }
+ 108 
+ 109     @Override public void mouseRelease(MouseButton... buttons) {
+ 110         Application.checkEventThread();
+ 111         if (ptr == 0) {
+ 112             return;
+ 113         }
+ 114         _mouseRelease(ptr, GlassRobot.convertToRobotMouseButton(buttons));
+ 115     }
+ 116 
+ 117     native protected void _mouseWheel(int wheelAmt);
+ 118     @Override protected void mouseWheel(int wheelAmt) {
+ 119         Application.checkEventThread();
+ 120         _mouseWheel(wheelAmt);
+ 121     }
+ 122 
+ 123     native protected int _getMouseX(long ptr);
+ 124     @Override public int getMouseX() {
+ 125         Application.checkEventThread();
+ 126         if (ptr == 0) {
+ 127             return 0;
+ 128         }
+ 129         return _getMouseX(ptr);
+ 130     }
+ 131 
+ 132     native protected int _getMouseY(long ptr);
+ 133     @Override public int getMouseY() {
+ 134         Application.checkEventThread();
+ 135         if (ptr == 0) {
+ 136             return 0;
+ 137         }
+ 138         return _getMouseY(ptr);
+ 139     }
+ 140 
+ 141     native protected int _getPixelColor(int x, int y);
+ 142     @Override public Color getPixelColor(int x, int y) {
+ 143         Application.checkEventThread();
+ 144         return GlassRobot.convertFromIntArgb(_getPixelColor(x, y));
+ 145     }
+ 146 
+ 147     @Override native protected void getScreenCapture(int x, int y, int width, int height, int[] data);
+ 148 }
+ 149 
+</pre></body></html>

@@ -1,0 +1,445 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>Old modules/javafx.graphics/src/main/java/com/sun/glass/ui/win/WinApplication.java</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 package com.sun.glass.ui.win;
+  26 
+  27 import com.sun.glass.ui.*;
+  28 import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+  29 import com.sun.glass.ui.CommonDialogs.FileChooserResult;
+  30 import com.sun.glass.utils.NativeLibLoader;
+  31 import com.sun.prism.impl.PrismSettings;
+  32 import com.sun.javafx.tk.Toolkit;
+  33 
+  34 import java.io.File;
+  35 import java.nio.ByteBuffer;
+  36 import java.nio.IntBuffer;
+  37 import java.security.AccessController;
+  38 import java.security.PrivilegedAction;
+  39 
+  40 final class WinApplication extends Application implements InvokeLaterDispatcher.InvokeLaterSubmitter {
+  41     static float   overrideUIScale;
+  42 
+  43     private static boolean getBoolean(String propname, boolean defval, String description) {
+  44         String str = System.getProperty(propname);
+  45         if (str == null) {
+  46             str = System.getenv(propname);
+  47         }
+  48         if (str == null) {
+  49             return defval;
+  50         }
+  51         Boolean ret = Boolean.parseBoolean(str);
+  52         if (PrismSettings.verbose) {
+  53             System.out.println((ret ? "" : "not ")+description);
+  54         }
+  55         return ret;
+  56     }
+  57 
+  58     private static float getFloat(String propname, float defval, String description) {
+  59         String str = System.getProperty(propname);
+  60         if (str == null) {
+  61             str = System.getenv(propname);
+  62         }
+  63         if (str == null) {
+  64             return defval;
+  65         }
+  66         str = str.trim();
+  67         float val;
+  68         if (str.endsWith("%")) {
+  69             val = Integer.parseInt(str.substring(0, str.length()-1)) / 100.0f;
+  70         } else if (str.endsWith("DPI") || str.endsWith("dpi")) {
+  71             val = Integer.parseInt(str.substring(0, str.length()-3)) / 96.0f;
+  72         } else {
+  73             val = Float.parseFloat(str);
+  74         }
+  75         if (PrismSettings.verbose) {
+  76             System.out.println(description+val);
+  77         }
+  78         return val;
+  79     }
+  80 
+  81     private static native void initIDs(float overrideUIScale);
+  82     static {
+  83         AccessController.doPrivileged(new PrivilegedAction&lt;Void&gt;() {
+  84             public Void run() {
+  85                 verbose = Boolean.getBoolean("javafx.verbose");
+  86                 if (PrismSettings.allowHiDPIScaling) {
+  87                     overrideUIScale = getFloat("glass.win.uiScale", -1.0f, "Forcing UI scaling factor: ");
+  88                     // We only parse these if verbose, to inform the user...
+  89                     if (PrismSettings.verbose) {
+  90                         getFloat("glass.win.renderScale", -1.0f,
+  91                                  "(No longer supported) Rendering scaling factor: ");
+  92                         getFloat("glass.win.minHiDPI", 1.5f,
+  93                                  "(No longer supported) UI scaling threshold: ");
+  94                         getBoolean("glass.win.forceIntegerRenderScale", true,
+  95                                    "(No longer supported) force integer rendering scale");
+  96                     }
+  97                 } else {
+  98                     overrideUIScale = 1.0f;
+  99                 }
+ 100                 // This loading of msvcp140.dll and vcruntime140.dll (VS2017) is required on Windows platforms
+ 101                 Toolkit.loadMSWindowsLibraries();
+ 102                 Application.loadNativeLibrary();
+ 103                 return null;
+ 104             }
+ 105         });
+ 106         initIDs(overrideUIScale);
+ 107     }
+ 108 
+ 109     private final InvokeLaterDispatcher invokeLaterDispatcher;
+ 110     WinApplication() {
+ 111         // Embedded in SWT, with shared event thread
+ 112         boolean isEventThread = AccessController
+ 113                 .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("javafx.embed.isEventThread"));
+ 114         if (!isEventThread) {
+ 115             invokeLaterDispatcher = new InvokeLaterDispatcher(this);
+ 116             invokeLaterDispatcher.start();
+ 117         } else {
+ 118             invokeLaterDispatcher = null;
+ 119         }
+ 120     }
+ 121 
+ 122     private static boolean verbose;
+ 123 
+ 124     // returng toolkit window HWND
+ 125     private native long _init(int awarenessRequested);
+ 126     private native void _setClassLoader(ClassLoader classLoader);
+ 127     private native void _runLoop(Runnable launchable);
+ 128     private native void _terminateLoop();
+ 129 
+ 130     private static final int Process_DPI_Unaware            = 0;
+ 131     private static final int Process_System_DPI_Aware       = 1;
+ 132     private static final int Process_Per_Monitor_DPI_Aware  = 2;
+ 133 
+ 134     private static int getDesiredAwarenesslevel() {
+ 135         if (!PrismSettings.allowHiDPIScaling) {
+ 136             return Process_DPI_Unaware;
+ 137         }
+ 138         String awareRequested = AccessController
+ 139             .doPrivileged((PrivilegedAction&lt;String&gt;) () -&gt;
+ 140                           System.getProperty("javafx.glass.winDPIawareness"));
+ 141         if (awareRequested != null) {
+ 142             awareRequested = awareRequested.toLowerCase();
+ 143             if (awareRequested.equals("aware")) {
+ 144                 return Process_System_DPI_Aware;
+ 145             } else if (awareRequested.equals("permonitor")) {
+ 146                 return Process_Per_Monitor_DPI_Aware;
+ 147             } else {
+ 148                 if (!awareRequested.equals("unaware")) {
+ 149                     System.err.println("unrecognized DPI awareness request, defaulting to unaware: "+awareRequested);
+ 150                 }
+ 151                 return Process_DPI_Unaware;
+ 152             }
+ 153         }
+ 154         return Process_Per_Monitor_DPI_Aware;
+ 155     }
+ 156 
+ 157     @Override
+ 158     protected void runLoop(final Runnable launchable) {
+ 159         boolean isEventThread = AccessController
+ 160             .doPrivileged((PrivilegedAction&lt;Boolean&gt;) () -&gt; Boolean.getBoolean("javafx.embed.isEventThread"));
+ 161         int awareness = getDesiredAwarenesslevel();
+ 162 
+ 163         ClassLoader classLoader = WinApplication.class.getClassLoader();
+ 164         _setClassLoader(classLoader);
+ 165 
+ 166         if (isEventThread) {
+ 167             _init(awareness);
+ 168             setEventThread(Thread.currentThread());
+ 169             launchable.run();
+ 170             return;
+ 171         }
+ 172         final Thread toolkitThread =
+ 173             AccessController.doPrivileged((PrivilegedAction&lt;Thread&gt;) () -&gt; new Thread(() -&gt; {
+ 174                 _init(awareness);
+ 175                 _runLoop(launchable);
+ 176             }, "WindowsNativeRunloopThread"));
+ 177         setEventThread(toolkitThread);
+ 178         toolkitThread.start();
+ 179     }
+ 180 
+ 181     @Override protected void finishTerminating() {
+ 182         final Thread toolkitThread = getEventThread();
+ 183         if (toolkitThread != null) {
+ 184             _terminateLoop();
+ 185             setEventThread(null);
+ 186         }
+ 187         super.finishTerminating();
+ 188     }
+ 189 
+ 190     @Override public boolean shouldUpdateWindow() {
+ 191         return true;
+ 192     }
+ 193 
+ 194     native private Object _enterNestedEventLoopImpl();
+ 195     native private void _leaveNestedEventLoopImpl(Object retValue);
+ 196 
+ 197     @Override protected Object _enterNestedEventLoop() {
+ 198         if (invokeLaterDispatcher != null) {
+ 199             invokeLaterDispatcher.notifyEnteringNestedEventLoop();
+ 200         }
+ 201         try {
+ 202             return _enterNestedEventLoopImpl();
+ 203         } finally {
+ 204             if (invokeLaterDispatcher != null) {
+ 205                 invokeLaterDispatcher.notifyLeftNestedEventLoop();
+ 206             }
+ 207         }
+ 208     }
+ 209 
+ 210     @Override protected void _leaveNestedEventLoop(Object retValue) {
+ 211         if (invokeLaterDispatcher != null) {
+ 212             invokeLaterDispatcher.notifyLeavingNestedEventLoop();
+ 213         }
+ 214         _leaveNestedEventLoopImpl(retValue);
+ 215     }
+ 216 
+ 217     // FACTORY METHODS
+ 218 
+ 219     @Override public Window createWindow(Window owner, Screen screen, int styleMask) {
+ 220         return new WinWindow(owner, screen, styleMask);
+ 221     }
+ 222 
+ 223     @Override public Window createWindow(long parent) {
+ 224         return new WinChildWindow(parent);
+ 225     }
+ 226 
+ 227     @Override public View createView() {
+ 228         return new WinView();
+ 229     }
+ 230 
+ 231     @Override public Cursor createCursor(int type) {
+ 232         return new WinCursor(type);
+ 233     }
+ 234 
+ 235     @Override public Cursor createCursor(int x, int y, Pixels pixels) {
+ 236         return new WinCursor(x, y, pixels);
+ 237     }
+ 238 
+ 239     @Override protected void staticCursor_setVisible(boolean visible) {
+ 240         WinCursor.setVisible_impl(visible);
+ 241     }
+ 242 
+ 243     @Override protected Size staticCursor_getBestSize(int width, int height) {
+ 244         return WinCursor.getBestSize_impl(width, height);
+ 245     }
+ 246 
+ 247     @Override public Pixels createPixels(int width, int height, ByteBuffer data) {
+ 248         return new WinPixels(width, height, data);
+ 249     }
+ 250 
+ 251     @Override public Pixels createPixels(int width, int height, IntBuffer data) {
+ 252         return new WinPixels(width, height, data);
+ 253     }
+ 254 
+ 255     @Override
+ 256     public Pixels createPixels(int width, int height, IntBuffer data, float scalex, float scaley) {
+ 257         return new WinPixels(width, height, data, scalex, scaley);
+ 258     }
+ 259 
+ 260     @Override protected int staticPixels_getNativeFormat() {
+ 261         return WinPixels.getNativeFormat_impl();
+ 262     }
+ 263 
+ 264     @Override public Robot createRobot() {
+ 265         return new WinRobot();
+ 266     }
+ 267 
+ 268     @Override protected double staticScreen_getVideoRefreshPeriod() {
+ 269         return 0.0;     // indicate millisecond resolution
+ 270     }
+ 271 
+ 272     @Override native protected Screen[] staticScreen_getScreens();
+ 273 
+ 274     @Override public Timer createTimer(Runnable runnable) {
+ 275         return new WinTimer(runnable);
+ 276     }
+ 277 
+ 278     @Override protected int staticTimer_getMinPeriod() {
+ 279         return WinTimer.getMinPeriod_impl();
+ 280     }
+ 281 
+ 282     @Override protected int staticTimer_getMaxPeriod() {
+ 283         return WinTimer.getMaxPeriod_impl();
+ 284     }
+ 285 
+ 286     @Override public Accessible createAccessible() {
+ 287         return new WinAccessible();
+ 288     }
+ 289 
+ 290     @Override protected FileChooserResult staticCommonDialogs_showFileChooser(Window owner, String folder, String filename, String title, int type,
+ 291                                              boolean multipleMode, ExtensionFilter[] extensionFilters, int defaultFilterIndex) {
+ 292         if (invokeLaterDispatcher != null) {
+ 293             invokeLaterDispatcher.notifyEnteringNestedEventLoop();
+ 294         }
+ 295         return WinCommonDialogs.showFileChooser_impl(owner, folder, filename, title, type, multipleMode, extensionFilters, defaultFilterIndex);
+ 296     }
+ 297 
+ 298     @Override protected File staticCommonDialogs_showFolderChooser(Window owner, String folder, String title) {
+ 299         if (invokeLaterDispatcher != null) {
+ 300             invokeLaterDispatcher.notifyEnteringNestedEventLoop();
+ 301         }
+ 302         return WinCommonDialogs.showFolderChooser_impl(owner, folder, title);
+ 303     }
+ 304 
+ 305     @Override protected long staticView_getMultiClickTime() {
+ 306         return WinView.getMultiClickTime_impl();
+ 307     }
+ 308 
+ 309     @Override protected int staticView_getMultiClickMaxX() {
+ 310         return WinView.getMultiClickMaxX_impl();
+ 311     }
+ 312 
+ 313     @Override protected int staticView_getMultiClickMaxY() {
+ 314         return WinView.getMultiClickMaxY_impl();
+ 315     }
+ 316 
+ 317     @Override native protected void _invokeAndWait(Runnable runnable);
+ 318 
+ 319     native private void _submitForLaterInvocation(Runnable r);
+ 320     // InvokeLaterDispatcher.InvokeLaterSubmitter
+ 321     @Override public void submitForLaterInvocation(Runnable r) {
+ 322         _submitForLaterInvocation(r);
+ 323     }
+ 324 
+ 325     @Override protected void _invokeLater(Runnable runnable) {
+ 326         if (invokeLaterDispatcher != null) {
+ 327             invokeLaterDispatcher.invokeLater(runnable);
+ 328         } else {
+ 329             submitForLaterInvocation(runnable);
+ 330         }
+ 331     }
+ 332 
+ 333     private native String _getHighContrastTheme();
+ 334     @Override public String getHighContrastTheme() {
+ 335         checkEventThread();
+ 336         return _getHighContrastTheme();
+ 337     }
+ 338 
+ 339     @Override
+ 340     protected boolean _supportsInputMethods() {
+ 341         return true;
+ 342     }
+ 343 
+ 344     @Override
+ 345     protected boolean _supportsTransparentWindows() {
+ 346         return true;
+ 347     }
+ 348 
+ 349     @Override native protected boolean _supportsUnifiedWindows();
+ 350 
+ 351     public String getDataDirectory() {
+ 352         checkEventThread();
+ 353         String baseDirectory = AccessController.doPrivileged((PrivilegedAction&lt;String&gt;) () -&gt; System.getenv("APPDATA"));
+ 354         if (baseDirectory == null || baseDirectory.length() == 0) {
+ 355             return super.getDataDirectory();
+ 356         }
+ 357         return baseDirectory + File.separator + name + File.separator;
+ 358     }
+ 359 
+ 360     @Override
+ 361     protected native int _getKeyCodeForChar(char c);
+ 362 }
+</pre></body></html>

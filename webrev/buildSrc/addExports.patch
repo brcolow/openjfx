@@ -1,0 +1,7 @@
+--- old/buildSrc/addExports	2018-01-01 14:51:07.616841100 -0700
++++ new/buildSrc/addExports	2018-01-01 14:51:07.257821300 -0700
+@@ -13,3 +13,4 @@
+ # ----------------------------------------------------------------------
+ #
+ # end temporary --add-exports
++--add-exports javafx.graphics/javafx.scene.robot=ALL-UNNAMED

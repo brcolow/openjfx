@@ -1,0 +1,349 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>New modules/javafx.graphics/src/main/native-glass/gtk/GlassRobot.cpp</title>
+<body id="SUNWwebrev">
+<pre>
+   1 /*
+   2  * Copyright (c) 2011, 2016, Oracle and/or its affiliates. All rights reserved.
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the "Classpath" exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 #include &lt;X11/Xlib.h&gt;
+  26 #include &lt;X11/Xutil.h&gt;
+  27 #include &lt;X11/extensions/XTest.h&gt;
+  28 #include &lt;assert.h&gt;
+  29 #include &lt;stdlib.h&gt;
+  30 #include &lt;math.h&gt;
+  31 #include &lt;gdk/gdk.h&gt;
+  32 #include &lt;gdk/gdkx.h&gt;
+  33 
+  34 #include &lt;com_sun_glass_ui_GlassRobot.h&gt;
+  35 #include &lt;com_sun_glass_ui_gtk_GtkRobot.h&gt;
+  36 #include &lt;com_sun_glass_events_MouseEvent.h&gt;
+  37 #include "glass_general.h"
+  38 #include "glass_key.h"
+  39 #include "glass_screen.h"
+  40 
+  41 
+  42 static void checkXTest(JNIEnv* env) {
+  43     int32_t major_opcode, first_event, first_error;
+  44     int32_t  event_basep, error_basep, majorp, minorp;
+  45     static int32_t isXTestAvailable;
+  46     static gboolean checkDone = FALSE;
+  47     if (!checkDone) {
+  48         /* check if XTest is available */
+  49         isXTestAvailable = XQueryExtension(gdk_x11_get_default_xdisplay(), XTestExtensionName, &amp;major_opcode, &amp;first_event, &amp;first_error);
+  50         if (isXTestAvailable) {
+  51             /* check if XTest version is OK */
+  52             XTestQueryExtension(gdk_x11_get_default_xdisplay(), &amp;event_basep, &amp;error_basep, &amp;majorp, &amp;minorp);
+  53             if (majorp &lt; 2 || (majorp == 2 &amp;&amp; minorp &lt; 2)) {
+  54                     isXTestAvailable = False;
+  55             } else {
+  56                 XTestGrabControl(gdk_x11_get_default_xdisplay(), True);
+  57             }
+  58         }
+  59         checkDone = TRUE;
+  60     }
+  61     if (!isXTestAvailable) {
+  62         jclass cls = env-&gt;FindClass("java/lang/UnsupportedOperationException");
+  63         if (env-&gt;ExceptionCheck()) return;
+  64         env-&gt;ThrowNew(cls, "Glass Robot needs XTest extension to work");
+  65     }
+  66 }
+  67 
+  68 static void keyButton(jint code, gboolean press)
+  69 {
+  70     Display *xdisplay = gdk_x11_get_default_xdisplay();
+  71     gint gdk_keyval = find_gdk_keyval_for_glass_keycode(code);
+  72     GdkKeymapKey *keys;
+  73     gint n_keys;
+  74     if (gdk_keyval == -1) {
+  75         return;
+  76     }
+  77     gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(),
+  78             gdk_keyval, &amp;keys, &amp;n_keys);
+  79     if (n_keys &lt; 1) {
+  80         return;
+  81     }
+  82 
+  83     XTestFakeKeyEvent(xdisplay,
+  84                       keys[0].keycode,
+  85                       press ? True : False,
+  86                       CurrentTime);
+  87     g_free(keys);
+  88     XSync(xdisplay, False);
+  89 }
+  90 
+  91 extern "C" {
+  92 
+  93 /*
+  94  * Class:     com_sun_glass_ui_gtk_GtkRobot
+  95  * Method:    _keyPress
+  96  * Signature: (I)V
+  97  */
+  98 JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1keyPress
+  99   (JNIEnv *env, jobject obj, jint code)
+ 100 {
+ 101     (void)obj;
+ 102 
+ 103     checkXTest(env);
+ 104     keyButton(code, TRUE);
+ 105 }
+ 106 
+ 107 /*
+ 108  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 109  * Method:    _keyRelease
+ 110  * Signature: (I)V
+ 111  */
+ 112 JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1keyRelease
+ 113   (JNIEnv *env, jobject obj, jint code)
+ 114 {
+ 115     (void)obj;
+ 116 
+ 117     checkXTest(env);
+ 118     keyButton(code, FALSE);
+ 119 }
+ 120 
+ 121 /*
+ 122  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 123  * Method:    _mouseMove
+ 124  * Signature: (II)V
+ 125  */
+ 126 JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseMove
+ 127   (JNIEnv *env, jobject obj, jint x, jint y)
+ 128 {
+ 129     (void)obj;
+ 130 
+ 131     Display *xdisplay = gdk_x11_get_default_xdisplay();
+ 132     checkXTest(env);
+ 133     jfloat uiScale = getUIScale();
+ 134     x = rint(x * uiScale);
+ 135     y = rint(y * uiScale);
+ 136     XWarpPointer(xdisplay,
+ 137             None,
+ 138             XRootWindow(xdisplay,gdk_x11_get_default_screen()),
+ 139             0, 0, 0, 0, x, y);
+ 140     XSync(xdisplay, False);
+ 141 }
+ 142 
+ 143 static void mouseButtons(jint buttons, gboolean press)
+ 144 {
+ 145     Display *xdisplay = gdk_x11_get_default_xdisplay();
+ 146     if (buttons &amp; com_sun_glass_ui_GlassRobot_MOUSE_LEFT_BTN) {
+ 147         XTestFakeButtonEvent(xdisplay, 1, press, CurrentTime);
+ 148     }
+ 149     if (buttons &amp; com_sun_glass_ui_GlassRobot_MOUSE_MIDDLE_BTN) {
+ 150         XTestFakeButtonEvent(xdisplay, 2, press, CurrentTime);
+ 151     }
+ 152     if (buttons &amp; com_sun_glass_ui_GlassRobot_MOUSE_RIGHT_BTN) {
+ 153         XTestFakeButtonEvent(xdisplay, 3, press, CurrentTime);
+ 154     }
+ 155 
+ 156     XSync(xdisplay, False);
+ 157 }
+ 158 
+ 159 /*
+ 160  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 161  * Method:    _mousePress
+ 162  * Signature: (I)V
+ 163  */
+ 164 JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mousePress
+ 165   (JNIEnv *env, jobject obj, jint buttons)
+ 166 {
+ 167     (void)obj;
+ 168 
+ 169     checkXTest(env);
+ 170     mouseButtons(buttons, TRUE);
+ 171 }
+ 172 
+ 173 /*
+ 174  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 175  * Method:    _mouseRelease
+ 176  * Signature: (I)V
+ 177  */
+ 178 JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseRelease
+ 179   (JNIEnv *env, jobject obj, jint buttons)
+ 180 {
+ 181     (void)obj;
+ 182 
+ 183     checkXTest(env);
+ 184     mouseButtons(buttons, FALSE);
+ 185 }
+ 186 
+ 187 /*
+ 188  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 189  * Method:    _mouseWheel
+ 190  * Signature: (I)V
+ 191  */
+ 192 JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1mouseWheel
+ 193   (JNIEnv *env, jobject obj, jint amt)
+ 194 {
+ 195     (void)obj;
+ 196 
+ 197     Display *xdisplay = gdk_x11_get_default_xdisplay();
+ 198     int repeat = abs(amt);
+ 199     int button = amt &lt; 0 ? 5 : 4;
+ 200     int i;
+ 201 
+ 202     checkXTest(env);
+ 203     for (i = 0; i &lt; repeat; i++) {
+ 204         XTestFakeButtonEvent(xdisplay, button, True, CurrentTime);
+ 205         XTestFakeButtonEvent(xdisplay, button, False, CurrentTime);
+ 206     }
+ 207     XSync(xdisplay, False);
+ 208 }
+ 209 
+ 210 /*
+ 211  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 212  * Method:    _getMouseX
+ 213  * Signature: ()I
+ 214  */
+ 215 JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getMouseX
+ 216   (JNIEnv *env, jobject obj)
+ 217 {
+ 218     (void)env;
+ 219     (void)obj;
+ 220 
+ 221     jint x;
+ 222     glass_gdk_display_get_pointer(gdk_display_get_default(), &amp;x, NULL);
+ 223     return x;
+ 224 }
+ 225 
+ 226 /*
+ 227  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 228  * Method:    _getMouseY
+ 229  * Signature: ()I
+ 230  */
+ 231 JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkRobot__1getMouseY
+ 232   (JNIEnv *env, jobject obj)
+ 233 {
+ 234     (void)env;
+ 235     (void)obj;
+ 236 
+ 237     jint y;
+ 238     glass_gdk_display_get_pointer(gdk_display_get_default(), NULL, &amp;y);
+ 239     return y;
+ 240 }
+ 241 
+ 242 /*
+ 243  * Class:     com_sun_glass_ui_gtk_GtkRobot
+ 244  * Method:    getScreenCapture
+ 245  * Signature: (IIII[I)V
+ 246  */
+ 247 JNIEXPORT void JNICALL Java_com_sun_glass_ui_gtk_GtkRobot_getScreenCapture
+ 248   (JNIEnv * env, jobject obj, jint x, jint y, jint width, jint height, jintArray data)
+ 249 {
+ 250     (void)obj;
+ 251 
+ 252     GdkPixbuf *screenshot, *tmp;
+ 253     GdkWindow *root_window = gdk_get_default_root_window();
+ 254 
+ 255     tmp = glass_pixbuf_from_window(root_window, x, y, width, height);
+ 256     screenshot = gdk_pixbuf_add_alpha(tmp, FALSE, 0, 0, 0);
+ 257     g_object_unref(tmp);
+ 258 
+ 259     jint *pixels = (jint *)convert_BGRA_to_RGBA((int*)gdk_pixbuf_get_pixels(screenshot), width * 4, height);
+ 260     env-&gt;SetIntArrayRegion(data, 0, height * width, pixels);
+ 261     g_free(pixels);
+ 262 
+ 263     g_object_unref(screenshot);
+ 264 }
+ 265 
+ 266 } // extern "C"
+</pre></body></html>
