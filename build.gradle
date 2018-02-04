@@ -58,9 +58,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-
 /******************************************************************************
  *                              Utility methods                               *
  *****************************************************************************/
@@ -105,7 +102,6 @@ void defineProperty(String name, Properties props, String defaultValue) {
  *         is the supplied path.
  */
 String cygpath(String path) {
-    if (true) return path;
     if (!IS_WINDOWS) return path;
     if (path == null || "".equals(path)) return path;
     String ret = path.replaceAll('\\\\', '/')
@@ -1533,44 +1529,7 @@ allprojects {
     test {
         executable = JAVA;
         enableAssertions = true;
-        testLogging {
-            exceptionFormat TestExceptionFormat.FULL
-            events TestLogEvent.PASSED, TestLogEvent.SKIPPED,
-                    TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT
-            showCauses true
-            showStackTraces true
-            showExceptions true
-            // set options for log level DEBUG and INFO
-            debug {
-                events TestLogEvent.STARTED, TestLogEvent.PASSED,
-                        TestLogEvent.SKIPPED, TestLogEvent.FAILED,
-                        TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR
-            }
-            info.events = debug.events
-            def failedTestSummary = "\n\n FAILED TESTS SUMMARY: \n\n"
-            afterTest { desc, result ->
-                if (desc.parent) {
-                    if (result.getResultType() == TestResult.ResultType.FAILURE) {
-                        failedTestSummary += "${desc.getClassName()}#${desc.getName()} FAILED:\n" +
-                                "${result.getExceptions()}\n"
-                    }
-                }
-            }
-            afterSuite { desc, result ->
-                if (!desc.parent) {
-                    def output = "Results: ${result.resultType} (${result.testCount} tests, " +
-                            "${result.successfulTestCount} successes, " +
-                            "${result.failedTestCount} failures, " +
-                            "${result.skippedTestCount} skipped)"
-                    def startItem = '|  ', endItem = '  |'
-                    def repeat = startItem + output + endItem
-                    println('\n' + ('-' * repeat.length()) + '\n' + repeat + '\n' + ('-' * repeat.length()))
-                    if (result.failedTestCount > 0) {
-                        println(failedTestSummary)
-                    }
-                }
-            }
-        }
+        testLogging.exceptionFormat = "full";
         scanForTestClasses = false;
         include("**/*Test.*");
         if (BUILD_CLOSED && DO_JCOV) {
@@ -1748,8 +1707,8 @@ project(":graphics") {
     We have two shader groups - Decora and Prism.
 
     The shader groups each will generate a custom compiler that
-    then generates the shader code. These compilers rely on the JSLC
-    grammar parser which is antlr generated and compile separately.
+    then genarates the shader code. These compilers rely on the JSLC
+    gramar parser which is antlr generated and compile separately.
 
     The decora compiler relies on compileJava - which is sourceSet.main.java
     It also accesses module private packages, so will need add-exports
@@ -2097,7 +2056,7 @@ project(":graphics") {
         File libsDir = rootProject.file("build/libs");
 
         // In some IDEs (Eclipse for example), touching these libraries
-        // causes a full build within the IDE. When gradle is used
+        // cauese a full build within the IDE. When gradle is used
         // outside of the IDE, for example to build the native code,
         // a full rebuild is caused within the IDE. The fix is to check
         // for the presence of the target files in the lib directory
@@ -3434,13 +3393,13 @@ project(":web") {
         }
     }
 
-    def drtClasses = "com/sun/javafx/webkit/drt/**"
-    jar.exclude(drtClasses)
+    def drtClasses = "**/com/sun/javafx/webkit/drt/**"
     task drtJar(type: Jar, dependsOn: compileJava) {
         archiveName = "drt.jar"
         destinationDir = file("$buildDir/test")
-        from "$buildDir/classes/main"
+        from "$buildDir/classes/main/javafx.web/"
         include drtClasses
+        includeEmptyDirs = false
     }
 
     if (IS_COMPILE_WEBKIT) {
@@ -4300,6 +4259,7 @@ compileTargets { t ->
                 exclude("com/sun/glass/ui/swt")
                 exclude("com/sun/javafx/tools/ant")
                 exclude("com/javafx/main")
+                exclude("com/sun/javafx/webkit/drt")
                 if (!IS_INCLUDE_NULL3D) {
                     exclude ("com/sun/prism/null3d")
                 }

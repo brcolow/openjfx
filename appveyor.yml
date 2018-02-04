@@ -4,6 +4,9 @@ image: Visual Studio 2017
 
 environment:
   JAVA_HOME: C:\jdk9
+  VS150COMNTOOLS: C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build
+  MSVC_VER: 14.12.25827
+  APPVEYOR_CACHE_ENTRY_ZIP_ARGS: "-t7z -m0=lzma -mx=9"
 
 shallow_clone: true
 
@@ -12,41 +15,34 @@ build:
 
 build_script:
   - ps: |
-      choco install jdk9 --version 9.0.1.11 -params 'installdir=C:\\jdk9'
-      refreshenv
+      choco install jdk9 --version 9.0.4.11 -params 'installdir=C:\\jdk9'
+      choco install gradle --version 4.3.0
       choco install pscx
-      choco install gradle -version 4.3.1
-
-      # Set environment to mimic the Visual Studio command prompt
-      Invoke-Environment '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat"' -Force
+      refreshenv
 
       # Install DirectX SDK needed by JavaFX
       $client = new-object net.webclient
       $client.DownloadFile("http://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe", "DXSDK_Jun10.exe")
       Start-Process "DXSDK_Jun10.exe" -ArgumentList "/silent"
-
-      java -version
-      .\gradlew --version
-      .\gradlew build --stacktrace
-
-      # Print any crash logs if gradle build returned non-zero exit code
-      if ($Result.ExitCode -ne 0) {
-        Get-ChildItem -Include hs_err_pid*.log -Recurse | Get-Content
-      }
-
-      # TODO use cdb to get back traces
+  - cmd: |
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+      gradle build -PCOMPILE_WEBKIT=false --stacktrace -x :web:test --info --no-daemon
 
 test_script:
-  - ps: |
-      .\gradlew check --stacktrace
-      # Print any crash logs if gradle build returned non-zero exit code
-      if ($Result.ExitCode -ne 0) {
-        Get-ChildItem -Include hs_err_pid*.log -Recurse | Get-Content
-      }
+  - gradle test -x :web:test -PFULL_TEST=true --stacktrace --info --no-daemon
 
-# Even if tests fail we want to upload results
 on_finish:
   - ps: |
+        Write-Output "Inside on_finish"
+        $crashes = Get-ChildItem -Include hs_err_pid*.log -Recurse
+        Write-Output $crashes
+        $javaExe = $env.JAVA_HOME + '\bin\java.exe'
+        ForEach ($crash in $crashes) {
+          Get-Content $crash
+          $crashDump = $crash.Name + '.mdmp'
+          cdb -v -z $crashDump -c '!sym noisy;~*;kb;q' -i $javaExe
+        }
+
         # This technically works but is really inefficient as it requires an HTTP request for every
         # single test. Ideally we want to batch the results. We can do this by POSTing to:
         # $APPVEYOR_API_URL/api/tests/batch
@@ -56,7 +52,7 @@ on_finish:
         # a big JSON array.
         Write-Verbose -Message 'Uploading test results to AppVeyor…' -Verbose
         $wc = New-Object 'System.Net.WebClient'
-        $modules = @("javafx.base", "javafx.graphics","javafx.controls", "javafx.fxml","javafx.jmx", "javafx.media", "javafx.swing", "javafx.swt", "javafx.web")
+        $modules = @("javafx.base", "javafx.graphics", "javafx.controls", "javafx.fxml", "javafx.jmx", "javafx.media", "javafx.swing", "javafx.swt", "javafx.web")
         ForEach ($module in $modules) {
           ForEach ($file in Get-ChildItem ".\modules\${module}\build\test-results\test\TEST-*.xml") {
               $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $file)
@@ -65,4 +61,4 @@ on_finish:
 
 cache:
   - C:\Users\appveyor\.gradle\caches
-  - C:\Users\appveyor\.gradle\wrapper -> .gradle-wrapper\gradle-wrapper.properties
+

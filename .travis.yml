@@ -34,7 +34,6 @@ addons:
 # For webkit: t5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev ?
 # Won't be able to build webkit in the time alloted by Travis
 
-# keep gradle cache.
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -42,7 +41,6 @@ before_cache:
 cache:
   directories:
     - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
 
 matrix:
   fast_finish: true
@@ -58,11 +56,13 @@ matrix:
     - os: osx
       osx_image: xcode9
       env:
-        - TRAVIS_JAVA_VERSION="9"
         - PRINT_CRASH_LOGS="true"
 
 before_script:
-  - echo $HOME
+  - wget https://services.gradle.org/distributions/gradle-4.3-bin.zip
+  - unzip gradle-4.3-bin.zip
+  - export GRADLE_HOME=$PWD/gradle-4.3
+  - export PATH=$GRADLE_HOME/bin:$PATH
   - echo $JAVA_OPTS
   - echo $GRADLE_OPTS
   # run on xvfb screen (for linux).
@@ -75,6 +75,7 @@ install: true
 
 script: .ci/script.sh
 
+# This is just a thing for testing, it uploads failure screenshots.
 deploy:
   provider: releases
   api_key:
@@ -89,3 +90,4 @@ deploy:
 
 notifications:
   email: false
+

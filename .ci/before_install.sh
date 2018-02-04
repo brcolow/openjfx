@@ -6,14 +6,7 @@ if [[ "${TRAVIS_OS_NAME}" == osx ]]; then
   brew install findutils
   brew install qt5
   brew link qt5 --force
-  if [[ "${TRAVIS_JAVA_VERSION}" == 8 ]]; then
-    brew cask reinstall caskroom/versions/java8
-  elif [[ "${TRAVIS_JAVA_VERSION}" == 9 ]]; then
-    brew cask reinstall java
-  else
-      echo "TRAVIS_JAVA_VERSION environment variable not set!"
-  fi
-
+  brew cask reinstall java
   brew outdated gradle || brew upgrade gradle
   brew unlink python # fixes 'run_one_line' is not defined error in backtrace
 fi
