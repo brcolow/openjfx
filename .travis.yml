@@ -83,7 +83,9 @@ deploy:
     secure: Dsu3STNPPMI2jN57Rvbdzu5iGnhyynJk5y40G0wrleb8+X4QXs3hQta+UJZzWQYTb/cufMxI+F776dwGkX36/YH4s2cJhfVLSJcjIvKxLnigQ0b1JUlsB6OlLj2h2/4mcfpjVEXjQ5TzmCjOFb7HumLqlvCxsp/uTedVJcv4WADNSK4j0cLIkRkfhvFDnnwNq6ICBpkbZnBGngI4mCw80ygho6kYNaMBpLeoVzOIDbNBG7wG1oKysV0DUEqUbK78pW73NW0ANdKDK41p8T4Tw+QhyGk+fPih64f5SSSC8K5lV37sEZEZwmCoDNkw3bja8fXNDCsXXky+q62XgpA2LfEAAWu1BZIYMAUf8aoCpZKTl9bWqF1IAXpVZHRoaN2g/M+tPDp+Bd1pflREVOs/PjolRa3jlSo0F7qXM+G7frQvo5SsodVmLxLddkqN86VwxTzDL2gGFzFE1kaOhUdAxS+UZXE7cRV/HH243lF5uEzeEVo8JLgE3isdDX8A5fie5xJkP5e+rC7WJXikTBTdoqwqmoRjvHYGkj/RvDf4zyqIQ6h3tKJwt7f4UgN0nT2qkkiH6aiOAa3r5W8xu1+aZktr9NiUrx4rGI5Pj2hxNDgzxz+0PsE99I+7Q94spBjErjErTeCV7ZqTSVwaaM25Faop5lIDoGUfVwlfVAhW1iw=
   skip_cleanup: true
   file_glob: true
-  file: ${TRAVIS_BUILD_DIR}/images.zip
+  file:
+    - ${TRAVIS_BUILD_DIR}/images.zip
+    - build/testrun.args
   on:
     repo: brcolow/openjfx
     all_branches: true
